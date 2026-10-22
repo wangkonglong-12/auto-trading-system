@@ -1,0 +1,1 @@
+[{"data":{"account_id":"simulation-account","attribution_status":"MATCHED","available_quantity":0,"cost_amount":null,"frozen_quantity":0,"market_value":"500","observed_at":"2026-09-07T15:30:00+08:00","snapshot_id":"mock-close","strategy_quantity":50,"symbol":"000001.SZ","total_quantity":50,"trade_date":"2026-09-07"},"record_id":"000001.SZ"}]

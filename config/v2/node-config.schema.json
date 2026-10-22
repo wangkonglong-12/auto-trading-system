@@ -1,0 +1,1186 @@
+{
+  "$defs": {
+    "EngineLimits": {
+      "additionalProperties": false,
+      "description": "Installed local ceiling, not a permission supplied by a remote plan.",
+      "properties": {
+        "max_buy_value": {
+          "description": "人民币元，最多2位小数",
+          "pattern": "^(0|[1-9][0-9]{0,11})(\\.[0-9]{1,2})?$",
+          "title": "Max Buy Value",
+          "type": "string"
+        },
+        "max_daily_loss": {
+          "default": "0",
+          "description": "人民币元，最多2位小数",
+          "pattern": "^(0|[1-9][0-9]{0,11})(\\.[0-9]{1,2})?$",
+          "title": "Max Daily Loss",
+          "type": "string"
+        },
+        "max_order_quantity": {
+          "maximum": 2147483647,
+          "minimum": 1,
+          "title": "Max Order Quantity",
+          "type": "integer"
+        },
+        "max_order_value": {
+          "description": "人民币元，最多2位小数",
+          "pattern": "^(0|[1-9][0-9]{0,11})(\\.[0-9]{1,2})?$",
+          "title": "Max Order Value",
+          "type": "string"
+        },
+        "max_positions": {
+          "maximum": 15,
+          "minimum": 0,
+          "title": "Max Positions",
+          "type": "integer"
+        },
+        "mode": {
+          "default": "PAPER",
+          "enum": [
+            "PAPER",
+            "SHADOW",
+            "LIVE"
+          ],
+          "title": "Mode",
+          "type": "string"
+        }
+      },
+      "required": [
+        "max_buy_value",
+        "max_order_value",
+        "max_positions",
+        "max_order_quantity"
+      ],
+      "title": "EngineLimits",
+      "type": "object"
+    },
+    "EntryInstrument": {
+      "additionalProperties": false,
+      "properties": {
+        "lower_price": {
+          "description": "当日合法申报价下界，元",
+          "pattern": "^(0|[1-9][0-9]{0,9})(\\.[0-9]{1,8})?$",
+          "title": "Lower Price",
+          "type": "string"
+        },
+        "max_order_quantity": {
+          "description": "规则包单笔股数上限",
+          "maximum": 2147483647,
+          "minimum": 1,
+          "title": "Max Order Quantity",
+          "type": "integer"
+        },
+        "min_quantity": {
+          "description": "合法最小买入数量，股",
+          "maximum": 10000,
+          "minimum": 1,
+          "title": "Min Quantity",
+          "type": "integer"
+        },
+        "price_tick": {
+          "description": "已验证价格档位，元",
+          "pattern": "^(0|[1-9][0-9]{0,9})(\\.[0-9]{1,8})?$",
+          "title": "Price Tick",
+          "type": "string"
+        },
+        "quantity_step": {
+          "description": "超过最低数量后的申报步长，股",
+          "maximum": 10000,
+          "minimum": 1,
+          "title": "Quantity Step",
+          "type": "integer"
+        },
+        "reference_price": {
+          "description": "计划追价保护参考价，元",
+          "pattern": "^(0|[1-9][0-9]{0,9})(\\.[0-9]{1,8})?$",
+          "title": "Reference Price",
+          "type": "string"
+        },
+        "source_hash": {
+          "description": "参考价和证券规则来源证据摘要",
+          "pattern": "^sha256:[a-f0-9]{64}$",
+          "title": "Source Hash",
+          "type": "string"
+        },
+        "symbol": {
+          "description": "证券代码及交易所",
+          "pattern": "^[0-9]{6}\\.(SH|SZ|BJ)$",
+          "title": "Symbol",
+          "type": "string"
+        },
+        "upper_price": {
+          "description": "当日合法申报价上界，元",
+          "pattern": "^(0|[1-9][0-9]{0,9})(\\.[0-9]{1,8})?$",
+          "title": "Upper Price",
+          "type": "string"
+        }
+      },
+      "required": [
+        "symbol",
+        "reference_price",
+        "lower_price",
+        "upper_price",
+        "price_tick",
+        "min_quantity",
+        "quantity_step",
+        "max_order_quantity",
+        "source_hash"
+      ],
+      "title": "EntryInstrument",
+      "type": "object"
+    },
+    "EntryPolicy": {
+      "additionalProperties": false,
+      "properties": {
+        "cancel_after_seconds": {
+          "description": "普通阶段子单最小调整间隔，秒",
+          "maximum": 300,
+          "minimum": 1,
+          "title": "Cancel After Seconds",
+          "type": "integer"
+        },
+        "depth_bps": {
+          "description": "可见卖一数量使用比例，基点",
+          "maximum": 10000,
+          "minimum": 1,
+          "title": "Depth Bps",
+          "type": "integer"
+        },
+        "fee_reserve": {
+          "description": "每个买入子单保守费用预留，元",
+          "pattern": "^(0|[1-9][0-9]{0,11})(\\.[0-9]{1,2})?$",
+          "title": "Fee Reserve",
+          "type": "string"
+        },
+        "instruments": {
+          "description": "本次已核验证券规则，最多15个唯一标的",
+          "items": {
+            "$ref": "#/$defs/EntryInstrument"
+          },
+          "maxItems": 15,
+          "minItems": 1,
+          "title": "Instruments",
+          "type": "array"
+        },
+        "max_active_orders": {
+          "description": "账户同时活动或不明委托数上限",
+          "maximum": 3,
+          "minimum": 1,
+          "title": "Max Active Orders",
+          "type": "integer"
+        },
+        "max_chase_bps": {
+          "description": "相对参考价的最大追价，基点",
+          "maximum": 1000,
+          "minimum": 0,
+          "title": "Max Chase Bps",
+          "type": "integer"
+        },
+        "max_children": {
+          "description": "每个分配最多子单数，含首次及至多三次补单",
+          "maximum": 4,
+          "minimum": 1,
+          "title": "Max Children",
+          "type": "integer"
+        },
+        "max_spread_bps": {
+          "description": "买卖一价差相对买一的上限，基点",
+          "maximum": 1000,
+          "minimum": 0,
+          "title": "Max Spread Bps",
+          "type": "integer"
+        },
+        "participation_bps": {
+          "description": "60秒成交量参与上限，基点",
+          "maximum": 10000,
+          "minimum": 1,
+          "title": "Participation Bps",
+          "type": "integer"
+        },
+        "quote_max_age_ms": {
+          "description": "源时间与单调时钟双重新鲜度上限",
+          "maximum": 5000,
+          "minimum": 100,
+          "title": "Quote Max Age Ms",
+          "type": "integer"
+        },
+        "rulebook_version": {
+          "description": "已安装证券规则包版本",
+          "pattern": "^[A-Za-z0-9_.:-]{1,96}$",
+          "title": "Rulebook Version",
+          "type": "string"
+        },
+        "version": {
+          "description": "已安装买入策略版本，由签名计划引用",
+          "pattern": "^[A-Za-z0-9_.:-]{1,96}$",
+          "title": "Version",
+          "type": "string"
+        }
+      },
+      "required": [
+        "version",
+        "rulebook_version",
+        "fee_reserve",
+        "max_chase_bps",
+        "max_spread_bps",
+        "participation_bps",
+        "depth_bps",
+        "quote_max_age_ms",
+        "cancel_after_seconds",
+        "max_children",
+        "max_active_orders",
+        "instruments"
+      ],
+      "title": "EntryPolicy",
+      "type": "object"
+    },
+    "EnvironmentSecretReference": {
+      "additionalProperties": false,
+      "description": "Development-only reference to a process environment variable.",
+      "properties": {
+        "source": {
+          "const": "ENVIRONMENT",
+          "title": "Source",
+          "type": "string"
+        },
+        "variable": {
+          "pattern": "^ATS_SECRET_[A-Z0-9_]{3,64}$",
+          "title": "Variable",
+          "type": "string"
+        }
+      },
+      "required": [
+        "source",
+        "variable"
+      ],
+      "title": "EnvironmentSecretReference",
+      "type": "object"
+    },
+    "ExchangeCalendar": {
+      "additionalProperties": false,
+      "properties": {
+        "sessions": {
+          "description": "完整覆盖区间内的升序交易日",
+          "items": {
+            "format": "date",
+            "type": "string"
+          },
+          "maxItems": 4000,
+          "minItems": 2,
+          "title": "Sessions",
+          "type": "array"
+        },
+        "version": {
+          "description": "已验证交易日日历版本，必须覆盖买入日至下一交易日",
+          "pattern": "^[A-Za-z0-9_.:-]{1,96}$",
+          "title": "Version",
+          "type": "string"
+        }
+      },
+      "required": [
+        "version",
+        "sessions"
+      ],
+      "title": "ExchangeCalendar",
+      "type": "object"
+    },
+    "ExitLotContext": {
+      "additionalProperties": false,
+      "properties": {
+        "allow_odd_liquidation": {
+          "description": "规则包是否允许一次清仓卖出零股",
+          "title": "Allow Odd Liquidation",
+          "type": "boolean"
+        },
+        "cost": {
+          "description": "经来源核对的单位持仓成本，元",
+          "pattern": "^(0|[1-9][0-9]{0,9})(\\.[0-9]{1,8})?$",
+          "title": "Cost",
+          "type": "string"
+        },
+        "lot_id": {
+          "description": "开盘检查点中唯一持仓批次",
+          "pattern": "^[A-Za-z0-9_.:-]{1,96}$",
+          "title": "Lot Id",
+          "type": "string"
+        },
+        "lower_price": {
+          "description": "当日可申报价下界，元",
+          "pattern": "^(0|[1-9][0-9]{0,9})(\\.[0-9]{1,8})?$",
+          "title": "Lower Price",
+          "type": "string"
+        },
+        "open_price": {
+          "description": "当日正式开盘价，元",
+          "pattern": "^(0|[1-9][0-9]{0,9})(\\.[0-9]{1,8})?$",
+          "title": "Open Price",
+          "type": "string"
+        },
+        "previous_close": {
+          "description": "同复权口径前收盘价，元",
+          "pattern": "^(0|[1-9][0-9]{0,9})(\\.[0-9]{1,8})?$",
+          "title": "Previous Close",
+          "type": "string"
+        },
+        "price_tick": {
+          "description": "已验证规则包规定的价格档位，元",
+          "pattern": "^(0|[1-9][0-9]{0,9})(\\.[0-9]{1,8})?$",
+          "title": "Price Tick",
+          "type": "string"
+        },
+        "sell_step": {
+          "description": "正常卖出数量步长，整数股",
+          "maximum": 1000,
+          "minimum": 1,
+          "title": "Sell Step",
+          "type": "integer"
+        },
+        "source_hash": {
+          "description": "开盘价、成本及市场规则来源证据摘要",
+          "pattern": "^sha256:[a-f0-9]{64}$",
+          "title": "Source Hash",
+          "type": "string"
+        },
+        "symbol": {
+          "description": "批次证券及交易所",
+          "pattern": "^[0-9]{6}\\.(SH|SZ|BJ)$",
+          "title": "Symbol",
+          "type": "string"
+        },
+        "upper_price": {
+          "description": "当日可申报价上界，元",
+          "pattern": "^(0|[1-9][0-9]{0,9})(\\.[0-9]{1,8})?$",
+          "title": "Upper Price",
+          "type": "string"
+        }
+      },
+      "required": [
+        "lot_id",
+        "symbol",
+        "cost",
+        "previous_close",
+        "open_price",
+        "price_tick",
+        "lower_price",
+        "upper_price",
+        "sell_step",
+        "allow_odd_liquidation",
+        "source_hash"
+      ],
+      "title": "ExitLotContext",
+      "type": "object"
+    },
+    "ExitSessionContext": {
+      "additionalProperties": false,
+      "properties": {
+        "account_id": {
+          "description": "绑定账户内部别名",
+          "pattern": "^[A-Za-z0-9_.:-]{1,96}$",
+          "title": "Account Id",
+          "type": "string"
+        },
+        "calendar_hash": {
+          "description": "完整交易日日历规范正文摘要",
+          "pattern": "^sha256:[a-f0-9]{64}$",
+          "title": "Calendar Hash",
+          "type": "string"
+        },
+        "cancel_after_seconds": {
+          "default": 30,
+          "description": "在途订单连续未更新多少秒后请求撤单",
+          "maximum": 300,
+          "minimum": 1,
+          "title": "Cancel After Seconds",
+          "type": "integer"
+        },
+        "cancel_by": {
+          "description": "允许提交撤单的截止时间",
+          "format": "date-time",
+          "title": "Cancel By",
+          "type": "string"
+        },
+        "context_id": {
+          "description": "不可变退出会话编号",
+          "pattern": "^[A-Za-z0-9_.:-]{1,96}$",
+          "title": "Context Id",
+          "type": "string"
+        },
+        "issued_at": {
+          "description": "来源证据完成并签发的时间",
+          "format": "date-time",
+          "title": "Issued At",
+          "type": "string"
+        },
+        "lots": {
+          "description": "本会话允许退出的批次及价格规则",
+          "items": {
+            "$ref": "#/$defs/ExitLotContext"
+          },
+          "maxItems": 15,
+          "minItems": 1,
+          "title": "Lots",
+          "type": "array"
+        },
+        "max_order_quantity": {
+          "description": "上下文单笔数量上限，股",
+          "maximum": 2147483647,
+          "minimum": 1,
+          "title": "Max Order Quantity",
+          "type": "integer"
+        },
+        "max_order_value": {
+          "description": "上下文单笔卖出名义金额上限，元",
+          "pattern": "^(0|[1-9][0-9]{0,11})(\\.[0-9]{1,2})?$",
+          "title": "Max Order Value",
+          "type": "string"
+        },
+        "opening_hash": {
+          "description": "已验证前日封存持仓正文摘要",
+          "pattern": "^sha256:[a-f0-9]{64}$",
+          "title": "Opening Hash",
+          "type": "string"
+        },
+        "rule_id": {
+          "default": "T1_EXIT_BASELINE_V3",
+          "description": "退出规则版本",
+          "enum": [
+            "T1_EXIT_BASELINE_V3",
+            "COST_EXIT_V1"
+          ],
+          "title": "Rule Id",
+          "type": "string"
+        },
+        "schema_version": {
+          "const": 1,
+          "default": 1,
+          "description": "开盘退出上下文版本",
+          "title": "Schema Version",
+          "type": "integer"
+        },
+        "sell_rules": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/SellRules"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "按本批买入成本执行的三项卖出规则"
+        },
+        "stop_new_at": {
+          "description": "停止新增SELL子单的时间",
+          "format": "date-time",
+          "title": "Stop New At",
+          "type": "string"
+        },
+        "strategy_id": {
+          "description": "责任策略编号",
+          "pattern": "^[A-Za-z0-9_.:-]{1,96}$",
+          "title": "Strategy Id",
+          "type": "string"
+        },
+        "trade_date": {
+          "description": "Asia/Shanghai交易日",
+          "format": "date",
+          "title": "Trade Date",
+          "type": "string"
+        },
+        "valid_from": {
+          "description": "最早允许退出的时间",
+          "format": "date-time",
+          "title": "Valid From",
+          "type": "string"
+        },
+        "valid_until": {
+          "description": "本上下文最终失效时间",
+          "format": "date-time",
+          "title": "Valid Until",
+          "type": "string"
+        }
+      },
+      "required": [
+        "context_id",
+        "account_id",
+        "strategy_id",
+        "trade_date",
+        "opening_hash",
+        "calendar_hash",
+        "issued_at",
+        "valid_from",
+        "stop_new_at",
+        "cancel_by",
+        "valid_until",
+        "max_order_value",
+        "max_order_quantity",
+        "lots"
+      ],
+      "title": "ExitSessionContext",
+      "type": "object"
+    },
+    "IPCSecrets": {
+      "additionalProperties": false,
+      "properties": {
+        "agent": {
+          "description": "代理到引擎的本机认证凭证引用",
+          "discriminator": {
+            "mapping": {
+              "ENVIRONMENT": "#/$defs/EnvironmentSecretReference",
+              "WINDOWS_CREDENTIAL_MANAGER": "#/$defs/WindowsCredentialReference"
+            },
+            "propertyName": "source"
+          },
+          "oneOf": [
+            {
+              "$ref": "#/$defs/EnvironmentSecretReference"
+            },
+            {
+              "$ref": "#/$defs/WindowsCredentialReference"
+            }
+          ],
+          "title": "Agent"
+        },
+        "jobrunner": {
+          "description": "定时任务到代理的本机认证凭证引用",
+          "discriminator": {
+            "mapping": {
+              "ENVIRONMENT": "#/$defs/EnvironmentSecretReference",
+              "WINDOWS_CREDENTIAL_MANAGER": "#/$defs/WindowsCredentialReference"
+            },
+            "propertyName": "source"
+          },
+          "oneOf": [
+            {
+              "$ref": "#/$defs/EnvironmentSecretReference"
+            },
+            {
+              "$ref": "#/$defs/WindowsCredentialReference"
+            }
+          ],
+          "title": "Jobrunner"
+        },
+        "operator": {
+          "description": "现场状态/急停/退出命令的凭证引用",
+          "discriminator": {
+            "mapping": {
+              "ENVIRONMENT": "#/$defs/EnvironmentSecretReference",
+              "WINDOWS_CREDENTIAL_MANAGER": "#/$defs/WindowsCredentialReference"
+            },
+            "propertyName": "source"
+          },
+          "oneOf": [
+            {
+              "$ref": "#/$defs/EnvironmentSecretReference"
+            },
+            {
+              "$ref": "#/$defs/WindowsCredentialReference"
+            }
+          ],
+          "title": "Operator"
+        }
+      },
+      "required": [
+        "agent",
+        "jobrunner",
+        "operator"
+      ],
+      "title": "IPCSecrets",
+      "type": "object"
+    },
+    "OpeningReference": {
+      "additionalProperties": false,
+      "properties": {
+        "payload_hash": {
+          "description": "同账户Journal内封存正文的完整摘要",
+          "pattern": "^sha256:[a-f0-9]{64}$",
+          "title": "Payload Hash",
+          "type": "string"
+        },
+        "trade_date": {
+          "description": "已封存持仓的上一交易日",
+          "format": "date",
+          "title": "Trade Date",
+          "type": "string"
+        }
+      },
+      "required": [
+        "trade_date",
+        "payload_hash"
+      ],
+      "title": "OpeningReference",
+      "type": "object"
+    },
+    "OperatorAccess": {
+      "additionalProperties": false,
+      "properties": {
+        "actor_id": {
+          "description": "本机唯一操作员身份，由配置确定",
+          "pattern": "^[A-Za-z][A-Za-z0-9_.:-]{2,95}$",
+          "title": "Actor Id",
+          "type": "string"
+        },
+        "password_verifier": {
+          "description": "独立scrypt口令校验值的凭据引用",
+          "discriminator": {
+            "mapping": {
+              "ENVIRONMENT": "#/$defs/EnvironmentSecretReference",
+              "WINDOWS_CREDENTIAL_MANAGER": "#/$defs/WindowsCredentialReference"
+            },
+            "propertyName": "source"
+          },
+          "oneOf": [
+            {
+              "$ref": "#/$defs/EnvironmentSecretReference"
+            },
+            {
+              "$ref": "#/$defs/WindowsCredentialReference"
+            }
+          ],
+          "title": "Password Verifier"
+        }
+      },
+      "required": [
+        "actor_id",
+        "password_verifier"
+      ],
+      "title": "OperatorAccess",
+      "type": "object"
+    },
+    "PaperSession": {
+      "additionalProperties": false,
+      "properties": {
+        "as_of": {
+          "description": "固定模拟时刻；切换时停止并重启进程",
+          "format": "date-time",
+          "title": "As Of",
+          "type": "string"
+        },
+        "entry_policy": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/EntryPolicy"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "测试买入规则"
+        },
+        "exit_context": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/SignedExitContext"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "签名测试退出上下文"
+        },
+        "label": {
+          "const": "FICTIONAL_ACCEPTANCE_ONLY",
+          "description": "明确的离线模拟标记",
+          "title": "Label",
+          "type": "string"
+        },
+        "limits": {
+          "$ref": "#/$defs/EngineLimits",
+          "description": "仅用于模拟券商的本地额度"
+        },
+        "opening": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/OpeningReference"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "前日已封存的持仓引用"
+        },
+        "phase": {
+          "description": "本次进程执行的测试阶段",
+          "enum": [
+            "ENTRY",
+            "EXIT"
+          ],
+          "title": "Phase",
+          "type": "string"
+        },
+        "prices": {
+          "description": "明确给定的模拟买卖一价，绝非真实行情",
+          "maxProperties": 15,
+          "minProperties": 1,
+          "patternProperties": {
+            "^[0-9]{6}\\.(SH|SZ|BJ)$": {
+              "description": "每股人民币元，最多8位小数",
+              "pattern": "^(0|[1-9][0-9]{0,9})(\\.[0-9]{1,8})?$",
+              "type": "string"
+            }
+          },
+          "propertyNames": {
+            "description": "带市场后缀的证券代码"
+          },
+          "title": "Prices",
+          "type": "object"
+        }
+      },
+      "required": [
+        "label",
+        "as_of",
+        "phase",
+        "limits",
+        "prices"
+      ],
+      "title": "PaperSession",
+      "type": "object"
+    },
+    "PolicyVersion": {
+      "additionalProperties": false,
+      "properties": {
+        "component": {
+          "enum": [
+            "entry",
+            "exit",
+            "execution",
+            "risk"
+          ],
+          "title": "Component",
+          "type": "string"
+        },
+        "payload_hash": {
+          "pattern": "^sha256:[a-f0-9]{64}$",
+          "title": "Payload Hash",
+          "type": "string"
+        },
+        "version": {
+          "pattern": "^[A-Za-z0-9_.:-]{1,96}$",
+          "title": "Version",
+          "type": "string"
+        }
+      },
+      "required": [
+        "component",
+        "version",
+        "payload_hash"
+      ],
+      "title": "PolicyVersion",
+      "type": "object"
+    },
+    "QmtReadOnlySettings": {
+      "additionalProperties": false,
+      "properties": {
+        "account_fingerprint": {
+          "description": "已验证股票资金账号的SHA-256前16位",
+          "pattern": "^[a-f0-9]{16}$",
+          "title": "Account Fingerprint",
+          "type": "string"
+        },
+        "session_base": {
+          "default": 6102301,
+          "maximum": 2147483646,
+          "minimum": 1,
+          "title": "Session Base",
+          "type": "integer"
+        },
+        "userdata_mini": {
+          "description": "中金极简交易终端的userdata_mini绝对目录",
+          "format": "path",
+          "title": "Userdata Mini",
+          "type": "string"
+        }
+      },
+      "required": [
+        "userdata_mini",
+        "account_fingerprint"
+      ],
+      "title": "QmtReadOnlySettings",
+      "type": "object"
+    },
+    "SellRules": {
+      "additionalProperties": false,
+      "description": "Percent values are human percentages (7 means 7%), never fractions.",
+      "properties": {
+        "sell_by": {
+          "description": "Asia/Shanghai trading-day deadline, HH:MM",
+          "format": "time",
+          "title": "Sell By",
+          "type": "string"
+        },
+        "stop_loss_pct": {
+          "anyOf": [
+            {
+              "exclusiveMaximum": 100.0,
+              "exclusiveMinimum": 0.0,
+              "type": "number"
+            },
+            {
+              "pattern": "^(?!^[-+.]*$)[+-]?0*(?:\\d{0,3}|(?=[\\d.]{1,6}0*$)\\d{0,3}\\.\\d{0,2}0*$)",
+              "type": "string"
+            }
+          ],
+          "title": "Stop Loss Pct"
+        },
+        "take_profit_pct": {
+          "anyOf": [
+            {
+              "exclusiveMinimum": 0.0,
+              "maximum": 100.0,
+              "type": "number"
+            },
+            {
+              "pattern": "^(?!^[-+.]*$)[+-]?0*(?:\\d{0,3}|(?=[\\d.]{1,6}0*$)\\d{0,3}\\.\\d{0,2}0*$)",
+              "type": "string"
+            }
+          ],
+          "title": "Take Profit Pct"
+        }
+      },
+      "required": [
+        "take_profit_pct",
+        "stop_loss_pct",
+        "sell_by"
+      ],
+      "title": "SellRules",
+      "type": "object"
+    },
+    "SignedExitContext": {
+      "additionalProperties": false,
+      "properties": {
+        "key_id": {
+          "description": "本地已信任的签名公钥标识",
+          "pattern": "^[A-Za-z0-9_.:-]{1,96}$",
+          "title": "Key Id",
+          "type": "string"
+        },
+        "payload": {
+          "$ref": "#/$defs/ExitSessionContext",
+          "description": "冻结的开盘退出上下文"
+        },
+        "signature": {
+          "description": "域分离Ed25519签名，Base64",
+          "maxLength": 88,
+          "minLength": 88,
+          "title": "Signature",
+          "type": "string"
+        }
+      },
+      "required": [
+        "payload",
+        "key_id",
+        "signature"
+      ],
+      "title": "SignedExitContext",
+      "type": "object"
+    },
+    "SupervisionPolicy": {
+      "additionalProperties": false,
+      "description": "Operational limits only; these values never select or authorize a strategy.",
+      "properties": {
+        "failure_limit": {
+          "default": 3,
+          "description": "累计失败熔断阈值，跨重启保留",
+          "maximum": 10,
+          "minimum": 1,
+          "title": "Failure Limit",
+          "type": "integer"
+        },
+        "minimum_free_bytes": {
+          "default": 268435456,
+          "description": "数据盘最低剩余字节数，低于阈值停止并锁定",
+          "minimum": 1048576,
+          "title": "Minimum Free Bytes",
+          "type": "integer"
+        },
+        "poll_seconds": {
+          "default": 1,
+          "description": "独立监护检查间隔，秒",
+          "maximum": 5,
+          "minimum": 1,
+          "title": "Poll Seconds",
+          "type": "integer"
+        },
+        "restart_seconds": {
+          "default": 2,
+          "description": "失败后指数退避的初始秒数",
+          "maximum": 30,
+          "minimum": 1,
+          "title": "Restart Seconds",
+          "type": "integer"
+        },
+        "stale_seconds": {
+          "default": 10,
+          "description": "主循环进度停止容忍秒数",
+          "maximum": 60,
+          "minimum": 3,
+          "title": "Stale Seconds",
+          "type": "integer"
+        },
+        "startup_seconds": {
+          "default": 30,
+          "description": "首次主循环进度等待秒数",
+          "maximum": 120,
+          "minimum": 5,
+          "title": "Startup Seconds",
+          "type": "integer"
+        },
+        "stop_seconds": {
+          "default": 5,
+          "description": "停止自有子进程等待秒数",
+          "maximum": 15,
+          "minimum": 1,
+          "title": "Stop Seconds",
+          "type": "integer"
+        }
+      },
+      "title": "SupervisionPolicy",
+      "type": "object"
+    },
+    "WindowsCredentialReference": {
+      "additionalProperties": false,
+      "description": "Reference to a generic credential stored by the installation process.",
+      "properties": {
+        "encoding": {
+          "default": "utf-16-le",
+          "enum": [
+            "utf-16-le",
+            "utf-8"
+          ],
+          "title": "Encoding",
+          "type": "string"
+        },
+        "source": {
+          "const": "WINDOWS_CREDENTIAL_MANAGER",
+          "title": "Source",
+          "type": "string"
+        },
+        "target": {
+          "maxLength": 160,
+          "minLength": 8,
+          "pattern": "^AutoTrading/[A-Za-z0-9._-]+(?:/[A-Za-z0-9._-]+)+$",
+          "title": "Target",
+          "type": "string"
+        }
+      },
+      "required": [
+        "source",
+        "target"
+      ],
+      "title": "WindowsCredentialReference",
+      "type": "object"
+    }
+  },
+  "additionalProperties": false,
+  "properties": {
+    "account_id": {
+      "description": "业务账户别名，决定恢复与互斥范围",
+      "pattern": "^[A-Za-z0-9_.:-]{1,96}$",
+      "title": "Account Id",
+      "type": "string"
+    },
+    "broker": {
+      "description": "节点的券商接入档",
+      "enum": [
+        "MOCK",
+        "QMT_READ_ONLY",
+        "QMT_TRADING"
+      ],
+      "title": "Broker",
+      "type": "string"
+    },
+    "calendar": {
+      "$ref": "#/$defs/ExchangeCalendar",
+      "description": "明确交易日列表及日历版本"
+    },
+    "data_root": {
+      "description": "init命令创建的专属受保护数据目录，绝对路径",
+      "format": "path",
+      "title": "Data Root",
+      "type": "string"
+    },
+    "ipc_secrets": {
+      "$ref": "#/$defs/IPCSecrets"
+    },
+    "journal_generation": {
+      "description": "当前关键恢复库代际",
+      "pattern": "^[A-Za-z0-9_.:-]{1,96}$",
+      "title": "Journal Generation",
+      "type": "string"
+    },
+    "mock_cash": {
+      "default": "10000.00",
+      "description": "MOCK初始资金，明确测试值",
+      "pattern": "^(0|[1-9][0-9]{0,11})(\\.[0-9]{1,2})?$",
+      "title": "Mock Cash",
+      "type": "string"
+    },
+    "node_generation": {
+      "description": "部署代际，绑定计划和上传",
+      "minimum": 1,
+      "title": "Node Generation",
+      "type": "integer"
+    },
+    "node_id": {
+      "description": "量化系统登记的节点身份",
+      "pattern": "^[A-Za-z0-9_.:-]{1,96}$",
+      "title": "Node Id",
+      "type": "string"
+    },
+    "operator_access": {
+      "anyOf": [
+        {
+          "$ref": "#/$defs/OperatorAccess"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "description": "交互式恢复确认/PAPER授权；未配置时保持此入口关闭"
+    },
+    "paper_session": {
+      "anyOf": [
+        {
+          "$ref": "#/$defs/PaperSession"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "description": "显式离线测试会话；缺省仍零额度且不开启买卖驱动"
+    },
+    "policies": {
+      "description": "已安装四类策略版本",
+      "items": {
+        "$ref": "#/$defs/PolicyVersion"
+      },
+      "maxItems": 4,
+      "minItems": 4,
+      "title": "Policies",
+      "type": "array"
+    },
+    "qmt_read_only": {
+      "anyOf": [
+        {
+          "$ref": "#/$defs/QmtReadOnlySettings"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "description": "真实QMT账户绑定；账号以指纹绑定，权限由broker档位决定"
+    },
+    "quant_ca_file": {
+      "anyOf": [
+        {
+          "format": "path",
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "description": "可选私有CA证书文件；仍校验主机名",
+      "title": "Quant Ca File"
+    },
+    "quant_key_id": {
+      "description": "量化HTTP签名密钥编号",
+      "pattern": "^[A-Za-z0-9_.:-]{1,96}$",
+      "title": "Quant Key Id",
+      "type": "string"
+    },
+    "quant_origin": {
+      "description": "量化系统HTTPS源地址",
+      "title": "Quant Origin",
+      "type": "string"
+    },
+    "quant_secret": {
+      "description": "量化HTTP密钥引用，与三类IPC凭证分离",
+      "discriminator": {
+        "mapping": {
+          "ENVIRONMENT": "#/$defs/EnvironmentSecretReference",
+          "WINDOWS_CREDENTIAL_MANAGER": "#/$defs/WindowsCredentialReference"
+        },
+        "propertyName": "source"
+      },
+      "oneOf": [
+        {
+          "$ref": "#/$defs/EnvironmentSecretReference"
+        },
+        {
+          "$ref": "#/$defs/WindowsCredentialReference"
+        }
+      ],
+      "title": "Quant Secret"
+    },
+    "rulebook": {
+      "description": "已安装证券交易规则版本",
+      "pattern": "^[A-Za-z0-9_.:-]{1,96}$",
+      "title": "Rulebook",
+      "type": "string"
+    },
+    "schema_major": {
+      "const": 2,
+      "default": 2,
+      "description": "独立进程配置主版本",
+      "title": "Schema Major",
+      "type": "integer"
+    },
+    "service_sid": {
+      "description": "专用运行用户SID",
+      "pattern": "^S-1-(?:[0-9]+-)+[0-9]+$",
+      "title": "Service Sid",
+      "type": "string"
+    },
+    "strategy_id": {
+      "description": "拉取计划对应的策略身份",
+      "pattern": "^[A-Za-z0-9_.:-]{1,96}$",
+      "title": "Strategy Id",
+      "type": "string"
+    },
+    "supervision": {
+      "$ref": "#/$defs/SupervisionPolicy",
+      "description": "独立进程监护；与策略参数和交易授权分离"
+    },
+    "trusted_plan_keys": {
+      "description": "可信Ed25519公钥hex",
+      "maxProperties": 8,
+      "minProperties": 1,
+      "patternProperties": {
+        "^[A-Za-z0-9_.:-]{1,96}$": {
+          "type": "string"
+        }
+      },
+      "title": "Trusted Plan Keys",
+      "type": "object"
+    }
+  },
+  "required": [
+    "broker",
+    "node_id",
+    "account_id",
+    "node_generation",
+    "journal_generation",
+    "strategy_id",
+    "service_sid",
+    "data_root",
+    "ipc_secrets",
+    "quant_origin",
+    "quant_key_id",
+    "quant_secret",
+    "trusted_plan_keys",
+    "policies",
+    "rulebook",
+    "calendar"
+  ],
+  "title": "NodeProcessConfig",
+  "type": "object"
+}

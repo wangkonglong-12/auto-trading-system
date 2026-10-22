@@ -1,0 +1,36 @@
+{
+  "root": "E:\\workspace\\auto-trading-system",
+  "added": [
+    "contracts/v2/schemas/checkpoint-chunk.schema.json",
+    "contracts/v2/schemas/checkpoint-manifest.schema.json",
+    "docs/design/v3.1/ADR-R31-004_历史流式核验与检查点分片.md",
+    "docs/design/v3.1/历史恢复与检查点分片实施报告_20260921.md",
+    "evidence/r31/20260921-journal-segments/coverage-all.json",
+    "evidence/r31/20260921-journal-segments/coverage-first-failed.json",
+    "evidence/r31/20260921-journal-segments/python-tests-first-failed.xml",
+    "evidence/r31/20260921-journal-segments/python-tests.xml",
+    "evidence/r31/20260921-journal-segments/quality-gate-final.txt",
+    "evidence/r31/20260921-journal-segments/quality-gate.txt",
+    "evidence/r31/20260921-journal-segments/quant-boundary.json",
+    "src/auto_trading_system/apps/trade_runtime/journal_simulation.py",
+    "src/auto_trading_system/journal/checkpoint_blobs.py",
+    "src/auto_trading_system/reconcile/journal_scan.py",
+    "tests/v31/test_checkpoint_segments.py",
+    "tests/v31/test_journal_scan.py"
+  ],
+  "deleted": [],
+  "modified": [
+    "README.md",
+    "docs/design/v3.1/开发修订计划与推进记录.md",
+    "docs/design/v3.1/详细设计方案.md",
+    "pyproject.toml",
+    "scripts/export-v2-contracts.py",
+    "src/auto_trading_system/apps/trade_runtime/__main__.py",
+    "src/auto_trading_system/execution/sell_policy.py",
+    "src/auto_trading_system/reconcile/portfolio_checkpoint.py",
+    "src/auto_trading_system/runtime/engine_v2.py",
+    "src/auto_trading_system/version.py",
+    "tests/v31/test_exit_integration.py",
+    "开发计划与推进记录.md"
+  ]
+}

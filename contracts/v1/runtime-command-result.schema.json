@@ -1,0 +1,39 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://contracts.auto-trading.local/v1/runtime-command-result.schema.json",
+  "title": "RuntimeCommandResult v1.0",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schema_version", "result_id", "request_id", "command_id", "command_seq", "node_id",
+    "account_id", "received_at", "completed_at", "status", "retryable", "reason_code"
+  ],
+  "properties": {
+    "schema_version": {"$ref": "common.schema.json#/$defs/schemaVersion"},
+    "result_id": {"$ref": "common.schema.json#/$defs/resultId"},
+    "request_id": {"$ref": "common.schema.json#/$defs/requestId"},
+    "command_id": {"$ref": "common.schema.json#/$defs/commandId"},
+    "command_seq": {"type": "integer", "minimum": 1, "maximum": 9223372036854775807},
+    "node_id": {"$ref": "common.schema.json#/$defs/nodeId"},
+    "account_id": {"$ref": "common.schema.json#/$defs/accountId"},
+    "received_at": {"$ref": "common.schema.json#/$defs/shanghaiDateTime"},
+    "completed_at": {"$ref": "common.schema.json#/$defs/shanghaiDateTime"},
+    "status": {"enum": ["APPLIED", "REJECTED", "NOOP", "DUPLICATE", "FAILED"]},
+    "retryable": {"type": "boolean"},
+    "reason_code": {"$ref": "common.schema.json#/$defs/reasonCode"},
+    "previous_state": {"$ref": "common.schema.json#/$defs/runtimeState"},
+    "resulting_state": {"$ref": "common.schema.json#/$defs/runtimeState"},
+    "error": {"$ref": "common.schema.json#/$defs/error"}
+  },
+  "allOf": [
+    {
+      "if": {"properties": {"status": {"enum": ["FAILED", "REJECTED"]}}, "required": ["status"]},
+      "then": {"required": ["error"]},
+      "else": {"not": {"required": ["error"]}, "properties": {"retryable": {"const": false}}}
+    },
+    {
+      "if": {"properties": {"status": {"const": "APPLIED"}}, "required": ["status"]},
+      "then": {"required": ["resulting_state"]}
+    }
+  ]
+}

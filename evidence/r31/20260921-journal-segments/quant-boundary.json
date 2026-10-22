@@ -1,0 +1,15 @@
+{
+  "root": "E:\\workspace\\ai-stock-assistant",
+  "added": [
+    "docs/analysis/20260921_attribution_v7b_risk_v8.md",
+    "scripts/selection_research/attribution_v7b.py",
+    "scripts/selection_research/risk_challenger_core_v8.py",
+    "scripts/selection_research/risk_challenger_probe_v8.py",
+    "scripts/test_attribution_v7b.py",
+    "scripts/test_risk_challenger_core_v8.py"
+  ],
+  "deleted": [],
+  "modified": [
+    "docs/CODEX_CONTEXT.md"
+  ]
+}

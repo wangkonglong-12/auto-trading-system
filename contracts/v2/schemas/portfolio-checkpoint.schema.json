@@ -1,0 +1,158 @@
+{
+  "$defs": {
+    "PositionLot": {
+      "additionalProperties": false,
+      "properties": {
+        "bought_quantity": {
+          "description": "累计真实买入股数",
+          "maximum": 2147483647,
+          "minimum": 0,
+          "title": "Bought Quantity",
+          "type": "integer"
+        },
+        "calendar_version": {
+          "description": "可卖日期依据的日历版本",
+          "pattern": "^[A-Za-z0-9_.:-]{1,96}$",
+          "title": "Calendar Version",
+          "type": "string"
+        },
+        "cost_price": {
+          "anyOf": [
+            {
+              "description": "每股人民币元，最多8位小数",
+              "pattern": "^(0|[1-9][0-9]{0,9})(\\.[0-9]{1,8})?$",
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "该批次真实买入成交的加权平均单位成本；旧检查点可为空",
+          "title": "Cost Price"
+        },
+        "eligible_sell_date": {
+          "description": "由已验证交易日日历计算的最早可卖交易日",
+          "format": "date",
+          "title": "Eligible Sell Date",
+          "type": "string"
+        },
+        "lot_id": {
+          "description": "账户、原买入子单绑定的稳定批次编号",
+          "pattern": "^[A-Za-z0-9_.:-]{1,96}$",
+          "title": "Lot Id",
+          "type": "string"
+        },
+        "reserved_quantity": {
+          "default": 0,
+          "description": "该批次尚未终结卖出意图的未成交预占股数",
+          "maximum": 2147483647,
+          "minimum": 0,
+          "title": "Reserved Quantity",
+          "type": "integer"
+        },
+        "sold_quantity": {
+          "default": 0,
+          "description": "分配到该批次的累计真实卖出股数",
+          "maximum": 2147483647,
+          "minimum": 0,
+          "title": "Sold Quantity",
+          "type": "integer"
+        },
+        "strategy_id": {
+          "description": "唯一责任策略",
+          "pattern": "^[A-Za-z0-9_.:-]{1,96}$",
+          "title": "Strategy Id",
+          "type": "string"
+        },
+        "symbol": {
+          "description": "证券代码及市场",
+          "pattern": "^[0-9]{6}\\.(SH|SZ|BJ)$",
+          "title": "Symbol",
+          "type": "string"
+        },
+        "trade_date_acquired": {
+          "description": "该批次实际买入交易日",
+          "format": "date",
+          "title": "Trade Date Acquired",
+          "type": "string"
+        }
+      },
+      "required": [
+        "lot_id",
+        "strategy_id",
+        "symbol",
+        "trade_date_acquired",
+        "eligible_sell_date",
+        "calendar_version",
+        "bought_quantity"
+      ],
+      "title": "PositionLot",
+      "type": "object"
+    }
+  },
+  "additionalProperties": false,
+  "properties": {
+    "account_id": {
+      "description": "唯一所属账户，与Journal账户一致",
+      "title": "Account Id",
+      "type": "string"
+    },
+    "calendar_version": {
+      "description": "买入与T+1归属采用的交易日日历版本",
+      "title": "Calendar Version",
+      "type": "string"
+    },
+    "lots": {
+      "description": "已核对归属及实成交的批次",
+      "items": {
+        "$ref": "#/$defs/PositionLot"
+      },
+      "maxItems": 2048,
+      "title": "Lots",
+      "type": "array"
+    },
+    "recovery_report_hash": {
+      "description": "当日已落盘且CLEAR的恢复报告摘要",
+      "pattern": "^sha256:[a-f0-9]{64}$",
+      "title": "Recovery Report Hash",
+      "type": "string"
+    },
+    "schema_version": {
+      "const": 1,
+      "default": 1,
+      "description": "跨日持仓检查点格式版本",
+      "title": "Schema Version",
+      "type": "integer"
+    },
+    "submission_high_watermark": {
+      "description": "封存覆盖的J1最大记录序号",
+      "minimum": 0,
+      "title": "Submission High Watermark",
+      "type": "integer"
+    },
+    "submission_prefix_hash": {
+      "description": "全部已封存J1序号及原始正文摘要的摘要",
+      "pattern": "^sha256:[a-f0-9]{64}$",
+      "title": "Submission Prefix Hash",
+      "type": "string"
+    },
+    "trade_date": {
+      "description": "已完成终态核对的封存交易日",
+      "format": "date",
+      "title": "Trade Date",
+      "type": "string"
+    }
+  },
+  "required": [
+    "account_id",
+    "trade_date",
+    "calendar_version",
+    "recovery_report_hash",
+    "submission_high_watermark",
+    "submission_prefix_hash",
+    "lots"
+  ],
+  "title": "PortfolioCheckpoint",
+  "type": "object"
+}

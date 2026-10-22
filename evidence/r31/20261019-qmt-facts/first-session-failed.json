@@ -1,0 +1,9 @@
+{
+  "failure_code": "QMT_DISCOVERY_CONNECT_FAILED",
+  "mode": "READ_ONLY",
+  "real_trading_enabled": false,
+  "schema": "qmt-onboarding/v1",
+  "stages": {},
+  "status": "ERROR",
+  "worker_exit_code": 3
+}

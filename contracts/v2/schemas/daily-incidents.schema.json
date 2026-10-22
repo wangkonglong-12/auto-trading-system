@@ -1,0 +1,80 @@
+{
+  "additionalProperties": false,
+  "properties": {
+    "account_id": {
+      "description": "内部账户标识，必须与上传清单一致",
+      "pattern": "^[A-Za-z0-9_.:-]{1,96}$",
+      "title": "Account Id",
+      "type": "string"
+    },
+    "code": {
+      "pattern": "^[A-Za-z0-9_.:-]{1,96}$",
+      "title": "Code",
+      "type": "string"
+    },
+    "incident_id": {
+      "pattern": "^[A-Za-z0-9_.:-]{1,96}$",
+      "title": "Incident Id",
+      "type": "string"
+    },
+    "observed_at": {
+      "description": "该条事实的观测时点",
+      "format": "date-time",
+      "title": "Observed At",
+      "type": "string"
+    },
+    "related_ids": {
+      "default": [],
+      "items": {
+        "pattern": "^[A-Za-z0-9_.:-]{1,96}$",
+        "type": "string"
+      },
+      "maxItems": 200,
+      "title": "Related Ids",
+      "type": "array"
+    },
+    "severity": {
+      "enum": [
+        "INFO",
+        "WARNING",
+        "CRITICAL"
+      ],
+      "title": "Severity",
+      "type": "string"
+    },
+    "status": {
+      "enum": [
+        "OPEN",
+        "ACKNOWLEDGED",
+        "RESOLVED"
+      ],
+      "title": "Status",
+      "type": "string"
+    },
+    "summary": {
+      "description": "脱敏说明，禁止凭据和完整账号",
+      "maxLength": 2048,
+      "minLength": 1,
+      "title": "Summary",
+      "type": "string"
+    },
+    "trade_date": {
+      "description": "所属交易日",
+      "format": "date",
+      "title": "Trade Date",
+      "type": "string"
+    }
+  },
+  "required": [
+    "account_id",
+    "trade_date",
+    "observed_at",
+    "incident_id",
+    "severity",
+    "status",
+    "code",
+    "summary"
+  ],
+  "title": "IncidentRecord",
+  "type": "object"
+}

@@ -1,0 +1,23 @@
+{
+  "account_fingerprints": [
+    "16d151a5410d41d0"
+  ],
+  "discovered_account_count": 1,
+  "discovered_account_sources": [
+    "ACCOUNT_INFO"
+  ],
+  "discovered_account_types": [
+    2
+  ],
+  "discovery_connection": "PASS",
+  "failure_code": "QMT_CONNECT_FAILED",
+  "mode": "READ_ONLY",
+  "real_trading_enabled": false,
+  "schema": "qmt-onboarding/v1",
+  "selected_account_fingerprint": "16d151a5410d41d0",
+  "stages": {
+    "connection": "BLOCKED"
+  },
+  "status": "BLOCKED",
+  "worker_exit_code": 2
+}

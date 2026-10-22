@@ -1,0 +1,17 @@
+{
+  "schema_version": "1.0",
+  "request_id": "req_ffffffffffffffffffffffffffffffff",
+  "occurred_at": "2026-09-04T14:45:30+08:00",
+  "error": {
+    "code": "REQUEST_VALIDATION_FAILED",
+    "message": "The request does not match protocol version 1.0",
+    "retryable": false
+  },
+  "field_errors": [
+    {
+      "field": "commands[0].expires_at",
+      "code": "REQUIRED_FIELD_MISSING",
+      "message": "expires_at is required"
+    }
+  ]
+}

@@ -1,0 +1,14 @@
+{
+  "account_fingerprints": [],
+  "discovered_account_count": 0,
+  "discovered_account_sources": [],
+  "discovered_account_types": [],
+  "discovery_connection": "PASS",
+  "failure_code": "QMT_NO_STOCK_ACCOUNT",
+  "mode": "READ_ONLY",
+  "real_trading_enabled": false,
+  "schema": "qmt-onboarding/v1",
+  "stages": {},
+  "status": "BLOCKED",
+  "worker_exit_code": 2
+}

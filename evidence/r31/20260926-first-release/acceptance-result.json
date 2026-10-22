@@ -1,0 +1,62 @@
+{
+  "account_id": "paper-96f38305ecee44f0a26a5a79a528fe66",
+  "batch_ids": [
+    "day-120b8f6d3deb3204ea95f38cd47323395908cf802d5e0ae8ea30fbb8acb9d006",
+    "day-d9cf9035c25489df7a71bbdcef9e24230ce7f384e802fa5c65d9524d4c804e17"
+  ],
+  "buy_trades": 1,
+  "sell_trades": 1,
+  "remaining": 0,
+  "restart_paused": true,
+  "halt_verified": true,
+  "https": true,
+  "outage_retry": true,
+  "daily_invocations": 2,
+  "interpreter": "3.11.16",
+  "daily_business": [
+    {
+      "trade_date": "2026-09-07",
+      "batch_id": "day-120b8f6d3deb3204ea95f38cd47323395908cf802d5e0ae8ea30fbb8acb9d006",
+      "business_status": "COMPLETE",
+      "statement": {
+        "status": "MATCHED_SAMPLE",
+        "statement_count": 1,
+        "daily_count": 1,
+        "fee_total": "5.01",
+        "net_cash_change": "-1005.01",
+        "differences": [],
+        "financial_status": "PROVISIONAL",
+        "source_kind": "SAMPLE"
+      }
+    },
+    {
+      "trade_date": "2026-09-08",
+      "batch_id": "day-d9cf9035c25489df7a71bbdcef9e24230ce7f384e802fa5c65d9524d4c804e17",
+      "business_status": "INCOMPLETE",
+      "statement": {
+        "status": "MATCHED_SAMPLE",
+        "statement_count": 1,
+        "daily_count": 1,
+        "fee_total": "5.01",
+        "net_cash_change": "1064.99",
+        "differences": [],
+        "financial_status": "PROVISIONAL",
+        "source_kind": "SAMPLE"
+      }
+    }
+  ],
+  "checks": [
+    "normal_cli_processes",
+    "signed_https",
+    "plan_receipt",
+    "buy_sell",
+    "halt",
+    "restart_paused",
+    "outage_pending",
+    "startup_catchup",
+    "mysql_current_version",
+    "admin_query",
+    "sample_fees",
+    "duplicate_statement"
+  ]
+}

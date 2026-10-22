@@ -1,0 +1,25 @@
+{
+  "schema_version": "1.0",
+  "event_id": "evt_00000000000000000000000000000008",
+  "event_hash": "sha256:147f0a4f142c0f8f8bff2abda9ecf549617beb41499cbf4844cc8d611df3d5eb",
+  "node_id": "node-demo-001",
+  "account_id": "acct_demo_001",
+  "boot_id": "boot_11111111111111111111111111111111",
+  "local_seq": 8,
+  "correlation_id": "corr_reconcile_20260904_001",
+  "source": "RECONCILIATION",
+  "severity": "CRITICAL",
+  "event_type": "RECONCILIATION_DISCREPANCY",
+  "aggregate_type": "RECONCILIATION",
+  "aggregate_id": "recon_01K43RECON00000001",
+  "trade_date": "2026-09-04",
+  "occurred_at": "2026-09-04T15:10:01+08:00",
+  "recorded_at": "2026-09-04T15:10:01.004+08:00",
+  "payload": {
+    "reconciliation_id": "recon_01K43RECON00000001",
+    "category": "TRADE",
+    "outcome": "MISSING_LOCAL",
+    "broker_reference": "QMT_TRADE_202609040099",
+    "summary": "Broker trade was not present in the local projection"
+  }
+}

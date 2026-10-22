@@ -1,0 +1,39 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://contracts.auto-trading.local/v1/plan-ack-result.schema.json",
+  "title": "PlanAckResult v1.0",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schema_version",
+    "request_id",
+    "ack_id",
+    "plan_id",
+    "ack_status",
+    "duplicate",
+    "received_at"
+  ],
+  "properties": {
+    "schema_version": {"const": "1.0"},
+    "request_id": {
+      "type": "string",
+      "pattern": "^req_[0-9a-f]{32}$"
+    },
+    "ack_id": {
+      "type": "string",
+      "pattern": "^ack_[A-Za-z0-9_-]{8,64}$"
+    },
+    "plan_id": {
+      "type": "string",
+      "pattern": "^plan_[A-Za-z0-9_-]{8,64}$"
+    },
+    "ack_status": {
+      "enum": ["ACCEPTED", "REJECTED", "STARTED", "COMPLETED", "CANCELLED", "EXPIRED"]
+    },
+    "duplicate": {"type": "boolean"},
+    "received_at": {
+      "type": "string",
+      "pattern": "^[0-9]{4}-[0-9]{2}-[0-9]{2}T[0-9]{2}:[0-9]{2}:[0-9]{2}(\\.[0-9]{1,6})?\\+08:00$"
+    }
+  }
+}

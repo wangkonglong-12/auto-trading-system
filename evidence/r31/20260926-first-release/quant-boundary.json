@@ -1,0 +1,28 @@
+{
+  "root": "E:\\workspace\\ai-stock-assistant",
+  "added": [
+    "backend/app/api/auto_trading/daily_history.py",
+    "backend/app/models/auto_trading/statement_v2.py",
+    "backend/app/repositories/auto_trading/daily_query.py",
+    "backend/app/repositories/auto_trading/statement_repository.py",
+    "backend/app/services/auto_trading/statement_reconcile.py",
+    "backend/docs/auto_trading/first_offline_release_20260926.md",
+    "backend/scripts/auto_trading/migrations/20260926_sample_statement_v2.sql",
+    "backend/tests/auto_trading/test_daily_business_v2.py",
+    "backend/tests/auto_trading/test_first_release_acceptance.py",
+    "frontend/src/api/auto_trading/daily.ts",
+    "frontend/src/views/auto_trading/DailyHistory.vue",
+    "frontend/tests/auto_trading/daily-preview.html",
+    "frontend/tests/auto_trading/daily-preview.ts",
+    "frontend/tests/auto_trading/preview.config.ts",
+    "frontend/tests/auto_trading/tsconfig.json"
+  ],
+  "deleted": [],
+  "modified": [
+    "backend/app/api/auto_trading/routes.py",
+    "backend/scripts/auto_trading/migrate_v2.py",
+    "backend/tests/auto_trading/test_v2_migration.py",
+    "backend/tests/auto_trading/v2_support.py",
+    "frontend/src/views/auto_trading/Monitor.vue"
+  ]
+}

@@ -1,0 +1,391 @@
+{
+  "callbacks": {
+    "accepted_sample_count": 1,
+    "ignored_sample_count": 0,
+    "invalid_count": 0
+  },
+  "cleanup_failure_codes": [],
+  "collection_mode": "READ_ONLY",
+  "completed_at": "2026-10-19T22:40:44.260498+08:00",
+  "config_hash": "8239dc378e6ee22da1d4829e295e2d4b19ee36a84e7f3577dcbbd87f05d84ed2",
+  "duration_milliseconds": 5219,
+  "failure_code": null,
+  "observation_seconds": 3,
+  "outcome": "PASS",
+  "phases": [
+    {
+      "elapsed_milliseconds": 63,
+      "phase": "CLIENT_CREATED"
+    },
+    {
+      "elapsed_milliseconds": 2204,
+      "phase": "SUBSCRIBE_RETURNED",
+      "result_code": 1
+    },
+    {
+      "elapsed_milliseconds": 2204,
+      "phase": "SNAPSHOT_RETURNED",
+      "result_code": 1
+    },
+    {
+      "elapsed_milliseconds": 5204,
+      "phase": "OBSERVATION_COMPLETED"
+    },
+    {
+      "elapsed_milliseconds": 5219,
+      "phase": "UNSUBSCRIBE_COMPLETED",
+      "result_code": 1
+    }
+  ],
+  "primary_failure_code": null,
+  "privacy": {
+    "exception_messages_omitted": true,
+    "full_broker_account_omitted": true,
+    "prices_amounts_and_volumes_omitted": true,
+    "raw_tick_payloads_omitted": true,
+    "security_codes_replaced_by_fingerprints": true,
+    "userdata_path_omitted": true
+  },
+  "qmt": {
+    "requested_symbol_count": 1,
+    "sdk_version": null,
+    "subscription_count": 1,
+    "unsubscribe_attempt_count": 1
+  },
+  "scenario": "CLOSED",
+  "schema": "qmt-tick-probe/v1",
+  "snapshot": {
+    "missing_symbol_count": 0,
+    "unexpected_symbol_count": 0
+  },
+  "started_at": "2026-10-19T22:40:39.037288+08:00",
+  "symbols": [
+    {
+      "fields": [],
+      "order_book_depth_mismatch_count": 0,
+      "sample_count": 0,
+      "source": "CALLBACK",
+      "stock_status_codes": [],
+      "structurally_valid": false,
+      "symbol_fingerprint": "56dab30ebda942d9",
+      "timestamp_units": [],
+      "valid_sample_count": 0,
+      "volume_multiplier_candidates": []
+    },
+    {
+      "fields": [
+        {
+          "element_types": [],
+          "invalid_count": 0,
+          "invalid_element_count": 0,
+          "maximum_sequence_length": null,
+          "minimum_sequence_length": null,
+          "missing_count": 0,
+          "name": "amount",
+          "negative_count": 0,
+          "non_finite_count": 0,
+          "none_count": 0,
+          "observed_types": [
+            "int"
+          ],
+          "required": true,
+          "sample_count": 1
+        },
+        {
+          "element_types": [
+            "float"
+          ],
+          "invalid_count": 0,
+          "invalid_element_count": 0,
+          "maximum_sequence_length": 5,
+          "minimum_sequence_length": 5,
+          "missing_count": 0,
+          "name": "askPrice",
+          "negative_count": 0,
+          "non_finite_count": 0,
+          "none_count": 0,
+          "observed_types": [
+            "list"
+          ],
+          "required": true,
+          "sample_count": 1
+        },
+        {
+          "element_types": [
+            "int"
+          ],
+          "invalid_count": 0,
+          "invalid_element_count": 0,
+          "maximum_sequence_length": 5,
+          "minimum_sequence_length": 5,
+          "missing_count": 0,
+          "name": "askVol",
+          "negative_count": 0,
+          "non_finite_count": 0,
+          "none_count": 0,
+          "observed_types": [
+            "list"
+          ],
+          "required": true,
+          "sample_count": 1
+        },
+        {
+          "element_types": [
+            "float"
+          ],
+          "invalid_count": 0,
+          "invalid_element_count": 0,
+          "maximum_sequence_length": 5,
+          "minimum_sequence_length": 5,
+          "missing_count": 0,
+          "name": "bidPrice",
+          "negative_count": 0,
+          "non_finite_count": 0,
+          "none_count": 0,
+          "observed_types": [
+            "list"
+          ],
+          "required": true,
+          "sample_count": 1
+        },
+        {
+          "element_types": [
+            "int"
+          ],
+          "invalid_count": 0,
+          "invalid_element_count": 0,
+          "maximum_sequence_length": 5,
+          "minimum_sequence_length": 5,
+          "missing_count": 0,
+          "name": "bidVol",
+          "negative_count": 0,
+          "non_finite_count": 0,
+          "none_count": 0,
+          "observed_types": [
+            "list"
+          ],
+          "required": true,
+          "sample_count": 1
+        },
+        {
+          "element_types": [],
+          "invalid_count": 0,
+          "invalid_element_count": 0,
+          "maximum_sequence_length": null,
+          "minimum_sequence_length": null,
+          "missing_count": 0,
+          "name": "high",
+          "negative_count": 0,
+          "non_finite_count": 0,
+          "none_count": 0,
+          "observed_types": [
+            "float"
+          ],
+          "required": true,
+          "sample_count": 1
+        },
+        {
+          "element_types": [],
+          "invalid_count": 0,
+          "invalid_element_count": 0,
+          "maximum_sequence_length": null,
+          "minimum_sequence_length": null,
+          "missing_count": 0,
+          "name": "lastClose",
+          "negative_count": 0,
+          "non_finite_count": 0,
+          "none_count": 0,
+          "observed_types": [
+            "float"
+          ],
+          "required": true,
+          "sample_count": 1
+        },
+        {
+          "element_types": [],
+          "invalid_count": 0,
+          "invalid_element_count": 0,
+          "maximum_sequence_length": null,
+          "minimum_sequence_length": null,
+          "missing_count": 0,
+          "name": "lastPrice",
+          "negative_count": 0,
+          "non_finite_count": 0,
+          "none_count": 0,
+          "observed_types": [
+            "float"
+          ],
+          "required": true,
+          "sample_count": 1
+        },
+        {
+          "element_types": [],
+          "invalid_count": 0,
+          "invalid_element_count": 0,
+          "maximum_sequence_length": null,
+          "minimum_sequence_length": null,
+          "missing_count": 0,
+          "name": "lastSettlementPrice",
+          "negative_count": 0,
+          "non_finite_count": 0,
+          "none_count": 0,
+          "observed_types": [
+            "float"
+          ],
+          "required": false,
+          "sample_count": 1
+        },
+        {
+          "element_types": [],
+          "invalid_count": 0,
+          "invalid_element_count": 0,
+          "maximum_sequence_length": null,
+          "minimum_sequence_length": null,
+          "missing_count": 0,
+          "name": "low",
+          "negative_count": 0,
+          "non_finite_count": 0,
+          "none_count": 0,
+          "observed_types": [
+            "float"
+          ],
+          "required": true,
+          "sample_count": 1
+        },
+        {
+          "element_types": [],
+          "invalid_count": 0,
+          "invalid_element_count": 0,
+          "maximum_sequence_length": null,
+          "minimum_sequence_length": null,
+          "missing_count": 0,
+          "name": "open",
+          "negative_count": 0,
+          "non_finite_count": 0,
+          "none_count": 0,
+          "observed_types": [
+            "float"
+          ],
+          "required": true,
+          "sample_count": 1
+        },
+        {
+          "element_types": [],
+          "invalid_count": 0,
+          "invalid_element_count": 0,
+          "maximum_sequence_length": null,
+          "minimum_sequence_length": null,
+          "missing_count": 0,
+          "name": "openInt",
+          "negative_count": 0,
+          "non_finite_count": 0,
+          "none_count": 0,
+          "observed_types": [
+            "int"
+          ],
+          "required": false,
+          "sample_count": 1
+        },
+        {
+          "element_types": [],
+          "invalid_count": 0,
+          "invalid_element_count": 0,
+          "maximum_sequence_length": null,
+          "minimum_sequence_length": null,
+          "missing_count": 0,
+          "name": "pvolume",
+          "negative_count": 0,
+          "non_finite_count": 0,
+          "none_count": 0,
+          "observed_types": [
+            "int"
+          ],
+          "required": true,
+          "sample_count": 1
+        },
+        {
+          "element_types": [],
+          "invalid_count": 0,
+          "invalid_element_count": 0,
+          "maximum_sequence_length": null,
+          "minimum_sequence_length": null,
+          "missing_count": 0,
+          "name": "stockStatus",
+          "negative_count": 0,
+          "non_finite_count": 0,
+          "none_count": 0,
+          "observed_types": [
+            "int"
+          ],
+          "required": true,
+          "sample_count": 1
+        },
+        {
+          "element_types": [],
+          "invalid_count": 0,
+          "invalid_element_count": 0,
+          "maximum_sequence_length": null,
+          "minimum_sequence_length": null,
+          "missing_count": 0,
+          "name": "time",
+          "negative_count": 0,
+          "non_finite_count": 0,
+          "none_count": 0,
+          "observed_types": [
+            "int"
+          ],
+          "required": true,
+          "sample_count": 1
+        },
+        {
+          "element_types": [],
+          "invalid_count": 0,
+          "invalid_element_count": 0,
+          "maximum_sequence_length": null,
+          "minimum_sequence_length": null,
+          "missing_count": 1,
+          "name": "transactionNum",
+          "negative_count": 0,
+          "non_finite_count": 0,
+          "none_count": 0,
+          "observed_types": [
+            "missing"
+          ],
+          "required": false,
+          "sample_count": 1
+        },
+        {
+          "element_types": [],
+          "invalid_count": 0,
+          "invalid_element_count": 0,
+          "maximum_sequence_length": null,
+          "minimum_sequence_length": null,
+          "missing_count": 0,
+          "name": "volume",
+          "negative_count": 0,
+          "non_finite_count": 0,
+          "none_count": 0,
+          "observed_types": [
+            "int"
+          ],
+          "required": true,
+          "sample_count": 1
+        }
+      ],
+      "order_book_depth_mismatch_count": 0,
+      "sample_count": 1,
+      "source": "SNAPSHOT",
+      "stock_status_codes": [
+        5
+      ],
+      "structurally_valid": true,
+      "symbol_fingerprint": "56dab30ebda942d9",
+      "timestamp_units": [
+        "MILLISECONDS"
+      ],
+      "valid_sample_count": 1,
+      "volume_multiplier_candidates": []
+    }
+  ],
+  "work_item": "QMT-003"
+}

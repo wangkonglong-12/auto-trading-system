@@ -1,0 +1,36 @@
+**********************
+PowerShell transcript start
+Start time: 20260921123456
+Username: DESKTOP-OVIR8KO\Thinkpad
+RunAs User: DESKTOP-OVIR8KO\Thinkpad
+Configuration Name: 
+Machine: DESKTOP-OVIR8KO (Microsoft Windows NT 10.0.19045.0)
+Host Application: C:\Users\Thinkpad\.cache\codex-runtimes\codex-primary-runtime\dependencies\native\powershell\pwsh.dll -Command try { [Console]::OutputEncoding=[System.Text.Encoding]::UTF8 } catch {}
+Start-Transcript -Path evidence/r31/20260921-exit-owner/python-final.txt
+try {
+$pythonChecks = @(@('-m','ruff','check','.'), @('-m','ruff','format','--check','src','tests'), @('-m','mypy','src','tests'), @('-m','pytest','-q','--junitxml=evidence/r31/20260921-exit-owner/python-tests.xml','--cov-report=json:evidence/r31/20260921-exit-owner/coverage-all.json'))
+foreach ($checkArgs in $pythonChecks) {
+& .codex_tmp/r31-venv/Scripts/python.exe @checkArgs
+if ($LASTEXITCODE -ne 0) { throw 'Final Python verification failed' }
+}
+} finally { Stop-Transcript }
+Process ID: 19528
+PSVersion: 7.6.5
+PSEdition: Core
+GitCommitId: 7.6.5
+OS: Microsoft Windows 10.0.19045
+Platform: Win32NT
+PSCompatibleVersions: 1.0, 2.0, 3.0, 4.0, 5.0, 5.1, 6.0, 7.0
+PSRemotingProtocolVersion: 2.4
+SerializationVersion: 1.1.0.1
+WSManStackVersion: 3.0
+**********************
+Transcript started, output file is evidence/r31/20260921-exit-owner/python-final.txt
+
+
+
+
+**********************
+PowerShell transcript end
+End time: 20260921123552
+**********************

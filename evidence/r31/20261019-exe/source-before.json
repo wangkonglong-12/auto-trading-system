@@ -1,0 +1,1882 @@
+[
+  {
+    "hash": "E872A7E5F410E2611A2D67EC0186898A7DB7FDFB7A4FF12E857646E763970DED",
+    "path": "E:\\workspace\\auto-trading-system\\src\\auto_trading_system\\__init__.py"
+  },
+  {
+    "hash": "002D5BDADE8101C8D05526FD0521F385F82333EF467F02D2A894E3BED5C9025C",
+    "path": "E:\\workspace\\auto-trading-system\\src\\auto_trading_system\\version.py"
+  },
+  {
+    "hash": "7C31A4812FB2346860A991C3A30F1D3D827E72391D3A43512D53F9A96BE0A775",
+    "path": "E:\\workspace\\auto-trading-system\\src\\auto_trading_system\\apps\\__init__.py"
+  },
+  {
+    "hash": "FCA83A39C08133FCDA345DC4D93503451BD5DCFFD75D5741210FF1485DEA3DDF",
+    "path": "E:\\workspace\\auto-trading-system\\src\\auto_trading_system\\apps\\credential_admin\\__init__.py"
+  },
+  {
+    "hash": "C9793B2546B7ABF4CADF8FA0D50E8F26C04B4A9490FF227A0F6472E537D1398D",
+    "path": "E:\\workspace\\auto-trading-system\\src\\auto_trading_system\\apps\\credential_admin\\__main__.py"
+  },
+  {
+    "hash": "F32C7B258BFAA2436196FF7C4FA8CFD215D199659300715657FD12FBAFD55CD8",
+    "path": "E:\\workspace\\auto-trading-system\\src\\auto_trading_system\\apps\\local_console\\__init__.py"
+  },
+  {
+    "hash": "682C059B9E6571EAF961E6A57912707D29D7539C3AB9031EDCE93611A7D076CA",
+    "path": "E:\\workspace\\auto-trading-system\\src\\auto_trading_system\\apps\\local_console\\app.py"
+  },
+  {
+    "hash": "528B1FE9BB7F56E5D9E40F87BE35B00E620DD504051D545346039A66E68492CC",
+    "path": "E:\\workspace\\auto-trading-system\\src\\auto_trading_system\\apps\\local_console\\composition.py"
+  },
+  {
+    "hash": "0B493C003E45B4BA0FA5FD29496F2F9DFD19208FD13DA2C734F5D5DC4CE05355",
+    "path": "E:\\workspace\\auto-trading-system\\src\\auto_trading_system\\apps\\local_console\\control_api.py"
+  },
+  {
+    "hash": "081409729842CE539AF4F2B255B00ADA003D2F4BD9FA831678A5AA99E9E638C2",
+    "path": "E:\\workspace\\auto-trading-system\\src\\auto_trading_system\\apps\\local_console\\node_app.py"
+  },
+  {
+    "hash": "14DBC9BE0B37D555F00857B16DD9E206C37220DBC4099EBE295E9F8EABF75FC4",
+    "path": "E:\\workspace\\auto-trading-system\\src\\auto_trading_system\\apps\\local_console\\node_bridge.py"
+  },
+  {
+    "hash": "662D34F2BF6DDCB60C0EE9D0A7A93CA8442FFDB71F385815CBC545C3BBD5321C",
+    "path": "E:\\workspace\\auto-trading-system\\src\\auto_trading_system\\apps\\local_console\\node_status.py"
+  },
+  {
+    "hash": "85001F861C5884805711F606E900539AFCB9D56FDDCA469A4A5303459137A916",
+    "path": "E:\\workspace\\auto-trading-system\\src\\auto_trading_system\\apps\\local_console\\security_api.py"
+  },
+  {
+    "hash": "FF173E074CAEA41096C228AB473055AAA51FEF87E6955EF4954715CB8AA104BD",
+    "path": "E:\\workspace\\auto-trading-system\\src\\auto_trading_system\\apps\\local_console\\server.py"
+  },
+  {
+    "hash": "B968269FC43869C13A49914E3FE668432616424C25A0CA838BDB8FC373662E49",
+    "path": "E:\\workspace\\auto-trading-system\\src\\auto_trading_system\\apps\\local_console\\static\\index.html"
+  },
+  {
+    "hash": "4E9ED0453C6DA6924809D035260CF7004D3FFA58838BB3C0BF1DA970258BA634",
+    "path": "E:\\workspace\\auto-trading-system\\src\\auto_trading_system\\apps\\local_console\\static\\node.html"
+  },
+  {
+    "hash": "6881F44312177AF8CC493F650E6A326ECF803B5C26B392E21776435D26D2A7E7",
+    "path": "E:\\workspace\\auto-trading-system\\src\\auto_trading_system\\apps\\local_console\\static\\assets\\legacy-BsA1BXnQ.js"
+  },
+  {
+    "hash": "1F55E67C6B9354826EEFDFFEEC918AB01892F936417E69E88B4E0A7D724692C8",
+    "path": "E:\\workspace\\auto-trading-system\\src\\auto_trading_system\\apps\\local_console\\static\\assets\\legacy-CCU6ErJe.css"
+  },
+  {
+    "hash": "ABC34D1E537C139A0501CC0F551A65B894D5C5090D5E37CDB7B1906932F67D41",
+    "path": "E:\\workspace\\auto-trading-system\\src\\auto_trading_system\\apps\\local_console\\static\\assets\\ModulePlaceholderView-Qe07V4Pf.js"
+  },
+  {
+    "hash": "D2A32840421496E872ADE591618D2FA5C33797605D1AEC04301717E5A90757D0",
+    "path": "E:\\workspace\\auto-trading-system\\src\\auto_trading_system\\apps\\local_console\\static\\assets\\modulepreload-polyfill-B5Qt9EMX.js"
+  },
+  {
+    "hash": "20E914320DA8242EB4DB775E843E0F2F1CCB8EEF1C71B764BDCE18FD74B75229",
+    "path": "E:\\workspace\\auto-trading-system\\src\\auto_trading_system\\apps\\local_console\\static\\assets\\node-D99xfpMi.js"
+  },
+  {
+    "hash": "8EFB095A95E3B626E48E5D6C4830F0285F572B228284600F8FD95FACB99B8054",
+    "path": "E:\\workspace\\auto-trading-system\\src\\auto_trading_system\\apps\\local_console\\static\\assets\\node-DH3A6DeV.css"
+  },
+  {
+    "hash": "BFF34575C0FF02F806FAE5548B5C79F9045A7EE9195A7A0A51F53AAEAAAD1A1A",
+    "path": "E:\\workspace\\auto-trading-system\\src\\auto_trading_system\\apps\\local_console\\static\\assets\\vendor-charts-Cxryhlfn.js"
+  },
+  {
+    "hash": "82E3B50D441F72217355329EF2BE892E5DC1DBAF7A8FB8F36E83F9A655E34BE3",
+    "path": "E:\\workspace\\auto-trading-system\\src\\auto_trading_system\\apps\\local_console\\static\\assets\\vendor-ui-IXJI97Z6.js"
+  },
+  {
+    "hash": "95965F46E6A7A5CE43141E0FAED31FECB15EBE568BCD2010AEF2C0B8501121ED",
+    "path": "E:\\workspace\\auto-trading-system\\src\\auto_trading_system\\apps\\local_console\\static\\assets\\vendor-vue-Bqt8vJsE.js"
+  },
+  {
+    "hash": "4F968ADDC9C5E5F920938ECFD5784BAC738E5843D3B754457807B2367DEAC933",
+    "path": "E:\\workspace\\auto-trading-system\\src\\auto_trading_system\\apps\\node_process\\__init__.py"
+  },
+  {
+    "hash": "82B6553FE3F20F7DC590E4FE26E1AA655143055377B7CF97F495D151E2A52197",
+    "path": "E:\\workspace\\auto-trading-system\\src\\auto_trading_system\\apps\\node_process\\__main__.py"
+  },
+  {
+    "hash": "B7AFA6E748E2A1230362A15FB87A43520585376DDA85B13D135D3C2287CB614F",
+    "path": "E:\\workspace\\auto-trading-system\\src\\auto_trading_system\\apps\\node_process\\authorization_cli.py"
+  },
+  {
+    "hash": "D25CC259151FC0574AE084B645F23B53AFE8F27B6A67EE650D6F227F75B737FA",
+    "path": "E:\\workspace\\auto-trading-system\\src\\auto_trading_system\\apps\\qmt_order_preflight\\__init__.py"
+  },
+  {
+    "hash": "4E54DC0B8964B39852D9552D8ED1A20B16CF15A6FFAEBD802A44830E06D26CE2",
+    "path": "E:\\workspace\\auto-trading-system\\src\\auto_trading_system\\apps\\qmt_order_preflight\\__main__.py"
+  },
+  {
+    "hash": "4EB061AF6FD1AB7FA227FA67986DC919A50A623762128E382590F190ECF65AE6",
+    "path": "E:\\workspace\\auto-trading-system\\src\\auto_trading_system\\apps\\qmt_readonly_probe\\__init__.py"
+  },
+  {
+    "hash": "8A53CA9834192A3B04EFB33AB0A5B52517F1A3F5052E95B353B2B62DE27A7D08",
+    "path": "E:\\workspace\\auto-trading-system\\src\\auto_trading_system\\apps\\qmt_readonly_probe\\__main__.py"
+  },
+  {
+    "hash": "4B1BCF4587CF6E8A6E43A40852CDFFCC2A949C4F97AC17A408CC68ACC3943A60",
+    "path": "E:\\workspace\\auto-trading-system\\src\\auto_trading_system\\apps\\qmt_snapshot_probe\\__init__.py"
+  },
+  {
+    "hash": "47BAA9D1C988DFCFB73A987BAB210B485F5BD23217D4A5200D91D1A4DD9C1913",
+    "path": "E:\\workspace\\auto-trading-system\\src\\auto_trading_system\\apps\\qmt_snapshot_probe\\__main__.py"
+  },
+  {
+    "hash": "879EBA3F2779CDEA24E00600E9E08E30DB73B50FA5F45E74C25DE849DFBDF441",
+    "path": "E:\\workspace\\auto-trading-system\\src\\auto_trading_system\\apps\\qmt_tick_probe\\__init__.py"
+  },
+  {
+    "hash": "451B43715DB46CAB5C253596562D60B52D8AB1D00A6FE8249A2F85BA4C3D53FD",
+    "path": "E:\\workspace\\auto-trading-system\\src\\auto_trading_system\\apps\\qmt_tick_probe\\__main__.py"
+  },
+  {
+    "hash": "C6E6C460056B4060EFC07D89ADCA62A832FEB5EF7ABC6D42690EF03D983DD7C6",
+    "path": "E:\\workspace\\auto-trading-system\\src\\auto_trading_system\\apps\\trade_runtime\\__init__.py"
+  },
+  {
+    "hash": "3C9FC19CB8954B4F882936750775C6B941B45E92CCE09C9CCBAEC6DD5D96F667",
+    "path": "E:\\workspace\\auto-trading-system\\src\\auto_trading_system\\apps\\trade_runtime\\__main__.py"
+  },
+  {
+    "hash": "717F3338DA8800A876FF7CE1EF2B7A158760AE635E8A045242D4223D23EAA306",
+    "path": "E:\\workspace\\auto-trading-system\\src\\auto_trading_system\\apps\\trade_runtime\\bootstrap.py"
+  },
+  {
+    "hash": "8ECCF4D37B74092FDACE50FBE8EB603AB5380806C202D8434E088840466BC5EF",
+    "path": "E:\\workspace\\auto-trading-system\\src\\auto_trading_system\\apps\\trade_runtime\\business_flow.py"
+  },
+  {
+    "hash": "8EA47188999DACC296DC16D3299E9ABA413FB3F6D802507B9D5AA3E519DE0DCD",
+    "path": "E:\\workspace\\auto-trading-system\\src\\auto_trading_system\\apps\\trade_runtime\\engine_simulation.py"
+  },
+  {
+    "hash": "30412360086736625E868FE7BFF5E8A7D1DE51CA22A68648EE3E2DE7489EC00A",
+    "path": "E:\\workspace\\auto-trading-system\\src\\auto_trading_system\\apps\\trade_runtime\\entry_simulation.py"
+  },
+  {
+    "hash": "B2E52E16F485DDA4650DE0E95AB7742AF2A8B6806B1556A1B3887D8D4FCC01EF",
+    "path": "E:\\workspace\\auto-trading-system\\src\\auto_trading_system\\apps\\trade_runtime\\exit_owner_simulation.py"
+  },
+  {
+    "hash": "78A213C35BBDA61A28EA88CFF389FF30AEF21D00647F0AAEE139A161A414050C",
+    "path": "E:\\workspace\\auto-trading-system\\src\\auto_trading_system\\apps\\trade_runtime\\exit_simulation.py"
+  },
+  {
+    "hash": "55D79C6C2CAEF3EC718D3C0D329E2CFC93CF97DC54ADD0A837EF5D85BC589394",
+    "path": "E:\\workspace\\auto-trading-system\\src\\auto_trading_system\\apps\\trade_runtime\\journal_simulation.py"
+  },
+  {
+    "hash": "71E5B99E7EB68A0F086E77D6C3286965B1E6CA7534F385325092221AA88C5ECF",
+    "path": "E:\\workspace\\auto-trading-system\\src\\auto_trading_system\\apps\\trade_runtime\\portfolio_simulation.py"
+  },
+  {
+    "hash": "3335672F9DDAAC3223922D7BB5051EC2C48CE1ED0995975A96F2E2E46F9A59F4",
+    "path": "E:\\workspace\\auto-trading-system\\src\\auto_trading_system\\apps\\trade_runtime\\simulation.py"
+  },
+  {
+    "hash": "783B323FFFD0E9E8F6FFC78DCE4B4C3FD5195B021C9C4B2B334D58FAF9A7F8A3",
+    "path": "E:\\workspace\\auto-trading-system\\src\\auto_trading_system\\apps\\watchdog\\__init__.py"
+  },
+  {
+    "hash": "DBC56B07A82E27464F93F9D796830807BE4877DD1499D7FF7EFFF9C135F35553",
+    "path": "E:\\workspace\\auto-trading-system\\src\\auto_trading_system\\apps\\watchdog\\__main__.py"
+  },
+  {
+    "hash": "17E91D945243258AFA566499B3D4FF4CD5C4372F7ADEEFC8EF4B5782C9A208F7",
+    "path": "E:\\workspace\\auto-trading-system\\src\\auto_trading_system\\apps\\watchdog\\supervisor.py"
+  },
+  {
+    "hash": "9D42AC0D3FE404713BCA97197BE4824887C1B5AC020799C5B15DDCE9852B0AFD",
+    "path": "E:\\workspace\\auto-trading-system\\src\\auto_trading_system\\config\\__init__.py"
+  },
+  {
+    "hash": "AF6D9E955F7670F668FE3822903124710B6B55D952CE77862CCEA4CC484EA796",
+    "path": "E:\\workspace\\auto-trading-system\\src\\auto_trading_system\\config\\credentials.py"
+  },
+  {
+    "hash": "911044F51A159629033544B7A8F53BD37F3B8DBEC8C42FAA51CCA86382AA8FD3",
+    "path": "E:\\workspace\\auto-trading-system\\src\\auto_trading_system\\config\\loader.py"
+  },
+  {
+    "hash": "CB0445F14AE73F83810CD7CB3DC43996EB18169182ABDDCFE2A798839E37B788",
+    "path": "E:\\workspace\\auto-trading-system\\src\\auto_trading_system\\config\\models.py"
+  },
+  {
+    "hash": "D9C1169ACA9BB26F7BC33F3461B9BB9E69B44DEDBD179B63687783EA7AFDCF29",
+    "path": "E:\\workspace\\auto-trading-system\\src\\auto_trading_system\\config\\node_v2.py"
+  },
+  {
+    "hash": "16F9E6FF0C06B4EEF776D8234854579C2CABFD0D3A54AF297661378B485C3DE5",
+    "path": "E:\\workspace\\auto-trading-system\\src\\auto_trading_system\\config\\paper_session.py"
+  },
+  {
+    "hash": "74FDE77FCD9D46C2F5EE1FFC3A32F4D520B2B808E1DAFC51A153CA598D816BDE",
+    "path": "E:\\workspace\\auto-trading-system\\src\\auto_trading_system\\config\\schema.py"
+  },
+  {
+    "hash": "94417DB63D30EB27001F56DEA52279EC4259FDCAA8EE20DD4990C13A7DA156FB",
+    "path": "E:\\workspace\\auto-trading-system\\src\\auto_trading_system\\config\\windows_credentials.py"
+  },
+  {
+    "hash": "7490E545787FCEA6461EC3E255D0F3E4AA92E21821982E7AAB5A529B7DE266D4",
+    "path": "E:\\workspace\\auto-trading-system\\src\\auto_trading_system\\control\\__init__.py"
+  },
+  {
+    "hash": "97EE0DA38307FD043FE4307766EC3B52E7CA790FCAED87A291B7640F81AAAAA2",
+    "path": "E:\\workspace\\auto-trading-system\\src\\auto_trading_system\\control\\approval_v2.py"
+  },
+  {
+    "hash": "DEF83B7B1E8537F06AD84E3E4FCAACEA8179B1645082B7794293E8C6DD853310",
+    "path": "E:\\workspace\\auto-trading-system\\src\\auto_trading_system\\control\\authorization.py"
+  },
+  {
+    "hash": "3B3CEFC7816D050B075BB10BDE86621767FA02F1E5FCB35BAFC43D7AA29C2D3C",
+    "path": "E:\\workspace\\auto-trading-system\\src\\auto_trading_system\\control\\dispatch.py"
+  },
+  {
+    "hash": "7392DFAD70C78F0B5176A54DFFE364F27AEBC802457DA92A0FB6AF111A413195",
+    "path": "E:\\workspace\\auto-trading-system\\src\\auto_trading_system\\control\\ipc_protocol.py"
+  },
+  {
+    "hash": "F0496AFA6BE401E004344F4F70D089317FC9B1B6233D164698E544D0C7C884AC",
+    "path": "E:\\workspace\\auto-trading-system\\src\\auto_trading_system\\control\\models.py"
+  },
+  {
+    "hash": "9609C23CE91BC23EB9F27E8AF49FF66D104E7BC3DC7D6046D9CB8D8683B21213",
+    "path": "E:\\workspace\\auto-trading-system\\src\\auto_trading_system\\control\\node_authorization.py"
+  },
+  {
+    "hash": "270776B29F63BF0202379EC9AA14C6B0029A5F0A79E37351C39C1759ACC3BCD8",
+    "path": "E:\\workspace\\auto-trading-system\\src\\auto_trading_system\\control\\owner_mailbox.py"
+  },
+  {
+    "hash": "B597AA2E4D6FD0E2E15ABBF08DF17B2ADD0A6EAED0ABCE68ACFBFC99CDB58788",
+    "path": "E:\\workspace\\auto-trading-system\\src\\auto_trading_system\\control\\plan_delivery.py"
+  },
+  {
+    "hash": "462F876DE5CF836B331E2191E535016F092295FD67C74B3DA8D918F798237B70",
+    "path": "E:\\workspace\\auto-trading-system\\src\\auto_trading_system\\control\\recovery.py"
+  },
+  {
+    "hash": "8E83A734123872791575614E8FB50885CEBC69FB8CAAB9C217DB1532D451304F",
+    "path": "E:\\workspace\\auto-trading-system\\src\\auto_trading_system\\control\\service.py"
+  },
+  {
+    "hash": "AB4C8B047C8ED2662775532C96A32E07DF4D991ED5E450C35186CA2CD550F5E6",
+    "path": "E:\\workspace\\auto-trading-system\\src\\auto_trading_system\\control\\windows_pipe.py"
+  },
+  {
+    "hash": "2E76E703E4A4D37D5483C8FCFFB89C0177C47E4E2D51419EB0F7EFFB1AC83DD3",
+    "path": "E:\\workspace\\auto-trading-system\\src\\auto_trading_system\\deployment\\__init__.py"
+  },
+  {
+    "hash": "3BAE9C6E37A698A8003989B11742CAE7E90D3D0AE961077520E92DB3E4A3B150",
+    "path": "E:\\workspace\\auto-trading-system\\src\\auto_trading_system\\domain\\__init__.py"
+  },
+  {
+    "hash": "4E06684CC9322FC79C75CCF676A1C7154543BB458D179A5D9BA82FB409FA473C",
+    "path": "E:\\workspace\\auto-trading-system\\src\\auto_trading_system\\domain\\clock.py"
+  },
+  {
+    "hash": "EADB7EDE30A8115C973852F7D18373E7838CB2344C8520E3D360EC1D7ADACD72",
+    "path": "E:\\workspace\\auto-trading-system\\src\\auto_trading_system\\domain\\decimal_values.py"
+  },
+  {
+    "hash": "58C3B43737532D40B5C99CE2450DA40EFA89AB8912585E13587BD4DE29044457",
+    "path": "E:\\workspace\\auto-trading-system\\src\\auto_trading_system\\domain\\errors.py"
+  },
+  {
+    "hash": "DB7BABF112C9055008D68217FDF6800CFBDE8F549936886ADB2A5090499F5BDC",
+    "path": "E:\\workspace\\auto-trading-system\\src\\auto_trading_system\\domain\\quantity.py"
+  },
+  {
+    "hash": "2A9D25E00C6C837B78BD6D84345810B22611FE6A8A2578F4704A56C9D337E916",
+    "path": "E:\\workspace\\auto-trading-system\\src\\auto_trading_system\\domain\\security.py"
+  },
+  {
+    "hash": "6E298598C635D1727D5E1CAB71B21F9CF27E5D8FC5F21DA4FAC728C2D4D1BFA7",
+    "path": "E:\\workspace\\auto-trading-system\\src\\auto_trading_system\\domain\\trading_time.py"
+  },
+  {
+    "hash": "4E123261142B692A1173BBAC7B3047564AFF3EC0F8E028A30113887AFBA8499C",
+    "path": "E:\\workspace\\auto-trading-system\\src\\auto_trading_system\\execution\\__init__.py"
+  },
+  {
+    "hash": "9D9B84D42B712EF9AB8158ED2A19D82D818DB63621BE62F3BC022E1C4BA836A7",
+    "path": "E:\\workspace\\auto-trading-system\\src\\auto_trading_system\\execution\\dispatch_boundary.py"
+  },
+  {
+    "hash": "F0EB7789F71CA1E56B59055D24174E557E7A8525A06CD01C76778E31800FE8D7",
+    "path": "E:\\workspace\\auto-trading-system\\src\\auto_trading_system\\execution\\entry_budget.py"
+  },
+  {
+    "hash": "63FBE44E03C1444F74AE27AFA09F37906CA3C81AED8CDC497E320A899CDC91B8",
+    "path": "E:\\workspace\\auto-trading-system\\src\\auto_trading_system\\execution\\hard_safety_guard.py"
+  },
+  {
+    "hash": "4AB0497088FBC2A8F29C279EF6C08D8BA5E914B47244DD2A4583310330F29B71",
+    "path": "E:\\workspace\\auto-trading-system\\src\\auto_trading_system\\execution\\order_intent_gate.py"
+  },
+  {
+    "hash": "209C98AEAD3F60C6F25A0C5E7171281D26477136ABBA9F052981AD469CD71682",
+    "path": "E:\\workspace\\auto-trading-system\\src\\auto_trading_system\\execution\\permission.py"
+  },
+  {
+    "hash": "6251F4A2D5B4BE4D79E8D18E5B8801BA29B9C366EFCF0764B91253760926F7BE",
+    "path": "E:\\workspace\\auto-trading-system\\src\\auto_trading_system\\execution\\plan_control.py"
+  },
+  {
+    "hash": "058273684ADFAAB13BD5B37C195F9E1FE9AFD8835B6859CB3E471DAFD16A1A0E",
+    "path": "E:\\workspace\\auto-trading-system\\src\\auto_trading_system\\execution\\sell_policy.py"
+  },
+  {
+    "hash": "F6A1F3CBD1BDFD073A392FAAA5C076E2C64B1A72CF311E1E1FDAE8BBA87333A9",
+    "path": "E:\\workspace\\auto-trading-system\\src\\auto_trading_system\\execution\\submission_coordinator.py"
+  },
+  {
+    "hash": "D622626580F5213FA947D63792FDF7D053F3265A0BBBDE2ACE50A586C7CBF223",
+    "path": "E:\\workspace\\auto-trading-system\\src\\auto_trading_system\\gateways\\__init__.py"
+  },
+  {
+    "hash": "210DAA71136283EA30151E14FF20F5D4566BAD23C9D78E89A6A8EBD2C0359B18",
+    "path": "E:\\workspace\\auto-trading-system\\src\\auto_trading_system\\gateways\\broker\\__init__.py"
+  },
+  {
+    "hash": "8E6F8C8166FDF9C9A28309664A6D884D61CAFF6D53CB52F1145BEEDCAF20E28A",
+    "path": "E:\\workspace\\auto-trading-system\\src\\auto_trading_system\\gateways\\broker\\cicc_qmt_snapshot.py"
+  },
+  {
+    "hash": "098D69E825894A00A3AA5D4D9E779957BABAD8EE3215987852EB98F94D64BC2A",
+    "path": "E:\\workspace\\auto-trading-system\\src\\auto_trading_system\\gateways\\broker\\cicc_qmt.py"
+  },
+  {
+    "hash": "6A42C4AEE58E7BC57551CA1816FAACD8071495EE5B639219FF1971527FD03872",
+    "path": "E:\\workspace\\auto-trading-system\\src\\auto_trading_system\\gateways\\broker\\errors.py"
+  },
+  {
+    "hash": "66FC018BB6DC4D5DF62243B1DB1EA3A7D0629E1BF41BBE5600B84677A17FF8B0",
+    "path": "E:\\workspace\\auto-trading-system\\src\\auto_trading_system\\gateways\\broker\\mock.py"
+  },
+  {
+    "hash": "7206DDE2C5C0766D0A7AEA867A1FEB6DB8A3A42D35D1D27C77B9AE6EBD56810B",
+    "path": "E:\\workspace\\auto-trading-system\\src\\auto_trading_system\\gateways\\broker\\models.py"
+  },
+  {
+    "hash": "6689B7E4E5FDBD399BA4B8561F928CD71950918A70C23D400ECC9154C06CEE72",
+    "path": "E:\\workspace\\auto-trading-system\\src\\auto_trading_system\\gateways\\broker\\paper_state.py"
+  },
+  {
+    "hash": "D4110606D5D6C4ACE580746CA56E4B9B0C9FE9AB5232DE93F1D611F344978E6E",
+    "path": "E:\\workspace\\auto-trading-system\\src\\auto_trading_system\\gateways\\broker\\port.py"
+  },
+  {
+    "hash": "89ECEE95B41D989B998F92186E87DD5EF75D3C9F7A670CC7E1F2E51C36C7DA37",
+    "path": "E:\\workspace\\auto-trading-system\\src\\auto_trading_system\\gateways\\broker\\query_validation.py"
+  },
+  {
+    "hash": "D52F257D628DE3BC10652A64FD4C1515144F9689204C195D66269D401B30EE6C",
+    "path": "E:\\workspace\\auto-trading-system\\src\\auto_trading_system\\gateways\\market\\__init__.py"
+  },
+  {
+    "hash": "75FD4361978DE9AF4B9B0F3987E040F86E5145812D3948F1820025E2F5F259F2",
+    "path": "E:\\workspace\\auto-trading-system\\src\\auto_trading_system\\gateways\\market\\errors.py"
+  },
+  {
+    "hash": "8351E439A3378684F7CD5EBA1C85296BACC3531FFE3538901EC283BB622610D4",
+    "path": "E:\\workspace\\auto-trading-system\\src\\auto_trading_system\\gateways\\market\\mock.py"
+  },
+  {
+    "hash": "0A348957DD0BC327FFE1778B9D9BE3BDF91BFEF69E419CD71D0EF3C7D1CAA7EE",
+    "path": "E:\\workspace\\auto-trading-system\\src\\auto_trading_system\\gateways\\market\\models.py"
+  },
+  {
+    "hash": "22A300DD46BD2AD8F42EAE60F03E34302B5338CCF91FDC189C416AF4837C67E0",
+    "path": "E:\\workspace\\auto-trading-system\\src\\auto_trading_system\\gateways\\market\\port.py"
+  },
+  {
+    "hash": "1F759153FC5D07D3AD29E2C09FA8E43B5F64A4BF3CA1E93126DADED2D12DDDFD",
+    "path": "E:\\workspace\\auto-trading-system\\src\\auto_trading_system\\gateways\\market\\qmt.py"
+  },
+  {
+    "hash": "8DE41FC106CFA0DD8BA68FF27F1DB2EE3B9048B17F85F5067E61D703D0A24544",
+    "path": "E:\\workspace\\auto-trading-system\\src\\auto_trading_system\\journal\\__init__.py"
+  },
+  {
+    "hash": "7081D04B2175C82C05633697236F6EE2C188B03353CDA0DA5B4A6AC616208B67",
+    "path": "E:\\workspace\\auto-trading-system\\src\\auto_trading_system\\journal\\apsw_backup.py"
+  },
+  {
+    "hash": "12EF96FDA08CEF5ECD9D40BABC606CD30CCCD73F86283D2FC25E8289F3FF1D64",
+    "path": "E:\\workspace\\auto-trading-system\\src\\auto_trading_system\\journal\\apsw_store.py"
+  },
+  {
+    "hash": "AAC0A667E9DC299004C828194D8A55666AAA94DE06DDE4FC7538E1F8B1079C3D",
+    "path": "E:\\workspace\\auto-trading-system\\src\\auto_trading_system\\journal\\checkpoint_blobs.py"
+  },
+  {
+    "hash": "054F9C5464C9D7134503D06C62622870C5692EB93914C3DDFFC4582D648D7134",
+    "path": "E:\\workspace\\auto-trading-system\\src\\auto_trading_system\\journal\\critical_models.py"
+  },
+  {
+    "hash": "D3B32C0E7237666B3D2108B1C5E1B81B5DD7841D361753D3E6726B4BAFA53553",
+    "path": "E:\\workspace\\auto-trading-system\\src\\auto_trading_system\\journal\\critical_schema.py"
+  },
+  {
+    "hash": "F311F1E8E608913952960F15F14891C9B0C9A35EACB56A8BC9959ACB2BAD8DC9",
+    "path": "E:\\workspace\\auto-trading-system\\src\\auto_trading_system\\journal\\critical_writer.py"
+  },
+  {
+    "hash": "0B387AE1FAB87DB8577ABB9290A49EC4D7DAD76891590545F8F55D50198E3111",
+    "path": "E:\\workspace\\auto-trading-system\\src\\auto_trading_system\\journal\\models.py"
+  },
+  {
+    "hash": "08D302F1D2A8729B0815B8ECF4A244E77480E059F38668D8B0280EBA4F137DAC",
+    "path": "E:\\workspace\\auto-trading-system\\src\\auto_trading_system\\journal\\port.py"
+  },
+  {
+    "hash": "2D7DCA3961113C91F2E69DA82C8DC10DC8D33ECC4C8700C3E1AB4392B468C6ED",
+    "path": "E:\\workspace\\auto-trading-system\\src\\auto_trading_system\\journal\\sqlite.py"
+  },
+  {
+    "hash": "10E73698A0BC57B989F759BB15D3DBCBC8361D16378A080D8FB8287206F3455C",
+    "path": "E:\\workspace\\auto-trading-system\\src\\auto_trading_system\\journal\\writer.py"
+  },
+  {
+    "hash": "5634EF30A303D7153EC222BBE9AE51A20CF15DBB2EDB6F22C44CE853B983EC64",
+    "path": "E:\\workspace\\auto-trading-system\\src\\auto_trading_system\\monitoring\\__init__.py"
+  },
+  {
+    "hash": "E3F444D9ACD256D6AAAD383D56577BA581FBB10104086F897648833F3E07AEFE",
+    "path": "E:\\workspace\\auto-trading-system\\src\\auto_trading_system\\monitoring\\diagnostics.py"
+  },
+  {
+    "hash": "D57CB54DECB38F220E2ABFEAE2AFBC41D2CA0393AABD25A5D52873EE5D8F02AC",
+    "path": "E:\\workspace\\auto-trading-system\\src\\auto_trading_system\\monitoring\\journal_health.py"
+  },
+  {
+    "hash": "B8960D6B84737EA1179284257008A9F709833239228732CF4CEB6351556F8619",
+    "path": "E:\\workspace\\auto-trading-system\\src\\auto_trading_system\\monitoring\\persistence.py"
+  },
+  {
+    "hash": "7D8ABC14C5FE97F4613634922145ED9F95C1733FE36FC4FFDA39EB16D51A6325",
+    "path": "E:\\workspace\\auto-trading-system\\src\\auto_trading_system\\monitoring\\qmt_order_preflight.py"
+  },
+  {
+    "hash": "62AE156CDC3A031D9BE3328CDC3A6EC5F568633380F7DE5BAAA22F85D2A7C20D",
+    "path": "E:\\workspace\\auto-trading-system\\src\\auto_trading_system\\monitoring\\qmt_readonly.py"
+  },
+  {
+    "hash": "B294537D99C6C6066ECE62E4B424C2CEB6687C18D6324F084373711D129FB5EA",
+    "path": "E:\\workspace\\auto-trading-system\\src\\auto_trading_system\\monitoring\\qmt_snapshot.py"
+  },
+  {
+    "hash": "6FD706CB0E881BB31B9C26C41CEA8E3C3BFFCA7FFC0AAA09E131297A7108B24B",
+    "path": "E:\\workspace\\auto-trading-system\\src\\auto_trading_system\\monitoring\\qmt_tick.py"
+  },
+  {
+    "hash": "41759EC0C367629B57799FC90A4172AD98C3BEEC0CE8AB64948699B881B42B18",
+    "path": "E:\\workspace\\auto-trading-system\\src\\auto_trading_system\\monitoring\\redaction.py"
+  },
+  {
+    "hash": "52694E4E254B32C14DAB8D0FEF47B8213FCF659439C3FD35DDD93C15C614C3D1",
+    "path": "E:\\workspace\\auto-trading-system\\src\\auto_trading_system\\orders\\__init__.py"
+  },
+  {
+    "hash": "8F3C8A348520B6F84620170147AD03C8D6D8F3471ED08CB47A99B44E5BC26F77",
+    "path": "E:\\workspace\\auto-trading-system\\src\\auto_trading_system\\orders\\projection.py"
+  },
+  {
+    "hash": "22BDCD0EC94A2E93C38D9D2316B3F31CA9352572568271F8813C85157B6DF545",
+    "path": "E:\\workspace\\auto-trading-system\\src\\auto_trading_system\\protocol\\__init__.py"
+  },
+  {
+    "hash": "6EEF16716983B8557BF2CBFE25CC74599F8849833BA85FBBAF0365F5B04F8561",
+    "path": "E:\\workspace\\auto-trading-system\\src\\auto_trading_system\\protocol\\canonical_json.py"
+  },
+  {
+    "hash": "740952A1D945B2013A27E085AA1643CD0593EC0AB4B20B41F875962DB4E12990",
+    "path": "E:\\workspace\\auto-trading-system\\src\\auto_trading_system\\protocol\\compat.py"
+  },
+  {
+    "hash": "C71F1011C55DADA7192EC7C3AEEAC87D2D0A4DA46E0C4B530F2D958FF1D7B6BD",
+    "path": "E:\\workspace\\auto-trading-system\\src\\auto_trading_system\\protocol\\events.py"
+  },
+  {
+    "hash": "CAF0C632AA4E75A70E13BC5371123521A51333F5E721109475E239AA8BEF03A0",
+    "path": "E:\\workspace\\auto-trading-system\\src\\auto_trading_system\\protocol\\node_messages.py"
+  },
+  {
+    "hash": "1F7E69FC80E7F5EA0ABC0092150690962B6224A434BF3EE827FA0F1E4D9DC313",
+    "path": "E:\\workspace\\auto-trading-system\\src\\auto_trading_system\\protocol\\signing.py"
+  },
+  {
+    "hash": "99DEE12B33ECCD31A1BDE9460B6B4BBF341AFC946E749F14F537CA0331362780",
+    "path": "E:\\workspace\\auto-trading-system\\src\\auto_trading_system\\protocol\\trade_plan.py"
+  },
+  {
+    "hash": "441006721742DBC9CD4567CBCD1DA5706F1545BA6842EFF63C498D75F0FE2F8B",
+    "path": "E:\\workspace\\auto-trading-system\\src\\auto_trading_system\\protocol\\v2\\__init__.py"
+  },
+  {
+    "hash": "DFF9CCE9B2C0BF9712170B616938E21C9549C2B9380925F479C54450F0076E06",
+    "path": "E:\\workspace\\auto-trading-system\\src\\auto_trading_system\\protocol\\v2\\api.py"
+  },
+  {
+    "hash": "544E54444FA7A53D60866EC00E582611F5D644E1D40A5E0E37BCC4F91247E877",
+    "path": "E:\\workspace\\auto-trading-system\\src\\auto_trading_system\\protocol\\v2\\authentication.py"
+  },
+  {
+    "hash": "A9BB7A791FEF9DF83C75F28A13ED17775F0D4AE01E986E9DAA6ED87BBC694514",
+    "path": "E:\\workspace\\auto-trading-system\\src\\auto_trading_system\\protocol\\v2\\base.py"
+  },
+  {
+    "hash": "9FEB947E719F14928A3B58183A1DE12695C00992181262722CBA7BD42CD97B80",
+    "path": "E:\\workspace\\auto-trading-system\\src\\auto_trading_system\\protocol\\v2\\canonical.py"
+  },
+  {
+    "hash": "6B5D2E98AEF72B429CFBD72D23349385F01E38EF8A86515242B7EDCC281CFCD3",
+    "path": "E:\\workspace\\auto-trading-system\\src\\auto_trading_system\\protocol\\v2\\daily_sync.py"
+  },
+  {
+    "hash": "A10A57D843ECC587F01A1C7FCE38F54CF709906C2451D1360B27389AE5818FB7",
+    "path": "E:\\workspace\\auto-trading-system\\src\\auto_trading_system\\protocol\\v2\\openapi.py"
+  },
+  {
+    "hash": "C65B3811424260EFBED553B579D8B45088A318C243B02F7E57313AD2509BA3DF",
+    "path": "E:\\workspace\\auto-trading-system\\src\\auto_trading_system\\protocol\\v2\\plans.py"
+  },
+  {
+    "hash": "D637C3AF216211CB5DCD32ADAFA364BC50FCA9621539F259AC63FE69C5D29B12",
+    "path": "E:\\workspace\\auto-trading-system\\src\\auto_trading_system\\protocol\\v2\\records.py"
+  },
+  {
+    "hash": "15EB44CCD0C6CEE1EC57A9CF56771BAD103CD77CBB221B70C96A8B6E60FF3823",
+    "path": "E:\\workspace\\auto-trading-system\\src\\auto_trading_system\\reconcile\\__init__.py"
+  },
+  {
+    "hash": "338E7B77D8BC107DC14A0D2472FA5D3EC556BE5ACBDFA576CBD3FBC8D80991ED",
+    "path": "E:\\workspace\\auto-trading-system\\src\\auto_trading_system\\reconcile\\journal_scan.py"
+  },
+  {
+    "hash": "1AE592F41EBB915E3289A475FDAFA2A57D378DAAD7BCE73637EE637F748A37A8",
+    "path": "E:\\workspace\\auto-trading-system\\src\\auto_trading_system\\reconcile\\portfolio_checkpoint.py"
+  },
+  {
+    "hash": "9C64391710722CBE03EF6B8DF8144E59B9195F89351F5506DA6A77FC7DCD24E9",
+    "path": "E:\\workspace\\auto-trading-system\\src\\auto_trading_system\\reconcile\\position_lots.py"
+  },
+  {
+    "hash": "D7D465F4D8B4190019C8CA392A42E1CD2AF7F3BAE391C7D659834B0304729225",
+    "path": "E:\\workspace\\auto-trading-system\\src\\auto_trading_system\\recorder\\__init__.py"
+  },
+  {
+    "hash": "73C65B86766D5D26BEC7DC00A58DEB076CBA0173068772BB84B4D912130B3CF4",
+    "path": "E:\\workspace\\auto-trading-system\\src\\auto_trading_system\\risk\\__init__.py"
+  },
+  {
+    "hash": "8AC399351CBB0E5EB2C6B08E779726B88BA53499E42043901E82EBD71242EBAC",
+    "path": "E:\\workspace\\auto-trading-system\\src\\auto_trading_system\\risk\\hard_safety_models.py"
+  },
+  {
+    "hash": "1511609E874E75560507CBCCAE93AA24320627CEB1DB3270012515C1CABD343E",
+    "path": "E:\\workspace\\auto-trading-system\\src\\auto_trading_system\\risk\\hard_safety.py"
+  },
+  {
+    "hash": "5F9B6725DB6966DEDC681F2E5D50F8862D61639F37EB6259307AE62F7848EFA8",
+    "path": "E:\\workspace\\auto-trading-system\\src\\auto_trading_system\\risk\\models.py"
+  },
+  {
+    "hash": "4C34862FF1F3E8EE8B68FB1C920BAD3D2BA6AB493063F0D7E427304A69C164D1",
+    "path": "E:\\workspace\\auto-trading-system\\src\\auto_trading_system\\risk\\plan_evaluator.py"
+  },
+  {
+    "hash": "93F8F9168418D405A451F3B0F7EFDF44A99298B9A38BFE7E2F3D54B8188FB4B5",
+    "path": "E:\\workspace\\auto-trading-system\\src\\auto_trading_system\\risk\\trade_plan.py"
+  },
+  {
+    "hash": "D008C86F05DAFC03815AC76FAFEF508486F1E10708549946548961F3AEF2044E",
+    "path": "E:\\workspace\\auto-trading-system\\src\\auto_trading_system\\runtime\\__init__.py"
+  },
+  {
+    "hash": "99AE1B80A4A3F7F14CD7E40DC86ECBAD1C4D7F2CB20D2316D677A4416937C9F8",
+    "path": "E:\\workspace\\auto-trading-system\\src\\auto_trading_system\\runtime\\day_snapshot.py"
+  },
+  {
+    "hash": "341473DDE1113CB996615E64BEF74D10D60D587E27601A5019A785D026546741",
+    "path": "E:\\workspace\\auto-trading-system\\src\\auto_trading_system\\runtime\\decision_loop.py"
+  },
+  {
+    "hash": "94FA6049EFEE52339E8DC58DF4014D3F78895CCA33A5CE2ED2A0E9CDFFBAF249",
+    "path": "E:\\workspace\\auto-trading-system\\src\\auto_trading_system\\runtime\\engine_v2.py"
+  },
+  {
+    "hash": "A4BDC35E0D135B49A37A77729B55EFCFDD24B96BDC94AEC28EA7C2DE1EE291AC",
+    "path": "E:\\workspace\\auto-trading-system\\src\\auto_trading_system\\runtime\\execution_scope.py"
+  },
+  {
+    "hash": "EF30796B2462A287FD8DC1D27E8FD13DF99DBE164C3721BD32B8D85B6BD6B71E",
+    "path": "E:\\workspace\\auto-trading-system\\src\\auto_trading_system\\runtime\\faults.py"
+  },
+  {
+    "hash": "B18F6E1F636CBEA34D1FD25F6745425A9873C8FA14803D4894E092F8A17F1AC5",
+    "path": "E:\\workspace\\auto-trading-system\\src\\auto_trading_system\\runtime\\lifecycle.py"
+  },
+  {
+    "hash": "8D1615D10AF3C1FE287D7502675395B13EE58E017FDC0880BE6CC1034CED7222",
+    "path": "E:\\workspace\\auto-trading-system\\src\\auto_trading_system\\runtime\\memory_state.py"
+  },
+  {
+    "hash": "C74AF1A0C2767F700C40EF30BA3293079B930BE05012E900280FFA961C0C4F03",
+    "path": "E:\\workspace\\auto-trading-system\\src\\auto_trading_system\\runtime\\node_backup.py"
+  },
+  {
+    "hash": "0741FBA130EB36317DD30FBDA187583502EA475F31B1C004C7E824EF00A2E97A",
+    "path": "E:\\workspace\\auto-trading-system\\src\\auto_trading_system\\runtime\\node_engine.py"
+  },
+  {
+    "hash": "EFB3CF31AA9CF7F745BCE93858DC7648F690AA82EC3901217D5399F632032385",
+    "path": "E:\\workspace\\auto-trading-system\\src\\auto_trading_system\\runtime\\node_layout.py"
+  },
+  {
+    "hash": "6EAA15735CD31747EB99DDDBBB40C867C93E601D3E2D46B6018AB3B99B6740C3",
+    "path": "E:\\workspace\\auto-trading-system\\src\\auto_trading_system\\runtime\\node_plan_recovery.py"
+  },
+  {
+    "hash": "6DF142EF4104D193C197357B87FD490CCA832716402931B757D8E2E76A0634EC",
+    "path": "E:\\workspace\\auto-trading-system\\src\\auto_trading_system\\runtime\\node_supervisor.py"
+  },
+  {
+    "hash": "13C87C00E8CF61E70490738835351F86B6B42B0B3019EB159CFA78D25F9D9DFB",
+    "path": "E:\\workspace\\auto-trading-system\\src\\auto_trading_system\\runtime\\node_tasks.py"
+  },
+  {
+    "hash": "C3D78DD232A5821EBEFAE982B6E32209578608914C25DFEAC6A8DF857F731453",
+    "path": "E:\\workspace\\auto-trading-system\\src\\auto_trading_system\\runtime\\observation_v2.py"
+  },
+  {
+    "hash": "653029D8430FB8A028456991FB64125B731A23E46E891A4537FC4251D9CBF627",
+    "path": "E:\\workspace\\auto-trading-system\\src\\auto_trading_system\\runtime\\owned_process.py"
+  },
+  {
+    "hash": "7101FD6BA3BB6C13A0B8F607BB02EDDF34464237274770B1DF1AF9902EA59C7A",
+    "path": "E:\\workspace\\auto-trading-system\\src\\auto_trading_system\\runtime\\paper_runtime.py"
+  },
+  {
+    "hash": "DD2A4EC5FD80A1669D5344658489228105C537FE71F9B4B30EEE759C33296F56",
+    "path": "E:\\workspace\\auto-trading-system\\src\\auto_trading_system\\runtime\\recovery_v2.py"
+  },
+  {
+    "hash": "C713E20DBE638D7A7AF1CE8DDB00C659904A1715BCFE743340E1B331EA72AAB7",
+    "path": "E:\\workspace\\auto-trading-system\\src\\auto_trading_system\\runtime\\scheduler.py"
+  },
+  {
+    "hash": "DAC8955CE18BA645EF247C5CBDC8AEE3648C4383155364757B12EC0925CF9829",
+    "path": "E:\\workspace\\auto-trading-system\\src\\auto_trading_system\\runtime\\single_instance.py"
+  },
+  {
+    "hash": "70B6A06690CA263E5BCD2B35CF8F045D63691C4E4C4BA903679D218FEA0DA1D4",
+    "path": "E:\\workspace\\auto-trading-system\\src\\auto_trading_system\\runtime\\state_machine.py"
+  },
+  {
+    "hash": "109721A289634347AC8CFC910FEC836432F9C60C558873FC8E96973D5380A484",
+    "path": "E:\\workspace\\auto-trading-system\\src\\auto_trading_system\\runtime\\supervision_state.py"
+  },
+  {
+    "hash": "819FAC77B1E0B0E6DEBCE9E60DA5B8F2B39300B9C4B1C0A1E87C7074E54D6BFE",
+    "path": "E:\\workspace\\auto-trading-system\\src\\auto_trading_system\\runtime\\watchdog.py"
+  },
+  {
+    "hash": "A18CD7036847057C0DB729CE92A18D34100F4B93533492799BA87065983F85CC",
+    "path": "E:\\workspace\\auto-trading-system\\src\\auto_trading_system\\security\\__init__.py"
+  },
+  {
+    "hash": "183440C3DF4A29A6F0A79B6A3E464C7400D947719DCAF9C7A2E9D25F71920461",
+    "path": "E:\\workspace\\auto-trading-system\\src\\auto_trading_system\\security\\operator_password.py"
+  },
+  {
+    "hash": "77FFDC711BB22C32A4D563CB71E4A62E7434DD43723BF4D67721FD989C1FA67F",
+    "path": "E:\\workspace\\auto-trading-system\\src\\auto_trading_system\\security\\operator_session.py"
+  },
+  {
+    "hash": "5355124811A2C66877895500174408E6E5F738BA7A42991F4E7E83BB48A9D2ED",
+    "path": "E:\\workspace\\auto-trading-system\\src\\auto_trading_system\\security\\repository_policy.py"
+  },
+  {
+    "hash": "A59EE443465AFE620DD7C92A30210AEB1540DA08A8A730CA141CBCBEE8B02DBF",
+    "path": "E:\\workspace\\auto-trading-system\\src\\auto_trading_system\\security\\storage.py"
+  },
+  {
+    "hash": "6A48AE6BA232E7C139C37E92CFCC0D804C45253685A10EC287630390F1C95C24",
+    "path": "E:\\workspace\\auto-trading-system\\src\\auto_trading_system\\security\\windows_acl.py"
+  },
+  {
+    "hash": "9BB8319B928D7A21E8BD149F3DEDB51CD7B2E9D1A1F2500EB4A2185C42111C75",
+    "path": "E:\\workspace\\auto-trading-system\\src\\auto_trading_system\\strategies\\__init__.py"
+  },
+  {
+    "hash": "4B4C73C18A3D2FAFB04DCA499C9A056E1B5554F071510211ABDE09BE718D8808",
+    "path": "E:\\workspace\\auto-trading-system\\src\\auto_trading_system\\strategies\\entry_gate.py"
+  },
+  {
+    "hash": "DA5699C4C1C996E0B1213513490CBEA4CE9CB7491F99A4C462AA3E4F6652C802",
+    "path": "E:\\workspace\\auto-trading-system\\src\\auto_trading_system\\strategies\\entry_owner.py"
+  },
+  {
+    "hash": "C5061436A0202CBC3624DDEB277942ED86FEF6F3AE3BDB5BD657F0F524911434",
+    "path": "E:\\workspace\\auto-trading-system\\src\\auto_trading_system\\strategies\\entry_sizing.py"
+  },
+  {
+    "hash": "4125F1E02C9BCBC77BFA1BF6EB186A229729DE352FC15CD14DF37FDD9E4B28E8",
+    "path": "E:\\workspace\\auto-trading-system\\src\\auto_trading_system\\strategies\\entry_state.py"
+  },
+  {
+    "hash": "F5A1CE22D4F7F0F5FD4DB64FE9C1A1DB2CD16994E1A56B4A0E6F9FC8B83EDB2D",
+    "path": "E:\\workspace\\auto-trading-system\\src\\auto_trading_system\\strategies\\exit_context.py"
+  },
+  {
+    "hash": "E974C08AB2D6C40B9A34C6F1D6858807F473FA9E8882614C2CE305E469CB258B",
+    "path": "E:\\workspace\\auto-trading-system\\src\\auto_trading_system\\strategies\\exit_execution.py"
+  },
+  {
+    "hash": "F3FD55839886237E93A7FA8A38FD3A6404D3F09DE001704A4F3E5F02B557D490",
+    "path": "E:\\workspace\\auto-trading-system\\src\\auto_trading_system\\strategies\\exit_owner.py"
+  },
+  {
+    "hash": "BC800E25DD83F9AD5730AC968AE0079E5ADB67BDCFE5877F3EA9A7FF4B9C4BB9",
+    "path": "E:\\workspace\\auto-trading-system\\src\\auto_trading_system\\strategies\\exit_state_store.py"
+  },
+  {
+    "hash": "93E85E8E3A5448E24DF17A1BF38BE312AD85C0CABE98CA27F48B683D44825D8D",
+    "path": "E:\\workspace\\auto-trading-system\\src\\auto_trading_system\\strategies\\exit_v3.py"
+  },
+  {
+    "hash": "4CC759EDE2E1D2C8ED36B3C0DFCE1D225481D705B897BA0835371FEF36087F5B",
+    "path": "E:\\workspace\\auto-trading-system\\src\\auto_trading_system\\strategies\\market_session.py"
+  },
+  {
+    "hash": "8462C45D6575219277FF76E08D4A824D42B86DA5F0FEC2E1B235200E70C733DC",
+    "path": "E:\\workspace\\auto-trading-system\\src\\auto_trading_system\\sync\\__init__.py"
+  },
+  {
+    "hash": "61A915A0B540B72AAB84BC8E911256D9EB23F63F8F46749A018CB2156D20000A",
+    "path": "E:\\workspace\\auto-trading-system\\src\\auto_trading_system\\sync\\agent_jobs.py"
+  },
+  {
+    "hash": "22BBAA179BA2AB1EE78C33AF5508322C247A736E78C06A1D1CD1623809DFC6CB",
+    "path": "E:\\workspace\\auto-trading-system\\src\\auto_trading_system\\sync\\artifact_files.py"
+  },
+  {
+    "hash": "BF139400E037A0582F4CB72A3B8B6F2628BD4A604CE427287C496BD56479AF33",
+    "path": "E:\\workspace\\auto-trading-system\\src\\auto_trading_system\\sync\\daily_catalog.py"
+  },
+  {
+    "hash": "636CF21BFD6D67D788E0253A757A4C0D76989CF1C27C409CE17C61111C6980D5",
+    "path": "E:\\workspace\\auto-trading-system\\src\\auto_trading_system\\sync\\daily_export.py"
+  },
+  {
+    "hash": "DDB5D391A2AA30998AA1CDA8645A8795A793BF006384A10944F05FF828202F19",
+    "path": "E:\\workspace\\auto-trading-system\\src\\auto_trading_system\\sync\\daily_files.py"
+  },
+  {
+    "hash": "BEB686A507059411F495AE02B961EAD8E5FE3BA93F30D6C715D01EDA4DB1F903",
+    "path": "E:\\workspace\\auto-trading-system\\src\\auto_trading_system\\sync\\daily_upload.py"
+  },
+  {
+    "hash": "D410C66941F9A5141C6A5EC96BA8066036D358DF75098ABA2BE62DB0396C66E7",
+    "path": "E:\\workspace\\auto-trading-system\\src\\auto_trading_system\\sync\\engine_daily.py"
+  },
+  {
+    "hash": "832E5DD4ECDF68420EA5299BF9650870B10618F8D0D7353F2871B68495724825",
+    "path": "E:\\workspace\\auto-trading-system\\src\\auto_trading_system\\sync\\event_transport.py"
+  },
+  {
+    "hash": "36A7B9FF8AC199A222B8C7F8BE76F9CB06C628A022DF327116D0F5A198F850B6",
+    "path": "E:\\workspace\\auto-trading-system\\src\\auto_trading_system\\sync\\http_v2.py"
+  },
+  {
+    "hash": "72A13116428EC59FFC405513C0816324A56F33295589129A33A7F7972D28A0F3",
+    "path": "E:\\workspace\\auto-trading-system\\src\\auto_trading_system\\sync\\job_store.py"
+  },
+  {
+    "hash": "24F32BB5CE9A99B8CB795DC50FF099C17D6E7B5175B370612A58639543AB14C7",
+    "path": "E:\\workspace\\auto-trading-system\\src\\auto_trading_system\\sync\\models.py"
+  },
+  {
+    "hash": "350D6456CFAB2CDC268F875A64B5C3378251E7B704FD11A853D4F73B5B00B7CC",
+    "path": "E:\\workspace\\auto-trading-system\\src\\auto_trading_system\\sync\\node_agent.py"
+  },
+  {
+    "hash": "095F242E5E53F886C66E68D5D39BCBA58D02B76AE78E631505BFD153B7377BC8",
+    "path": "E:\\workspace\\auto-trading-system\\src\\auto_trading_system\\sync\\outbox_worker.py"
+  },
+  {
+    "hash": "B0CD76546DB3787C60F9B6DDE707DC9BB6688C10117B250B4E83E84A48098E74",
+    "path": "E:\\workspace\\auto-trading-system\\src\\auto_trading_system\\sync\\plan_files.py"
+  },
+  {
+    "hash": "621194BF6CAE432E81E9314DB4D82F0A25828299EA40ADF80ECD74FA088197CE",
+    "path": "E:\\workspace\\auto-trading-system\\src\\auto_trading_system\\sync\\pressure.py"
+  },
+  {
+    "hash": "DBE25775923C297B4D976E7BC4148FC76A56C2B77C9B92BE251C0C36B6BD2C49",
+    "path": "E:\\workspace\\auto-trading-system\\src\\auto_trading_system\\sync\\routing.py"
+  },
+  {
+    "hash": "A63DAD46CB56E6F2FBEC79C25745815925BC8A14A94BCD4DD2D4B5668032F539",
+    "path": "E:\\workspace\\auto-trading-system\\src\\auto_trading_system\\testing\\__init__.py"
+  },
+  {
+    "hash": "57636B7F7691CD7D291DF797B701AD435AE1B343A03FFAD1BE9FD251D2814155",
+    "path": "E:\\workspace\\auto-trading-system\\src\\auto_trading_system\\testing\\business_remote.py"
+  },
+  {
+    "hash": "537E2E059495664466EA06A8C4FC7C77CDB7077848D982949F4AFDCE67326DC5",
+    "path": "E:\\workspace\\auto-trading-system\\src\\auto_trading_system\\testing\\central_api.py"
+  },
+  {
+    "hash": "B93F0B6CE7DDC6FF0A6FB7EA5D6139DF6FFA84B8DC36035E94C6A7417353C6EE",
+    "path": "E:\\workspace\\auto-trading-system\\src\\auto_trading_system\\testing\\daily_receiver.py"
+  },
+  {
+    "hash": "67D05B07371AE7A96F34D1B77C81702E4B7F7F94AA10754E792436FE98A466A1",
+    "path": "E:\\workspace\\auto-trading-system\\src\\auto_trading_system\\testing\\performance.py"
+  },
+  {
+    "hash": "75FAC8139CB4383638165F3CF6B9401FD4199736190B77D851306263FF8AC242",
+    "path": "E:\\workspace\\auto-trading-system\\src\\auto_trading_system\\testing\\v31_scenarios.py"
+  },
+  {
+    "hash": "354C73385CC3253BB3B48C6512B7A2DAB2DBA1EF7483F5ABFCA36C332DB01F5F",
+    "path": "E:\\workspace\\auto-trading-system\\tests\\contract\\test_contract_manifest.py"
+  },
+  {
+    "hash": "5BFEA6BDE474E4A324922313447484A04E1E7C13DA09BF709DC0C0EB7CFB577E",
+    "path": "E:\\workspace\\auto-trading-system\\tests\\contract\\test_domain_event_schema.py"
+  },
+  {
+    "hash": "687BC23C846F95A87D4774B7A021A8F9069FEEDA543143787007E688CBECB406",
+    "path": "E:\\workspace\\auto-trading-system\\tests\\contract\\test_hard_safety_event.py"
+  },
+  {
+    "hash": "6A1BEFD58301E9AD7415FED56C2CDDDCF520756E9B860C1E8D62F1A6B9D1343F",
+    "path": "E:\\workspace\\auto-trading-system\\tests\\contract\\test_hmac_vectors.py"
+  },
+  {
+    "hash": "F0BFE6546D4538D8A8A2CA7C032FCC363EE27A3AB86FD72F841C88FF0CF0AE49",
+    "path": "E:\\workspace\\auto-trading-system\\tests\\contract\\test_journal_protocol_alignment.py"
+  },
+  {
+    "hash": "0A4092FC9947E6A524297D7086E60F7AE1153E09577ED5D75548A93E21F746A9",
+    "path": "E:\\workspace\\auto-trading-system\\tests\\contract\\test_node_message_schemas.py"
+  },
+  {
+    "hash": "6DA0DE7DFD84CE2E42D88A7FACDBFFE66180AB84927EEE7D3C9AC6B4469EC51C",
+    "path": "E:\\workspace\\auto-trading-system\\tests\\contract\\test_plan_ack_contract.py"
+  },
+  {
+    "hash": "3F880058B5EF9E77706E0BBA4C05F33081036E9EA22B1E4A83A6DB009E1EAFAA",
+    "path": "E:\\workspace\\auto-trading-system\\tests\\contract\\test_plan_risk_event.py"
+  },
+  {
+    "hash": "971D6EFDA686633C0E6FDE402BBFC56EE71D2D806414561222675545B3130736",
+    "path": "E:\\workspace\\auto-trading-system\\tests\\contract\\test_runtime_config_schema.py"
+  },
+  {
+    "hash": "46F387932B76FF5EE97741F71CC0D3398BCBBCECDB2ED61D295E88C62A9C6906",
+    "path": "E:\\workspace\\auto-trading-system\\tests\\contract\\test_trade_plan_schema.py"
+  },
+  {
+    "hash": "C44C2ECBEEA537B4B00D0F54016A7E1B4457A290EA5AD6E39A2AC03F75B880F8",
+    "path": "E:\\workspace\\auto-trading-system\\tests\\fixtures\\watchdog_runtime_child.py"
+  },
+  {
+    "hash": "13FE6869C145BFA3B8EC0F3BF870ADE30EAABBCA41F5D5A0B5191956E6152731",
+    "path": "E:\\workspace\\auto-trading-system\\tests\\integration\\test_durable_outbox_delivery.py"
+  },
+  {
+    "hash": "45A0880F3C160616E1E0E706DB8A4F72ED1F996793CF7055EDEECCC3CCAF6E6C",
+    "path": "E:\\workspace\\auto-trading-system\\tests\\integration\\test_fault_injection_acceptance.py"
+  },
+  {
+    "hash": "59A6A0D2A5AB60E605EFE2EA018283AB715B08B922D9552AE8F6FA6B484D4CA7",
+    "path": "E:\\workspace\\auto-trading-system\\tests\\integration\\test_hard_safety_order_gate.py"
+  },
+  {
+    "hash": "02436655DE8BBEAA968D595FE2F7185F26D0BD6BD999FA76D19705897C298A07",
+    "path": "E:\\workspace\\auto-trading-system\\tests\\integration\\test_local_console_uvicorn.py"
+  },
+  {
+    "hash": "E96ED1977B79D9AF8B3A75B7761F7CACE20206ECCFD7D3F2C902B68EB09EE792",
+    "path": "E:\\workspace\\auto-trading-system\\tests\\integration\\test_local_control_api_sqlite.py"
+  },
+  {
+    "hash": "509FD72A58B95934B689048A275AECC1DBDDA82FCB14DCB63FDF730099C2670D",
+    "path": "E:\\workspace\\auto-trading-system\\tests\\integration\\test_local_control_sqlite.py"
+  },
+  {
+    "hash": "4439871E581616E2BF6C555EB2BCBB88F2CA1A45EB618D80155B813B1DBC6A0E",
+    "path": "E:\\workspace\\auto-trading-system\\tests\\integration\\test_local_security_boundary.py"
+  },
+  {
+    "hash": "F58EA29BF24901144728B4E45D2CF19C59E4377D8FBD0BF60D65802E079C8946",
+    "path": "E:\\workspace\\auto-trading-system\\tests\\integration\\test_mock_broker_anomaly_matrix.py"
+  },
+  {
+    "hash": "BB8CC90A449E38C1BF7F7332CAE8A702091F3C643BC8FBC2C23E6823D56FC5F4",
+    "path": "E:\\workspace\\auto-trading-system\\tests\\integration\\test_operator_console_packaging.py"
+  },
+  {
+    "hash": "CE9810C62EF640D034048C54DB8CE9301402D1271A7274E81A2F64A1A076CCB9",
+    "path": "E:\\workspace\\auto-trading-system\\tests\\integration\\test_order_intent_gate_sqlite.py"
+  },
+  {
+    "hash": "F85DC5C96A20933337EAA61775D5AC8247566FE98DD8BC4E31025B58A10426A6",
+    "path": "E:\\workspace\\auto-trading-system\\tests\\integration\\test_performance_boundaries.py"
+  },
+  {
+    "hash": "A2A437B7465DC7544049BBC3E8A3837EB4A42FBB363E7F69AA0CCB696589C333",
+    "path": "E:\\workspace\\auto-trading-system\\tests\\integration\\test_runtime_fault_matrix.py"
+  },
+  {
+    "hash": "182F421E5F0B406E95167787EB4349817BA15B622249AB91312BE4EBD19FD047",
+    "path": "E:\\workspace\\auto-trading-system\\tests\\integration\\test_sqlite_wal_recovery.py"
+  },
+  {
+    "hash": "0BC61CB50420CA543E2E19B499DE360818685DBDF5610324E9AC4FE4BF5D8165",
+    "path": "E:\\workspace\\auto-trading-system\\tests\\integration\\test_watchdog_process_recovery.py"
+  },
+  {
+    "hash": "659BC30EB101B3C270A590BDC5FEBE1A29CA2E8E1E2EF17EC70FEAD021F16AA9",
+    "path": "E:\\workspace\\auto-trading-system\\tests\\unit\\test_architecture_layout.py"
+  },
+  {
+    "hash": "53B7ED39647858F7DEDDA8DFDEED26D7709864A2E451C125D169417D1588299D",
+    "path": "E:\\workspace\\auto-trading-system\\tests\\unit\\test_broker_models.py"
+  },
+  {
+    "hash": "B576C401BC0940873F043116E3B37346108D7C2EA60276A9BAD92F13C93793CE",
+    "path": "E:\\workspace\\auto-trading-system\\tests\\unit\\test_broker_query_validation.py"
+  },
+  {
+    "hash": "FDC80BAD232DE47E7427B9DDEE461F15B792FA4A77012A6D43286B5E5929F0DA",
+    "path": "E:\\workspace\\auto-trading-system\\tests\\unit\\test_cicc_qmt_adapter.py"
+  },
+  {
+    "hash": "FAB7FE7074D6E651A1157C668C3127B2CB0483B57AE63D46AC131F307980A8A1",
+    "path": "E:\\workspace\\auto-trading-system\\tests\\unit\\test_cicc_qmt_snapshot_adapter.py"
+  },
+  {
+    "hash": "0D1BDD8C08825702542EFA3F6BFD89FEE5F359CC23C670574CCB6EF88ADF40B5",
+    "path": "E:\\workspace\\auto-trading-system\\tests\\unit\\test_config_loader.py"
+  },
+  {
+    "hash": "8584202DD0AD7A241AEEFCFEB5CEA8F181F950CF0387849DBBA33B0026805654",
+    "path": "E:\\workspace\\auto-trading-system\\tests\\unit\\test_config_models.py"
+  },
+  {
+    "hash": "1F32CC50D636FD0E5DF0C1FE3B5C89355F1AEDC0E9B03936C565D8CD3B7FF8B6",
+    "path": "E:\\workspace\\auto-trading-system\\tests\\unit\\test_credential_admin.py"
+  },
+  {
+    "hash": "76166D395C3028568C92E5B47B12B08EC1809E3E35BEBE559B185038054CF662",
+    "path": "E:\\workspace\\auto-trading-system\\tests\\unit\\test_credentials.py"
+  },
+  {
+    "hash": "D5604628BACBD89A179533A1F624B333F10463256440F1E6E630432C2373ADDD",
+    "path": "E:\\workspace\\auto-trading-system\\tests\\unit\\test_decision_loop.py"
+  },
+  {
+    "hash": "C017F02EA1A0D0802B7B34BD6A7F63C7B051C8116C8B56D5EADFCC9274A82627",
+    "path": "E:\\workspace\\auto-trading-system\\tests\\unit\\test_diagnostic_bundle.py"
+  },
+  {
+    "hash": "C907D22B44F0AA89DAAFAA3BCB63B0B5D5555D19D6F9B30CA370AAD59A9C8DE6",
+    "path": "E:\\workspace\\auto-trading-system\\tests\\unit\\test_domain_decimal_values.py"
+  },
+  {
+    "hash": "5DB4579354827441148F1453D456EE4EA73E968BC5A4EB9F125AA3F6ABECBAA7",
+    "path": "E:\\workspace\\auto-trading-system\\tests\\unit\\test_domain_quantity.py"
+  },
+  {
+    "hash": "35AC631704C3C3E5B3D18795350C0E1F3E0279B05C709C94495397D87A30AC5A",
+    "path": "E:\\workspace\\auto-trading-system\\tests\\unit\\test_domain_security.py"
+  },
+  {
+    "hash": "A02E84B99A8F4A01ACA4699B5E8862539259623F844AA59C4DA916A412F95F1B",
+    "path": "E:\\workspace\\auto-trading-system\\tests\\unit\\test_domain_trading_time.py"
+  },
+  {
+    "hash": "03ACE9C204E558528D8C6A0D1F8254ADC99AF94D5DA57B9B74D5B172AB4FB6F2",
+    "path": "E:\\workspace\\auto-trading-system\\tests\\unit\\test_environment_diagnostic_script.py"
+  },
+  {
+    "hash": "A28844DC457A95B27AC29CDB1CA389145EB199FF3CB6C60E61C4A1E794AD5F6C",
+    "path": "E:\\workspace\\auto-trading-system\\tests\\unit\\test_event_batch_transport.py"
+  },
+  {
+    "hash": "19FE6FA8E4984FFB5143D37627229491690B52326BDF1E7D2A072558074A83E8",
+    "path": "E:\\workspace\\auto-trading-system\\tests\\unit\\test_event_semantics.py"
+  },
+  {
+    "hash": "681E3C7A17B8C0CE73ADD7784B41B98C84AC07F8E140DC5341F64AAE9B89B638",
+    "path": "E:\\workspace\\auto-trading-system\\tests\\unit\\test_hard_safety_guard.py"
+  },
+  {
+    "hash": "9D041CAAC6727091145A065F76CE6FBA47B8CF1668CD8E307C86045E07D18B7A",
+    "path": "E:\\workspace\\auto-trading-system\\tests\\unit\\test_hard_safety.py"
+  },
+  {
+    "hash": "2C64DBC297E01EED8648665368B1BE6EC4E24E45470F4D61DDF9413B6015C2FA",
+    "path": "E:\\workspace\\auto-trading-system\\tests\\unit\\test_journal_contract.py"
+  },
+  {
+    "hash": "1308983EEFC8EED5B0606ABD7306A9F354507900519C2F937E5C9564D7C33DCC",
+    "path": "E:\\workspace\\auto-trading-system\\tests\\unit\\test_local_console_app.py"
+  },
+  {
+    "hash": "9CD2EB858AAF6B927B955CC5E4403448B89B82542369E1837E6DB643F866B26D",
+    "path": "E:\\workspace\\auto-trading-system\\tests\\unit\\test_local_console_security_api.py"
+  },
+  {
+    "hash": "8019E0B31A3A9D1662AEF73357C3A5B7AF401CDD1E0E15F8490E8B1A8CC83D56",
+    "path": "E:\\workspace\\auto-trading-system\\tests\\unit\\test_local_console_server.py"
+  },
+  {
+    "hash": "FBA0834912EC1B16E9A3B7856EC18D3492627D1003EBBC5D26BBA6D9A1283AD5",
+    "path": "E:\\workspace\\auto-trading-system\\tests\\unit\\test_local_control_api.py"
+  },
+  {
+    "hash": "1EE15D23DB6B0DDF147AB36BE2C7B5C91578192F09000204764944F002728627",
+    "path": "E:\\workspace\\auto-trading-system\\tests\\unit\\test_local_control_authorization.py"
+  },
+  {
+    "hash": "3A2009343AFC09872F4D4C30E847CC34CE32FEFC794949BA5BBA4ED26D0B75C8",
+    "path": "E:\\workspace\\auto-trading-system\\tests\\unit\\test_local_control_dispatch.py"
+  },
+  {
+    "hash": "1420BDE7530EB551884958E952B0B40B2CB8F13B51CCE08C7FDAAA1389B3F9A8",
+    "path": "E:\\workspace\\auto-trading-system\\tests\\unit\\test_local_control.py"
+  },
+  {
+    "hash": "E683E8EE8A5A76794423A54602A2C23FC7ADF9FEF02E1C9A5A60312B4316350D",
+    "path": "E:\\workspace\\auto-trading-system\\tests\\unit\\test_market_models.py"
+  },
+  {
+    "hash": "2CA00C1360B307B45ABCE94281AD459AFFACAE774ED3341B655D6B38713971E0",
+    "path": "E:\\workspace\\auto-trading-system\\tests\\unit\\test_mock_broker.py"
+  },
+  {
+    "hash": "8F22C218C7E31E666CCABA4581DFF9F9D918AD9C61B5F5A118D9449BD1C010BE",
+    "path": "E:\\workspace\\auto-trading-system\\tests\\unit\\test_mock_central_api.py"
+  },
+  {
+    "hash": "DD69C1D0A3283AFC79456B73C349BEB98F34B3E9507564E55A94B68011D4681E",
+    "path": "E:\\workspace\\auto-trading-system\\tests\\unit\\test_mock_market.py"
+  },
+  {
+    "hash": "89D3341BDA1013D47BF9C5797C6B2C877432DF8EE1248347127D572AF7D38E6B",
+    "path": "E:\\workspace\\auto-trading-system\\tests\\unit\\test_node_message_semantics.py"
+  },
+  {
+    "hash": "28EA8A9A8DAFDD2DC5D6299191B847477E8750DB176639DAD08B8B6477555BD5",
+    "path": "E:\\workspace\\auto-trading-system\\tests\\unit\\test_operator_password.py"
+  },
+  {
+    "hash": "35B1B02AB970B266E4CB7C462BE088511FB66F75C26C4CE347A1710ECEBED418",
+    "path": "E:\\workspace\\auto-trading-system\\tests\\unit\\test_operator_session.py"
+  },
+  {
+    "hash": "FEC3D26542340717680972E119B4C6B9C478F85A655960A7972295DC13C5A6D0",
+    "path": "E:\\workspace\\auto-trading-system\\tests\\unit\\test_order_intent_gate.py"
+  },
+  {
+    "hash": "CFB55B91C1135193D2B0C07F6808632631A8D08D97F2A6736DF58610F1E03AD9",
+    "path": "E:\\workspace\\auto-trading-system\\tests\\unit\\test_outbox_worker.py"
+  },
+  {
+    "hash": "BEF09A79F998181C1B66D06887871AF981BE778B4FB60924B7FFD316AE3788A3",
+    "path": "E:\\workspace\\auto-trading-system\\tests\\unit\\test_persistence_writer.py"
+  },
+  {
+    "hash": "2C7E28E64B4CF56E503D59567EF76FB3DC308FA88DDB58ACEC849B92B70DECD5",
+    "path": "E:\\workspace\\auto-trading-system\\tests\\unit\\test_plan_risk.py"
+  },
+  {
+    "hash": "C540C7A7A4B7E29D1D806BA92F931EA2D4DB34D82E5E48CA44C88F178CFAE7DB",
+    "path": "E:\\workspace\\auto-trading-system\\tests\\unit\\test_protocol_compat.py"
+  },
+  {
+    "hash": "1C505AA5FAD071F1F16F21B385D657B80F3CF1102C97AE1E71A560445696A1F1",
+    "path": "E:\\workspace\\auto-trading-system\\tests\\unit\\test_protocol_signing.py"
+  },
+  {
+    "hash": "9E2A9D2061C588E352D0A7677F32A919EA2C27C4BFFCD0E920498489D9429CB8",
+    "path": "E:\\workspace\\auto-trading-system\\tests\\unit\\test_qmt_order_preflight_cli.py"
+  },
+  {
+    "hash": "522CDAEF2BD50C91EE1EAEE1E5848ADB608B433D1AC71E2A998DD060B102E72D",
+    "path": "E:\\workspace\\auto-trading-system\\tests\\unit\\test_qmt_order_preflight.py"
+  },
+  {
+    "hash": "D34F1FEE8F7120F1598F77576362B0621E7F928DD3072E50A6174FA8E25212F3",
+    "path": "E:\\workspace\\auto-trading-system\\tests\\unit\\test_qmt_readonly_probe_cli.py"
+  },
+  {
+    "hash": "BD8BA188932A7097C9A11BB42CCA1307BA3E49EAB1B379C6329CA8E36064FEC8",
+    "path": "E:\\workspace\\auto-trading-system\\tests\\unit\\test_qmt_readonly_probe.py"
+  },
+  {
+    "hash": "E8C68DB7C11EEEF33A22322790777780AD1BDF2C2D00A92A4CF730607FFD5206",
+    "path": "E:\\workspace\\auto-trading-system\\tests\\unit\\test_qmt_snapshot_probe_cli.py"
+  },
+  {
+    "hash": "CE120E807808E64792B048DC273B7157D3A227767DBA3326A63211B278E2FBA6",
+    "path": "E:\\workspace\\auto-trading-system\\tests\\unit\\test_qmt_snapshot_probe.py"
+  },
+  {
+    "hash": "887D7B1F9FFDB2F4F9268358206A470597A9812ACA4E67D4E1BC308726DFAC5F",
+    "path": "E:\\workspace\\auto-trading-system\\tests\\unit\\test_qmt_tick_adapter.py"
+  },
+  {
+    "hash": "8D7FF64B471AD77D7254554B85EBC15C98939E69F7B9DE5A3D93C681D46A1798",
+    "path": "E:\\workspace\\auto-trading-system\\tests\\unit\\test_qmt_tick_probe_cli.py"
+  },
+  {
+    "hash": "5970EE272B19A0A9761606B8AD96698E2D26C9C1C758FBAA3E55A14A22822AE3",
+    "path": "E:\\workspace\\auto-trading-system\\tests\\unit\\test_qmt_tick_probe.py"
+  },
+  {
+    "hash": "C9B19FF732A5FAFA8FEE7933BC8FBF96E4FC607B8120D8B12056E4B64C65184C",
+    "path": "E:\\workspace\\auto-trading-system\\tests\\unit\\test_quality_gate_policy.py"
+  },
+  {
+    "hash": "D44619B797A38C3267F0A4CE9B304EBFB2868A4E092DBDE825F9E680C26068DA",
+    "path": "E:\\workspace\\auto-trading-system\\tests\\unit\\test_redaction.py"
+  },
+  {
+    "hash": "CE7751D5E215B6BB6B7A23742BCC7B18009134176471604030EB39EFAA471E25",
+    "path": "E:\\workspace\\auto-trading-system\\tests\\unit\\test_repository_policy.py"
+  },
+  {
+    "hash": "794F072767D1808C937E02A287D342B5CD2B097F0E2741167B23294850CD2873",
+    "path": "E:\\workspace\\auto-trading-system\\tests\\unit\\test_runtime_faults.py"
+  },
+  {
+    "hash": "0864EA228CCA5DD7B4EE8475994CDF3B6F192183F17E3D3002768460ED2D99FC",
+    "path": "E:\\workspace\\auto-trading-system\\tests\\unit\\test_runtime_lifecycle.py"
+  },
+  {
+    "hash": "82051724A770E03CE077CD0F46565F8EF1FA160204C74E4940ABE1AAC188A6F9",
+    "path": "E:\\workspace\\auto-trading-system\\tests\\unit\\test_runtime_scheduler.py"
+  },
+  {
+    "hash": "0789EFC320F49E933A7689D7B9BFA393E595CAEB774E1F84C511B24EF921CB4C",
+    "path": "E:\\workspace\\auto-trading-system\\tests\\unit\\test_runtime_state_machine.py"
+  },
+  {
+    "hash": "02BA3F1798B1696ED20A6C81987C6A5C7311A055B534112FA262680268A85424",
+    "path": "E:\\workspace\\auto-trading-system\\tests\\unit\\test_runtime_watchdog.py"
+  },
+  {
+    "hash": "7F77EC932AD66C83AC4EA1B99B40A89160E36232D0A676C53700368B3CDF98F9",
+    "path": "E:\\workspace\\auto-trading-system\\tests\\unit\\test_secure_storage.py"
+  },
+  {
+    "hash": "62D05C3A5FD454ABBD2F0C7275AB06EA91CB40614BF0D5E840FF1394E7CE06D4",
+    "path": "E:\\workspace\\auto-trading-system\\tests\\unit\\test_single_instance.py"
+  },
+  {
+    "hash": "4D33E158F183CC11E8750D6D65EBDC92292EAB67D638A33CD2907B6B3896762D",
+    "path": "E:\\workspace\\auto-trading-system\\tests\\unit\\test_sqlite_journal.py"
+  },
+  {
+    "hash": "A420F84506C445EF36B77EBC16B2ED35A5462CAC9B163DB403965E9EBF80B7A1",
+    "path": "E:\\workspace\\auto-trading-system\\tests\\unit\\test_sync_bootstrap.py"
+  },
+  {
+    "hash": "9943AB20051F0E8622A174662DBA2B1EB87CA3FC29EB999AD221D9BC609BA6E1",
+    "path": "E:\\workspace\\auto-trading-system\\tests\\unit\\test_trade_plan_semantics.py"
+  },
+  {
+    "hash": "764A185BBF71AB5C2150B32ADE88DB00DCD19A49B8886D2E0DE26A5936FDD86E",
+    "path": "E:\\workspace\\auto-trading-system\\tests\\unit\\test_version.py"
+  },
+  {
+    "hash": "A5987402DDE77827F862ED660D7F5324B504A539C3B457D8FC41E51EE5B742C5",
+    "path": "E:\\workspace\\auto-trading-system\\tests\\unit\\test_watchdog_cli.py"
+  },
+  {
+    "hash": "E25585A6C6CBD0D1712DED7CE51D36A9C0D1A09ED5F1E584F8D45FE9FA412CE8",
+    "path": "E:\\workspace\\auto-trading-system\\tests\\unit\\test_watchdog_supervisor.py"
+  },
+  {
+    "hash": "BA002F52BB26EFA832650AA609748977DA57429B7D9AE839E9E5E00A4BEBA4F1",
+    "path": "E:\\workspace\\auto-trading-system\\tests\\unit\\test_windows_acl.py"
+  },
+  {
+    "hash": "18BF07F42AADAD1B7F0E4762820D047CDE6492E7CF907034E45D48EC104348B8",
+    "path": "E:\\workspace\\auto-trading-system\\tests\\unit\\test_windows_credentials.py"
+  },
+  {
+    "hash": "0A188039688B4D45818A4EDC9F22377FBDCEC7320C2DC55A8940E1BD7908A478",
+    "path": "E:\\workspace\\auto-trading-system\\tests\\unit\\test_windows_task_scripts.py"
+  },
+  {
+    "hash": "0BE7AB4552AF41D669733544DF6041398D9A32A74001909A327F492F82E4DCB9",
+    "path": "E:\\workspace\\auto-trading-system\\tests\\v31\\conftest.py"
+  },
+  {
+    "hash": "1D93406C079E2CF8B75AF7A0C6E3C8AD34993E6650E6784D178BBA8577C880D1",
+    "path": "E:\\workspace\\auto-trading-system\\tests\\v31\\https_client_probe.py"
+  },
+  {
+    "hash": "4A1B71B57850E9268E5CEFB328D2D9205EBD2557E376B3F4905435D1972BD8DF",
+    "path": "E:\\workspace\\auto-trading-system\\tests\\v31\\node_fixture_process.py"
+  },
+  {
+    "hash": "D044B64662C3AA91F93E342492129E5C626FB3DB2703B56A2C4B0A2C25F1A9FB",
+    "path": "E:\\workspace\\auto-trading-system\\tests\\v31\\paper_acceptance_probe.py"
+  },
+  {
+    "hash": "F20E2E9AB7A7FE2250E86C27607E82FAB99F1FDD1D04D997BAE83E6BBF2FA265",
+    "path": "E:\\workspace\\auto-trading-system\\tests\\v31\\supervisor_stalled_engine.py"
+  },
+  {
+    "hash": "C288A9349A3FECD17ADF7A5B1DDCDB80EB64BA9B916BF5970ED5E9A06CCF93A0",
+    "path": "E:\\workspace\\auto-trading-system\\tests\\v31\\test_account_observation.py"
+  },
+  {
+    "hash": "90D7FFC95DEC9977370CE51B407972D43856319641D4A64128968B4EE174117C",
+    "path": "E:\\workspace\\auto-trading-system\\tests\\v31\\test_agent_jobs.py"
+  },
+  {
+    "hash": "656144FF31B49824F97ECF74B9445BB875E0ADC17979732BAC99B6C247302390",
+    "path": "E:\\workspace\\auto-trading-system\\tests\\v31\\test_business_flow.py"
+  },
+  {
+    "hash": "A38A47519A6BC57C47D3A4E593B95C6D7EC7DF17207ED52CCC72522966B41BD6",
+    "path": "E:\\workspace\\auto-trading-system\\tests\\v31\\test_checkpoint_segments.py"
+  },
+  {
+    "hash": "B8DB54CBE5DF8852582A047BC2F6993E01CE9A20EF18C55D78903D4C424D66A1",
+    "path": "E:\\workspace\\auto-trading-system\\tests\\v31\\test_contract_artifacts.py"
+  },
+  {
+    "hash": "405BEBC2F3249F937D50ABBD7C90080FCC1A0A2E76C8676A2775DC25A7B61D82",
+    "path": "E:\\workspace\\auto-trading-system\\tests\\v31\\test_critical_journal.py"
+  },
+  {
+    "hash": "D09B511355AC1241C875DCB706A4238189B4EBE747277296367216A458C0224C",
+    "path": "E:\\workspace\\auto-trading-system\\tests\\v31\\test_critical_storage_faults.py"
+  },
+  {
+    "hash": "E47C4BAE2BD3070AE8D8C6353E8BD94CCED1DA8CFD9279388431E2BB5659AE65",
+    "path": "E:\\workspace\\auto-trading-system\\tests\\v31\\test_cross_project_v2.py"
+  },
+  {
+    "hash": "DC725E9FFC253FFB471F9E4986C7990EF08B5C7FBED3220B7D2D213ED3419D65",
+    "path": "E:\\workspace\\auto-trading-system\\tests\\v31\\test_daily_records.py"
+  },
+  {
+    "hash": "E378F52AD8F7E407DC9D8BBE0BA3939F447DF8B68CB8D4D43CF2EDF229369472",
+    "path": "E:\\workspace\\auto-trading-system\\tests\\v31\\test_daily_revisions.py"
+  },
+  {
+    "hash": "D9A790FD0C1677649D0F2AB3E763A046EEC25A36633C21E374F5863C5B8D93F5",
+    "path": "E:\\workspace\\auto-trading-system\\tests\\v31\\test_engine_v2.py"
+  },
+  {
+    "hash": "6DC6D93A00A9956FAE5C986CA78393588B564FD148B446DCD615605036B93392",
+    "path": "E:\\workspace\\auto-trading-system\\tests\\v31\\test_entry_owner.py"
+  },
+  {
+    "hash": "262A3151994ECC3BF65CDBBD03E92DDD6D09D1A9C3794251D461F94A5154F28C",
+    "path": "E:\\workspace\\auto-trading-system\\tests\\v31\\test_exit_integration.py"
+  },
+  {
+    "hash": "D88419505B7393A51DB175DEB0E10B0F9420541F16C967398EB98925899E6655",
+    "path": "E:\\workspace\\auto-trading-system\\tests\\v31\\test_exit_owner.py"
+  },
+  {
+    "hash": "4355ADF9E51EC49BF2D870C9228CD2738C714DD5188CD5FDB653617117BEBCE9",
+    "path": "E:\\workspace\\auto-trading-system\\tests\\v31\\test_http_transport.py"
+  },
+  {
+    "hash": "1D5FE8ACAE7A976B3791BE91C9E50650A633B27ED89A1A26E91A7F7698A03A44",
+    "path": "E:\\workspace\\auto-trading-system\\tests\\v31\\test_journal_scan.py"
+  },
+  {
+    "hash": "A2B395446E515A686178BF7B734540D2F1D10E1AB911197361AB3261E1099504",
+    "path": "E:\\workspace\\auto-trading-system\\tests\\v31\\test_memory_state.py"
+  },
+  {
+    "hash": "DCFB47A9DC391B2C341773DF16B5E8BA77CEC47B645F70E87CADDDA63B071721",
+    "path": "E:\\workspace\\auto-trading-system\\tests\\v31\\test_node_authorization.py"
+  },
+  {
+    "hash": "6CE08DC776F15803828F7B6B84B1B1F0B4DE9DC6BC9A9C041F0EA4FF92508723",
+    "path": "E:\\workspace\\auto-trading-system\\tests\\v31\\test_node_backup.py"
+  },
+  {
+    "hash": "ED511F2685165D5BA7430D9F5FBC4A7C15AB6AEE31D1DA9F4D96F19D588B16E6",
+    "path": "E:\\workspace\\auto-trading-system\\tests\\v31\\test_node_console.py"
+  },
+  {
+    "hash": "01E599BF8165A9A607A06E44032C1971C6E61AFC78BE7FF2CD0BC9E7A2B57F62",
+    "path": "E:\\workspace\\auto-trading-system\\tests\\v31\\test_node_processes.py"
+  },
+  {
+    "hash": "270B6CE459D5C902043C79236584292433750478844D8C9E4185E5C214627572",
+    "path": "E:\\workspace\\auto-trading-system\\tests\\v31\\test_node_supervisor.py"
+  },
+  {
+    "hash": "47F69F68CBC7EF01B38E467AFB7754E6DEF9CD87315AD20C0D14722BA0FB2E9A",
+    "path": "E:\\workspace\\auto-trading-system\\tests\\v31\\test_paper_process.py"
+  },
+  {
+    "hash": "F6B7497715F27BFFC4395D8EAC62725BD5375E5EA7B08AD471AF8E0DDD343FAF",
+    "path": "E:\\workspace\\auto-trading-system\\tests\\v31\\test_paper_safety.py"
+  },
+  {
+    "hash": "8E8398FA4A7B009E96C98F3E96B2016C4CD90718EBC46606B3349FB14FCC85A5",
+    "path": "E:\\workspace\\auto-trading-system\\tests\\v31\\test_portfolio_projection.py"
+  },
+  {
+    "hash": "05E09D62CAB7F9073AC01A9A73EF316FC57AB8FFD0D0608AA4D6135327A7E52F",
+    "path": "E:\\workspace\\auto-trading-system\\tests\\v31\\test_recovery_v2.py"
+  },
+  {
+    "hash": "D02C88CF17CA73BA7C14E76F42355307928048FB3004F59BAD4908FDFF98E01F",
+    "path": "E:\\workspace\\auto-trading-system\\tests\\v31\\test_simulation_cli.py"
+  },
+  {
+    "hash": "66C6398EF332101AAFFBB5119D7935802F607CE375A99635BD35DB4A66239EC5",
+    "path": "E:\\workspace\\auto-trading-system\\tests\\v31\\test_strategy_rules.py"
+  },
+  {
+    "hash": "1DB95F120A6F51D06DC1F068DA88D039FC23C99B2D60A52F2FA16D8101795E7F",
+    "path": "E:\\workspace\\auto-trading-system\\tests\\v31\\test_submission_flow.py"
+  },
+  {
+    "hash": "3779422C7DBACA19E5C4205F1F3F400FC87965F9254831206AE832B5F70B93C2",
+    "path": "E:\\workspace\\auto-trading-system\\tests\\v31\\test_v2_authentication.py"
+  },
+  {
+    "hash": "90CE6DF79466896D3D5FF9C38AD64D8D50C96C02FC1EFAD05B348E91A5DA9CB4",
+    "path": "E:\\workspace\\auto-trading-system\\tests\\v31\\test_v2_control_contract.py"
+  },
+  {
+    "hash": "6F7FA258552A6206CCF5CE74058B7A095A8D7AB7D3E94259092070254F97E4F7",
+    "path": "E:\\workspace\\auto-trading-system\\tests\\v31\\test_v2_files_sync.py"
+  },
+  {
+    "hash": "7545158650A6FB4ECEA2BC2CDFECD052FE7DFE81AF58B7366E496087605ABD3E",
+    "path": "E:\\workspace\\auto-trading-system\\tests\\v31\\test_v31_boundaries.py"
+  },
+  {
+    "hash": "AB53D8A6ED720D270C388612D6AB62D71AB1FB7063663D2223C761F7BA7F391D",
+    "path": "E:\\workspace\\auto-trading-system\\scripts\\bootstrap-dev.ps1"
+  },
+  {
+    "hash": "5FCC4F4011A185029EA1A279BEA921AFFBE27EAF1CDCB0DB3B36B0D077E2A658",
+    "path": "E:\\workspace\\auto-trading-system\\scripts\\build-r31-inventory.py"
+  },
+  {
+    "hash": "5A49A26B196DCD02D1D658AE1A4B6ECE77FDDD254140CAF04CB26262DEBA35CB",
+    "path": "E:\\workspace\\auto-trading-system\\scripts\\capture-change-boundary.py"
+  },
+  {
+    "hash": "63BFF71E795F33BDF4C1C826F24A520FB156F11EB25464978DE34E4258BD1A7C",
+    "path": "E:\\workspace\\auto-trading-system\\scripts\\check.ps1"
+  },
+  {
+    "hash": "713F0C43500765E2AFE2FE6DEE7D4D5F7724F314831C7A2E8BFEF9FB3865CD89",
+    "path": "E:\\workspace\\auto-trading-system\\scripts\\diagnose-environment.ps1"
+  },
+  {
+    "hash": "3F5EC0DE2E5B41D34E479B93B15A4573309E3FEB2028F6615B5F44B07C3392E3",
+    "path": "E:\\workspace\\auto-trading-system\\scripts\\export-config-schema.ps1"
+  },
+  {
+    "hash": "151E226203C3D7B43C20BCF256351043686E4FC9C0C957D19B98549DF15BCE67",
+    "path": "E:\\workspace\\auto-trading-system\\scripts\\export-node-config.py"
+  },
+  {
+    "hash": "D8194F9B71D0D7E8A1B943D00B55E31D1471EBF2E5197897558A6AA4F1037E7D",
+    "path": "E:\\workspace\\auto-trading-system\\scripts\\export-v2-contracts.py"
+  },
+  {
+    "hash": "969998E751C750B22FEFF3B93FB116CB8FB5BAE3798D1099E7D9494FF809E848",
+    "path": "E:\\workspace\\auto-trading-system\\scripts\\qualify-critical-journal.py"
+  },
+  {
+    "hash": "49F8AC6B5FE886CC87ECCA9913B9121E803329B3FBE92A5AE12C069C165CB78B",
+    "path": "E:\\workspace\\auto-trading-system\\scripts\\verify-cross-project-contracts.ps1"
+  },
+  {
+    "hash": "7800CDA5876E246A25AA8A45272D0CA0D9768495B7112022CE9DE8CCEF0FF241",
+    "path": "E:\\workspace\\auto-trading-system\\scripts\\verify-fault-injection-matrix.ps1"
+  },
+  {
+    "hash": "3B79381F0CD2DA4E58AFAE8820288B614B7289B1BB4D685E6B3761837E7F9C81",
+    "path": "E:\\workspace\\auto-trading-system\\scripts\\verify-mock-broker-matrix.ps1"
+  },
+  {
+    "hash": "5DC7951CFC8902259262164DED76C68D488613FFF83F0ABCEFA08BFB58D320CD",
+    "path": "E:\\workspace\\auto-trading-system\\scripts\\verify-performance-boundaries.ps1"
+  },
+  {
+    "hash": "5617B101FFCB2B8C6B9C60691A1EFC01824882430CCB3026F466123709D9D875",
+    "path": "E:\\workspace\\auto-trading-system\\scripts\\verify-qmt-order-preflight.ps1"
+  },
+  {
+    "hash": "8D86A143A922502C5B3667F4684DA670FD623987DED5A3D0A269AD78C4FC5373",
+    "path": "E:\\workspace\\auto-trading-system\\scripts\\verify-qmt-readonly-probe.ps1"
+  },
+  {
+    "hash": "20C3B9DAA1222FD1525C2D660FB6321E688F4B9551C51D5CCBD55DA55FEA08BE",
+    "path": "E:\\workspace\\auto-trading-system\\scripts\\verify-qmt-snapshot-probe.ps1"
+  },
+  {
+    "hash": "292F3E9A0A394BF2BD1ADA6B67D60B0A006DD4681009B431AF4CC35D93BE55BA",
+    "path": "E:\\workspace\\auto-trading-system\\scripts\\verify-qmt-tick-probe.ps1"
+  },
+  {
+    "hash": "DA211579A55CA4B6BF5D910A156B491E2D118038D7BB6AEF83AC2BCB8B80FBF2",
+    "path": "E:\\workspace\\auto-trading-system\\scripts\\windows\\install-node-tasks.ps1"
+  },
+  {
+    "hash": "71EABC3E208FD19D34BC64F303C77E5199108CB62E0E6FD2CC6087249448C9EA",
+    "path": "E:\\workspace\\auto-trading-system\\scripts\\windows\\install-scheduled-tasks.ps1"
+  },
+  {
+    "hash": "302EA6792D5D0F022D8231118470F52C1017549188734A10245262AD69BFAB36",
+    "path": "E:\\workspace\\auto-trading-system\\scripts\\windows\\start-runtime.ps1"
+  },
+  {
+    "hash": "4A0611463CEFE42A97DB501D4C22250A4F4307A245A0E23306A658675A7668BA",
+    "path": "E:\\workspace\\auto-trading-system\\scripts\\windows\\start-watchdog.ps1"
+  },
+  {
+    "hash": "087C4AEFDCD21684C88A6258E9ECDCB1E3D29876042DA4095C6BC60A7134D481",
+    "path": "E:\\workspace\\auto-trading-system\\scripts\\windows\\TaskDeployment.Common.ps1"
+  },
+  {
+    "hash": "A25B775A0FE5050BA592CC76701A8F039C64765F97E56297028A2F7E1D068473",
+    "path": "E:\\workspace\\auto-trading-system\\scripts\\windows\\uninstall-scheduled-tasks.ps1"
+  },
+  {
+    "hash": "B752307B2605DFD4A2BBBCCBD64E00223A139EF838F192380D0575CE47427426",
+    "path": "E:\\workspace\\auto-trading-system\\scripts\\windows\\verify-scheduled-task-scripts.ps1"
+  },
+  {
+    "hash": "B4E20E9FBFA35D854D1EEBF92AA4AD7BE883E2E3323E05737A808789B304E084",
+    "path": "E:\\workspace\\auto-trading-system\\config\\README.md"
+  },
+  {
+    "hash": "1766321A2BE6DCB727B1EC3F1F71D862883B9DF0D1C8E95002128BA6C367E9F3",
+    "path": "E:\\workspace\\auto-trading-system\\config\\v1\\qmt-order-poc-approval.example.json"
+  },
+  {
+    "hash": "7628D271DF8B9242BE362D683D179B7DD43D0EB509A6378C7660C5ABD3FE3A55",
+    "path": "E:\\workspace\\auto-trading-system\\config\\v1\\runtime-config.schema.json"
+  },
+  {
+    "hash": "E46232DD00854258F2BED22F3E259AEDA6043B8AFB8FBBC58BBFB4D6493227BE",
+    "path": "E:\\workspace\\auto-trading-system\\config\\v1\\runtime.read-only.example.json"
+  },
+  {
+    "hash": "2FBCBAFB0A5D69D128D0E64F5A9055E16AA224FFCA9E5A867051EBE763581F36",
+    "path": "E:\\workspace\\auto-trading-system\\config\\v2\\node-config.schema.json"
+  },
+  {
+    "hash": "BB1BF0BFB30F6204E26FFAC1DC00C1CDC257E78F8F148C84F4E881CFEC00AF50",
+    "path": "E:\\workspace\\auto-trading-system\\config\\v2\\node.mock.example.json"
+  },
+  {
+    "hash": "FB70535FF9D57E47326AF236E1480A0689C29F6B9D2618A6BE0AEC8228F5ADCE",
+    "path": "E:\\workspace\\auto-trading-system\\docs\\architecture-boundaries.md"
+  },
+  {
+    "hash": "112E6B2FC3F3B4DACA32CBABCEDDA047A632747AF86896B2942D32CF4AF2B916",
+    "path": "E:\\workspace\\auto-trading-system\\docs\\configuration.md"
+  },
+  {
+    "hash": "C734E092F858EE05089B450D5FAA9D75B25384FF032B15447151BB28A068F9CF",
+    "path": "E:\\workspace\\auto-trading-system\\docs\\cross-project-contract-tests.md"
+  },
+  {
+    "hash": "501480DEC50F1CF82A9AEF3A5E10C6AE8212CB93717C0BA62B04C4005557EBCB",
+    "path": "E:\\workspace\\auto-trading-system\\docs\\domain-value-types.md"
+  },
+  {
+    "hash": "1C2B4D5D370DE55017568ABAE88B48CDD9556BFA0041C9A996197A42FAB95ADF",
+    "path": "E:\\workspace\\auto-trading-system\\docs\\durable-outbox.md"
+  },
+  {
+    "hash": "5E1E893D1B2C94422707B23465B70907D7570E8D5996207DE26CC66510632677",
+    "path": "E:\\workspace\\auto-trading-system\\docs\\hmac-authentication.md"
+  },
+  {
+    "hash": "C1C100B77E0C61BFC06220CF6E2BB77B65008A5C7D1E67542468EE68716001AC",
+    "path": "E:\\workspace\\auto-trading-system\\docs\\local-control-api.md"
+  },
+  {
+    "hash": "432A4CDD97CD7952D8A7DF8C32BA87E568FE807147453F5B6886606C540BD686",
+    "path": "E:\\workspace\\auto-trading-system\\docs\\local-control.md"
+  },
+  {
+    "hash": "93411BE4A02FA8619F74B53A9A80DB3B4374CB7FB606058DAD2D38B755F0D7B0",
+    "path": "E:\\workspace\\auto-trading-system\\docs\\local-journal-contract.md"
+  },
+  {
+    "hash": "E2C66EBF179706294D88784891B37F55C335D4CB18F8C8A9D6386F9F7FBD3C59",
+    "path": "E:\\workspace\\auto-trading-system\\docs\\local-security.md"
+  },
+  {
+    "hash": "55FE20994FFD33B193C0C01A535459B2011C31431B57A5AA54646C239DC025B4",
+    "path": "E:\\workspace\\auto-trading-system\\docs\\mock-broker-anomaly-matrix.md"
+  },
+  {
+    "hash": "D41E6301708F34BFC90F088A0900F64528678061DEE8D5128A30B7D3B9D96C34",
+    "path": "E:\\workspace\\auto-trading-system\\docs\\mock-central-api.md"
+  },
+  {
+    "hash": "06E2703FC219C3DAD73C9FDAB1DDF2B2050F581B219ED38D1C430695A441FB79",
+    "path": "E:\\workspace\\auto-trading-system\\docs\\mock-gateways.md"
+  },
+  {
+    "hash": "58CB08C5076E030BE58135C058979E877A1F7141832A7082400A2CD29B217C5F",
+    "path": "E:\\workspace\\auto-trading-system\\docs\\node-sync-contracts.md"
+  },
+  {
+    "hash": "EF54BE0BECC61A8C6638A7CE7DC2D6A5343A2E454EF85FE5A23D5E492EBD2ED0",
+    "path": "E:\\workspace\\auto-trading-system\\docs\\operator-console-security.md"
+  },
+  {
+    "hash": "7F9854393D4391B7D1186893E2041F1950910F02EB0F5E68948AAC336E2E8C6E",
+    "path": "E:\\workspace\\auto-trading-system\\docs\\order-intent-persistence-gate.md"
+  },
+  {
+    "hash": "EAF29C37665CD022D56906C4EF99F8E8C802B41134392F66AF605FA253988E41",
+    "path": "E:\\workspace\\auto-trading-system\\docs\\performance-boundaries.md"
+  },
+  {
+    "hash": "1CA8F1E5287FB0F029C168BFE38941DFDF2052FA83DAFFD748C55C7BBBB05337",
+    "path": "E:\\workspace\\auto-trading-system\\docs\\plan-risk-admission.md"
+  },
+  {
+    "hash": "B3B443A9316AF10F8B59A9D009A9173880CE63188C17B01EFE3D56F8436E3D80",
+    "path": "E:\\workspace\\auto-trading-system\\docs\\qmt-field-diagnostic.md"
+  },
+  {
+    "hash": "D96CA6662E144142892D15C0D6CDEB783A915AE3540F669C58792730E573D92D",
+    "path": "E:\\workspace\\auto-trading-system\\docs\\runtime-decision-loop.md"
+  },
+  {
+    "hash": "355BE23756855E4B50EE51A21F25259EBF94B289B7D802110EC7377CB6BC479C",
+    "path": "E:\\workspace\\auto-trading-system\\docs\\runtime-fault-injection.md"
+  },
+  {
+    "hash": "A648A62930307C22A3F87F0B216605A5FB974BE80EA1DB61204CE7535F723817",
+    "path": "E:\\workspace\\auto-trading-system\\docs\\runtime-lifecycle-scheduler.md"
+  },
+  {
+    "hash": "A6423067DEB31E2AA948B1865B12E4FA861930ADBD5C50652292676A07CB7A29",
+    "path": "E:\\workspace\\auto-trading-system\\docs\\runtime-single-instance.md"
+  },
+  {
+    "hash": "0363F1131A58BAA6A40CEAD0C9B80407B8324E84FCB0DD456E23F9A3282D97B6",
+    "path": "E:\\workspace\\auto-trading-system\\docs\\runtime-state-machine.md"
+  },
+  {
+    "hash": "798AE73CE71E6D82399EF15158403973ABC850DE5B6AFACC94ED90B70BEBC5DE",
+    "path": "E:\\workspace\\auto-trading-system\\docs\\runtime-watchdog.md"
+  },
+  {
+    "hash": "EEE38EF5A38750342BA32A4646219CDA9DF1BCD2BA8E71CFB1493ED017A8023D",
+    "path": "E:\\workspace\\auto-trading-system\\docs\\sqlite-local-journal.md"
+  },
+  {
+    "hash": "0BDFDC1830A5095CDCA2E4AAC87EE88F80A10AD94E3C5E12D75DECF577473829",
+    "path": "E:\\workspace\\auto-trading-system\\docs\\test-suite.md"
+  },
+  {
+    "hash": "74AB87BD191CE30275F2B97202E031E7CF27136B930758637BAD4E19E40A206C",
+    "path": "E:\\workspace\\auto-trading-system\\docs\\windows-hard-safety.md"
+  },
+  {
+    "hash": "FEF279218CE5E41B8F791261E7F979A255DF23C01BB0E1FFBCF140C738EEA39C",
+    "path": "E:\\workspace\\auto-trading-system\\docs\\windows-operator-console.md"
+  },
+  {
+    "hash": "83905B37052262666D5F594731FFA0924890A67904B23792BE9941BAEBB596B5",
+    "path": "E:\\workspace\\auto-trading-system\\docs\\windows-task-scheduler.md"
+  },
+  {
+    "hash": "E89A3591278F31E2E618DD6F3045B734F8FDC9DA92A6052D8BF9AAE67440CEF5",
+    "path": "E:\\workspace\\auto-trading-system\\docs\\design\\v3.0\\详细设计方案.md"
+  },
+  {
+    "hash": "72DE2F2CAFFF51BFE30333368EB474C45C1B5326383E73EF73BB44D56CF11446",
+    "path": "E:\\workspace\\auto-trading-system\\docs\\design\\v3.1\\本地人工授权实施报告_20260923.md"
+  },
+  {
+    "hash": "49A5B513A03CBE9F81B7AA6034A5DB760FCB48198C97FD0AF5AFB2C9E4D87551",
+    "path": "E:\\workspace\\auto-trading-system\\docs\\design\\v3.1\\代码复核与完整功能清单_20261015.md"
+  },
+  {
+    "hash": "AB0AAA8747B9C8253976CA142F84F75C4881827665F224C9B22CA6522EB8A503",
+    "path": "E:\\workspace\\auto-trading-system\\docs\\design\\v3.1\\订单观测与持仓批次实施报告_20260921.md"
+  },
+  {
+    "hash": "AEE23C79D2F13479B573C9FE2F6302230091C96F4CC3CB3947B9B1A27B0C665D",
+    "path": "E:\\workspace\\auto-trading-system\\docs\\design\\v3.1\\改造实施报告_20260907.md"
+  },
+  {
+    "hash": "4D5C1CB852CEABD130B2270E871F13AE8148B3389CBD14326A1E109F84F19A85",
+    "path": "E:\\workspace\\auto-trading-system\\docs\\design\\v3.1\\进程监护与异常恢复实施报告_20260924.md"
+  },
+  {
+    "hash": "86EB6469F4CB007D38A6BB1872ADF6EDFFA4D9CF7C19F0982E5F83033A184AAC",
+    "path": "E:\\workspace\\auto-trading-system\\docs\\design\\v3.1\\进程通信与定时任务实施报告_20260923.md"
+  },
+  {
+    "hash": "D02692E6DDE7339ADD9EF9BBB346D81288A21B2A708B2FA09F02CF37168E3C2A",
+    "path": "E:\\workspace\\auto-trading-system\\docs\\design\\v3.1\\开发修订计划与推进记录.md"
+  },
+  {
+    "hash": "A33E8A887F736EC16AEE8431CBD5C801D47A2A27DD8B5EE6331121BCC17E8B4F",
+    "path": "E:\\workspace\\auto-trading-system\\docs\\design\\v3.1\\历史恢复与检查点分片实施报告_20260921.md"
+  },
+  {
+    "hash": "8A267C060C4CFD1B73D855F1A70E8A18D291C167EE7B466FD957230E17D466D8",
+    "path": "E:\\workspace\\auto-trading-system\\docs\\design\\v3.1\\买入持续驱动实施报告_20260923.md"
+  },
+  {
+    "hash": "17912159F06AEEA5FC3568CF05ED85146C8015F9DDD836CEF3958B2555DD5117",
+    "path": "E:\\workspace\\auto-trading-system\\docs\\design\\v3.1\\卖出跨日与退出实施报告_20260921.md"
+  },
+  {
+    "hash": "875F292AD6405E8B36AD8247199EAD0FF9807F08B6D7B3E2BF08FF200BA3E84A",
+    "path": "E:\\workspace\\auto-trading-system\\docs\\design\\v3.1\\每日同步更正与恢复实施报告_20260925.md"
+  },
+  {
+    "hash": "96FE45213DED130FDDEBCCB0045969EAA373F97951D406EF3967E84C0C668260",
+    "path": "E:\\workspace\\auto-trading-system\\docs\\design\\v3.1\\首版离线交付收口计划.md"
+  },
+  {
+    "hash": "228BB8AD43C2D8340BEFC62A2108B3AEF68DB29F145E575A6E09D34FE3BA240C",
+    "path": "E:\\workspace\\auto-trading-system\\docs\\design\\v3.1\\首版离线交付与操作说明_20260926.md"
+  },
+  {
+    "hash": "CAEF16DB47E21C83B343A771F3D85EF7DE394A74E1387D74151CD7551F04DEF7",
+    "path": "E:\\workspace\\auto-trading-system\\docs\\design\\v3.1\\维护备份与恢复实施报告_20260926.md"
+  },
+  {
+    "hash": "25AC022F857E37891A3399480FF732CFB3B951836437F8699C5A4BACE77A4B7B",
+    "path": "E:\\workspace\\auto-trading-system\\docs\\design\\v3.1\\现状映射与改造边界.md"
+  },
+  {
+    "hash": "BF547096378F298450765EF63C54B51B36135F42878048C954601012EAF31E4C",
+    "path": "E:\\workspace\\auto-trading-system\\docs\\design\\v3.1\\详细设计方案.md"
+  },
+  {
+    "hash": "0DFB271AB5F7016C516B17B6796AE7F37B1E0EC173922A0709C3242BB0ABD332",
+    "path": "E:\\workspace\\auto-trading-system\\docs\\design\\v3.1\\新版现场台实施报告_20260925.md"
+  },
+  {
+    "hash": "BB1361769D5D041DAF7CEC04ECF69E2B24F004720D627B3F024B22D2A773940B",
+    "path": "E:\\workspace\\auto-trading-system\\docs\\design\\v3.1\\续开发实施报告_20260920.md"
+  },
+  {
+    "hash": "00CFCC09F4FD038D017CC887A93E1905C1016FC0513B61A098531CD468552953",
+    "path": "E:\\workspace\\auto-trading-system\\docs\\design\\v3.1\\业务主流程集成实施报告_20260923.md"
+  },
+  {
+    "hash": "67FDC9DDDF969A58CA2F311687BA7E2FD5D69EE48884AF5F4F975C984369EC00",
+    "path": "E:\\workspace\\auto-trading-system\\docs\\design\\v3.1\\引擎授权与恢复实施报告_20260920.md"
+  },
+  {
+    "hash": "AB9B79630FAC708F351939ACF0C4DC2E963AD6AE053A6C0F5DC030F173AD637F",
+    "path": "E:\\workspace\\auto-trading-system\\docs\\design\\v3.1\\ADR-R31-001_首批改造边界与运行基线.md"
+  },
+  {
+    "hash": "1E82B6C7DBC75E53A4D0A91B7A7DEBA01BE2BA980D70CE2E1909CD0DA5EF7AFF",
+    "path": "E:\\workspace\\auto-trading-system\\docs\\design\\v3.1\\ADR-R31-002_卖出绑定与跨日封存.md"
+  },
+  {
+    "hash": "6D4D5FAC689E4D077AA165AEF9578D607F0E6863567A7DD1B3DB9311A53845A9",
+    "path": "E:\\workspace\\auto-trading-system\\docs\\design\\v3.1\\ADR-R31-003_D1持续运行与独立状态.md"
+  },
+  {
+    "hash": "35621F7C75754235B1E8C1004E907DFFA512252902D0EC4C48632F1D3EBFFA0B",
+    "path": "E:\\workspace\\auto-trading-system\\docs\\design\\v3.1\\ADR-R31-004_历史流式核验与检查点分片.md"
+  },
+  {
+    "hash": "A79BE607D1BB1CF7C95866E5DD6B93DB482E489F10B7B4B39DC6D2F2F43A7245",
+    "path": "E:\\workspace\\auto-trading-system\\docs\\design\\v3.1\\ADR-R31-005_主流程交接与日终快照.md"
+  },
+  {
+    "hash": "B2BA7C6DD73790C6AE0CDC81E941CB356B2EE7598BFA61096B30597931DC7C26",
+    "path": "E:\\workspace\\auto-trading-system\\docs\\design\\v3.1\\ADR-R31-006_独立进程人工授权.md"
+  },
+  {
+    "hash": "E28DDE6B8A9AA37232B484457B3EDEE7AEF67DFA33CC6096283FC911F5C41EF6",
+    "path": "E:\\workspace\\auto-trading-system\\docs\\design\\v3.1\\ADR-R31-007_买入目标与受控补单.md"
+  },
+  {
+    "hash": "5F58E420483C7E064FE0524024C0328C0AA9A56BB1DA523BDEF7CA5B7896A0C3",
+    "path": "E:\\workspace\\auto-trading-system\\docs\\design\\v3.1\\ADR-R31-008_策略无关的进程监护与恢复.md"
+  },
+  {
+    "hash": "3607600AF1909A0B83746123EE1BB2FC8233E6908F782208A057A5BA3125CF20",
+    "path": "E:\\workspace\\auto-trading-system\\docs\\design\\v3.1\\ADR-R31-009_新版现场台与进程控制边界.md"
+  },
+  {
+    "hash": "D95A916352442BFC29DFFBD07FA4EEAB092161A38ADCD8F944565BC45C2BF8BD",
+    "path": "E:\\workspace\\auto-trading-system\\docs\\design\\v3.1\\ADR-R31-010_每日更正版与有界续传.md"
+  },
+  {
+    "hash": "C6BC7A0A5AF13B89167C5BA425EFBBD32FEE3BE3037A3941BF4DCBE183F5FEA4",
+    "path": "E:\\workspace\\auto-trading-system\\docs\\design\\v3.1\\ADR-R31-011_维护备份与受控恢复候选.md"
+  },
+  {
+    "hash": "1BE3C87A906E6DE2D18ADE7CC493D2F8ACB483E51B42E53C1EE29BD149D7216C",
+    "path": "E:\\workspace\\auto-trading-system\\docs\\design\\v3.1\\D1策略运行与状态持久化实施报告_20260921.md"
+  },
+  {
+    "hash": "916E934AF669915C16C8EDF5963764AF3CE5CAFECA2A72F13D18E8BBD19729AE",
+    "path": "E:\\workspace\\auto-trading-system\\frontend\\operator-console\\src\\App.vue"
+  },
+  {
+    "hash": "65996936FBB042915F7B74A200FCDDE7E410F32A669B1AB9597CFAA4B0FADDB5",
+    "path": "E:\\workspace\\auto-trading-system\\frontend\\operator-console\\src\\env.d.ts"
+  },
+  {
+    "hash": "23C9CD22D5328D04ECBB918EF902A6B6A554B048E8EEDE2ABA351967A2619F90",
+    "path": "E:\\workspace\\auto-trading-system\\frontend\\operator-console\\src\\main.ts"
+  },
+  {
+    "hash": "DCBBA1697FDC692D1DBC6C5915519FF661957E18FEA96B5C960109CA05BD25BB",
+    "path": "E:\\workspace\\auto-trading-system\\frontend\\operator-console\\src\\navigation.ts"
+  },
+  {
+    "hash": "F50718BA20C56DB66F6242B7DC8F9B0471EFC9C2F889004F3C38479183DB66E1",
+    "path": "E:\\workspace\\auto-trading-system\\frontend\\operator-console\\src\\nodeMain.ts"
+  },
+  {
+    "hash": "F75930AAF0C70A02C3D0612CB1AB40DC175FBA8906CED07E9D422337DE89446B",
+    "path": "E:\\workspace\\auto-trading-system\\frontend\\operator-console\\src\\router.spec.ts"
+  },
+  {
+    "hash": "1BFB888145EA6638F4EF0F803384F797DEF070F5AF97F6437B7B253412418160",
+    "path": "E:\\workspace\\auto-trading-system\\frontend\\operator-console\\src\\router.ts"
+  },
+  {
+    "hash": "00A54FC3EF5A31EED51589A433862322F66F76C10CA2B1D5EB2104D01AB30AA4",
+    "path": "E:\\workspace\\auto-trading-system\\frontend\\operator-console\\src\\components\\AppShell.spec.ts"
+  },
+  {
+    "hash": "C25EA60F346F2A5F6D4B0102DD242948926A8C5158744D03EB382B66D5D097F6",
+    "path": "E:\\workspace\\auto-trading-system\\frontend\\operator-console\\src\\components\\AppShell.vue"
+  },
+  {
+    "hash": "B4E6FC30814DBFC21D477C02C35070BBD891EF88DCB9AC1BE23A14AD893ADDFC",
+    "path": "E:\\workspace\\auto-trading-system\\frontend\\operator-console\\src\\components\\EmptyTrendChart.spec.ts"
+  },
+  {
+    "hash": "627F502CB485FE2CFB9529ADAACDE02B827E59096B7453F182A8E08B4C3CB11E",
+    "path": "E:\\workspace\\auto-trading-system\\frontend\\operator-console\\src\\components\\EmptyTrendChart.vue"
+  },
+  {
+    "hash": "8DEBC17D5DD44080373186208798D6EF0E559F8880DAAFE5D666D5F362703A13",
+    "path": "E:\\workspace\\auto-trading-system\\frontend\\operator-console\\src\\components\\OperatorLoginDialog.spec.ts"
+  },
+  {
+    "hash": "FCA4A55726EB92E642CA2201F92BE29E64A90BD5A33BD551B5A70E57F2FCDD99",
+    "path": "E:\\workspace\\auto-trading-system\\frontend\\operator-console\\src\\components\\OperatorLoginDialog.vue"
+  },
+  {
+    "hash": "446BC1E7D55DB1C3B1900A19A7429D43D8E774D8D558E6D7AFDA2A7873F367CC",
+    "path": "E:\\workspace\\auto-trading-system\\frontend\\operator-console\\src\\components\\ProtectedControlDialog.spec.ts"
+  },
+  {
+    "hash": "FE57C0584DC51C0F3CC4F0DC9CFBDFE8877608FAC3B6DE2B3C38F526EBE6386D",
+    "path": "E:\\workspace\\auto-trading-system\\frontend\\operator-console\\src\\components\\ProtectedControlDialog.vue"
+  },
+  {
+    "hash": "F775C562F028E2E1F5BC80D499AEAACEA47D8C72B1F6ECCF717DC9C8C32666A7",
+    "path": "E:\\workspace\\auto-trading-system\\frontend\\operator-console\\src\\components\\StatusPill.spec.ts"
+  },
+  {
+    "hash": "E692F7D8DBA251A0F0581CBEEB67C3F05EB02AA726274F08D84ECAC16C17413C",
+    "path": "E:\\workspace\\auto-trading-system\\frontend\\operator-console\\src\\components\\StatusPill.vue"
+  },
+  {
+    "hash": "E0E68E74B3B85BC6D067CB585DF850406A283872BF6B0B03FF4D716FDE3A2222",
+    "path": "E:\\workspace\\auto-trading-system\\frontend\\operator-console\\src\\models\\controls.ts"
+  },
+  {
+    "hash": "D94E5081984DF171F5598D6AC6F5DBBFF51A82F81F886FC42E6490612B77DE09",
+    "path": "E:\\workspace\\auto-trading-system\\frontend\\operator-console\\src\\models\\shell.ts"
+  },
+  {
+    "hash": "597D7D973A43E3D571F7344647BFDC1AF67D7390EB4B110E5396AE1738199439",
+    "path": "E:\\workspace\\auto-trading-system\\frontend\\operator-console\\src\\node\\api.ts"
+  },
+  {
+    "hash": "224B0F320EB5AF06CB943F5654FB588A2ABDD63435F9D75993F3C0982B922956",
+    "path": "E:\\workspace\\auto-trading-system\\frontend\\operator-console\\src\\node\\node.css"
+  },
+  {
+    "hash": "23884F0161C28E98CA83BCE6F430F7952AA249FE2BF8374FA700FBC6F07D7064",
+    "path": "E:\\workspace\\auto-trading-system\\frontend\\operator-console\\src\\node\\NodeConsole.vue"
+  },
+  {
+    "hash": "B0CA624EA461483A2A0CEB5AC42F5E8F410C175000BE2EF95FFEC9F4D17D6E2E",
+    "path": "E:\\workspace\\auto-trading-system\\frontend\\operator-console\\src\\node\\pending.ts"
+  },
+  {
+    "hash": "802A98B3E02AA0C0FB5186BC63BF6701640788D82776E0FF75C86D210DBFF11A",
+    "path": "E:\\workspace\\auto-trading-system\\frontend\\operator-console\\src\\services\\localConsoleApi.spec.ts"
+  },
+  {
+    "hash": "ADC966534CD5C0DB41BB362ABB45C2F3A4402DA0A44D402A77E1996415D2C38A",
+    "path": "E:\\workspace\\auto-trading-system\\frontend\\operator-console\\src\\services\\localConsoleApi.ts"
+  },
+  {
+    "hash": "2D316E6196D96CCAF000C928285EDB391CB077A61F68DB23D98F3D726043C0E8",
+    "path": "E:\\workspace\\auto-trading-system\\frontend\\operator-console\\src\\styles\\index.css"
+  },
+  {
+    "hash": "49096900D89D7C3AE28E6768A6E817A8BF54C3285F9E2BD8127820CF502E331C",
+    "path": "E:\\workspace\\auto-trading-system\\frontend\\operator-console\\src\\test\\nodeConsole.test.ts"
+  },
+  {
+    "hash": "99FA0DE9BC36AD52D8A94277E96AC9F3ABC2DA178F0F1D1253FB6BD062E48296",
+    "path": "E:\\workspace\\auto-trading-system\\frontend\\operator-console\\src\\test\\setup.ts"
+  },
+  {
+    "hash": "5742153DAC01C20575C80C66DDEF7B7993F77ECDE942EA68C0430104578A5489",
+    "path": "E:\\workspace\\auto-trading-system\\frontend\\operator-console\\src\\views\\ModulePlaceholderView.vue"
+  },
+  {
+    "hash": "4A9F731BC7F3D04595B9DAD9FA9AE963267C34F364F2F5EFC0304C99D21758EB",
+    "path": "E:\\workspace\\auto-trading-system\\frontend\\operator-console\\src\\views\\OverviewView.vue"
+  }
+]

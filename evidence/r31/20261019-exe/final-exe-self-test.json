@@ -1,0 +1,16 @@
+{
+  "version": "0.1.0.dev54",
+  "frozen": true,
+  "tk_version": "8.6.12",
+  "status": "PASS",
+  "components": {
+    "engine": "CURRENT",
+    "agent": "CURRENT",
+    "supervisor": "CURRENT"
+  },
+  "assets": 4,
+  "real_trading_enabled": false,
+  "order_count": 0,
+  "owned_jobs_closed": true,
+  "owned_job_count": 3
+}

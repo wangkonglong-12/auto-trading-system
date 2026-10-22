@@ -1,0 +1,341 @@
+{
+  "$defs": {
+    "ActionTarget": {
+      "additionalProperties": false,
+      "properties": {
+        "action_id": {
+          "description": "一次策略动作的稳定幂等键",
+          "pattern": "^[A-Za-z0-9_.:-]{1,96}$",
+          "title": "Action Id",
+          "type": "string"
+        },
+        "rule_id": {
+          "description": "触发该目标的规则及版本标识",
+          "pattern": "^[A-Za-z0-9_.:-]{1,96}$",
+          "title": "Rule Id",
+          "type": "string"
+        },
+        "target_remaining": {
+          "description": "目标剩余持仓，整数股",
+          "maximum": 9223372036854775807,
+          "minimum": 0,
+          "title": "Target Remaining",
+          "type": "integer"
+        }
+      },
+      "required": [
+        "action_id",
+        "target_remaining",
+        "rule_id"
+      ],
+      "title": "ActionTarget",
+      "type": "object"
+    },
+    "EntryBinding": {
+      "additionalProperties": false,
+      "description": "Frozen entry target; a plan quantity ceiling is not an execution target.",
+      "properties": {
+        "allocation_id": {
+          "description": "本次买入目标对应计划分配编号",
+          "pattern": "^[A-Za-z0-9_.:-]{1,96}$",
+          "title": "Allocation Id",
+          "type": "string"
+        },
+        "plan_id": {
+          "description": "本次买入目标所属不可变计划编号",
+          "pattern": "^[A-Za-z0-9_.:-]{1,96}$",
+          "title": "Plan Id",
+          "type": "string"
+        },
+        "state_hash": {
+          "anyOf": [
+            {
+              "pattern": "^sha256:[a-f0-9]{64}$",
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "独立一次性买入目标记录的正文摘要",
+          "title": "State Hash"
+        },
+        "target_quantity": {
+          "description": "执行时冻结的目标买入股数",
+          "exclusiveMinimum": 0,
+          "maximum": 2147483647,
+          "title": "Target Quantity",
+          "type": "integer"
+        }
+      },
+      "required": [
+        "plan_id",
+        "allocation_id",
+        "target_quantity"
+      ],
+      "title": "EntryBinding",
+      "type": "object"
+    },
+    "SellAllocation": {
+      "additionalProperties": false,
+      "properties": {
+        "lot_id": {
+          "description": "报单前冻结的持仓来源批次编号",
+          "pattern": "^[A-Za-z0-9_.:-]{1,96}$",
+          "title": "Lot Id",
+          "type": "string"
+        },
+        "quantity": {
+          "description": "本子单绑定该批次的整数股数",
+          "exclusiveMinimum": 0,
+          "maximum": 2147483647,
+          "title": "Quantity",
+          "type": "integer"
+        }
+      },
+      "required": [
+        "lot_id",
+        "quantity"
+      ],
+      "title": "SellAllocation",
+      "type": "object"
+    },
+    "SellBinding": {
+      "additionalProperties": false,
+      "description": "Recovery ownership, saved atomically with the SELL intent in J1.",
+      "properties": {
+        "allocations": {
+          "description": "冻结的有序批次分配，覆盖全部委托股数",
+          "items": {
+            "$ref": "#/$defs/SellAllocation"
+          },
+          "maxItems": 64,
+          "minItems": 1,
+          "title": "Allocations",
+          "type": "array"
+        },
+        "fired_rules": {
+          "default": [],
+          "description": "本次退出决策已触发规则，随子单原子保存",
+          "items": {
+            "pattern": "^[A-Za-z0-9_.:-]{1,96}$",
+            "type": "string"
+          },
+          "maxItems": 32,
+          "title": "Fired Rules",
+          "type": "array"
+        },
+        "opening_hash": {
+          "description": "本交易日已验证跨日持仓检查点的正文摘要",
+          "pattern": "^sha256:[a-f0-9]{64}$",
+          "title": "Opening Hash",
+          "type": "string"
+        },
+        "schema_version": {
+          "const": 1,
+          "default": 1,
+          "description": "卖出归属证据版本",
+          "title": "Schema Version",
+          "type": "integer"
+        },
+        "state_hash": {
+          "anyOf": [
+            {
+              "pattern": "^sha256:[a-f0-9]{64}$",
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "独立规则状态已成功保存的正文摘要",
+          "title": "State Hash"
+        },
+        "strategy_id": {
+          "description": "持仓及退出动作的责任策略",
+          "pattern": "^[A-Za-z0-9_.:-]{1,96}$",
+          "title": "Strategy Id",
+          "type": "string"
+        }
+      },
+      "required": [
+        "strategy_id",
+        "opening_hash",
+        "allocations"
+      ],
+      "title": "SellBinding",
+      "type": "object"
+    }
+  },
+  "additionalProperties": false,
+  "properties": {
+    "account_id": {
+      "description": "绑定账户标识，使用内部别名",
+      "pattern": "^[A-Za-z0-9_.:-]{1,96}$",
+      "title": "Account Id",
+      "type": "string"
+    },
+    "action_type": {
+      "description": "新委托或撤单",
+      "enum": [
+        "NEW",
+        "CANCEL"
+      ],
+      "title": "Action Type",
+      "type": "string"
+    },
+    "client_order_id": {
+      "description": "一次实际报单或撤单的唯一请求编号",
+      "pattern": "^ord_[A-Za-z0-9_-]{8,64}$",
+      "title": "Client Order Id",
+      "type": "string"
+    },
+    "context_type": {
+      "default": "ENTRY_PLAN",
+      "description": "plan_hash引用的上下文类型，买入计划或独立退出会话",
+      "enum": [
+        "ENTRY_PLAN",
+        "EXIT_SESSION"
+      ],
+      "title": "Context Type",
+      "type": "string"
+    },
+    "engine_boot_id": {
+      "description": "本次引擎运行代际，重启时更新",
+      "pattern": "^[A-Za-z0-9_.:-]{1,96}$",
+      "title": "Engine Boot Id",
+      "type": "string"
+    },
+    "entry_binding": {
+      "anyOf": [
+        {
+          "$ref": "#/$defs/EntryBinding"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "description": "买入分配及实际目标股数证据；缺失时日终标记目标未取得"
+    },
+    "limit_price": {
+      "description": "限价，元，十进制字符串",
+      "title": "Limit Price",
+      "type": "string"
+    },
+    "maximum_amount": {
+      "description": "最高资金预占，元，包含预计费用",
+      "title": "Maximum Amount",
+      "type": "string"
+    },
+    "original_client_order_id": {
+      "anyOf": [
+        {
+          "pattern": "^[A-Za-z0-9_.:-]{1,96}$",
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "description": "撤单对应本地原始子单编号",
+      "title": "Original Client Order Id"
+    },
+    "original_order_id": {
+      "anyOf": [
+        {
+          "pattern": "^[A-Za-z0-9_.:-]{1,96}$",
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "description": "撤单对应券商委托号",
+      "title": "Original Order Id"
+    },
+    "permission_epoch": {
+      "description": "提交依据的本地许可版本",
+      "minimum": 1,
+      "title": "Permission Epoch",
+      "type": "integer"
+    },
+    "plan_hash": {
+      "description": "不可变执行上下文正文摘要，具体类型由context_type指定",
+      "pattern": "^sha256:[a-f0-9]{64}$",
+      "title": "Plan Hash",
+      "type": "string"
+    },
+    "quantity": {
+      "description": "委托数量，整数股",
+      "exclusiveMinimum": 0,
+      "maximum": 9223372036854775807,
+      "title": "Quantity",
+      "type": "integer"
+    },
+    "remark_token": {
+      "description": "券商回报关联短令牌",
+      "pattern": "^[A-Za-z0-9_-]{1,24}$",
+      "title": "Remark Token",
+      "type": "string"
+    },
+    "sell_binding": {
+      "anyOf": [
+        {
+          "$ref": "#/$defs/SellBinding"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "description": "卖出批次证据；历史无绑定记录仅可读取，执行层拒绝派发"
+    },
+    "side": {
+      "description": "原委托方向",
+      "enum": [
+        "BUY",
+        "SELL"
+      ],
+      "title": "Side",
+      "type": "string"
+    },
+    "symbol": {
+      "description": "带交易所后缀的证券代码",
+      "title": "Symbol",
+      "type": "string"
+    },
+    "target": {
+      "$ref": "#/$defs/ActionTarget",
+      "description": "与提交在同一个J1中保存的一次性动作目标"
+    },
+    "trade_date": {
+      "description": "所属交易日，Asia/Shanghai",
+      "format": "date",
+      "title": "Trade Date",
+      "type": "string"
+    }
+  },
+  "required": [
+    "client_order_id",
+    "account_id",
+    "trade_date",
+    "action_type",
+    "plan_hash",
+    "symbol",
+    "side",
+    "quantity",
+    "limit_price",
+    "maximum_amount",
+    "remark_token",
+    "engine_boot_id",
+    "permission_epoch",
+    "target"
+  ],
+  "title": "Submission",
+  "type": "object"
+}

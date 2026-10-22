@@ -1,0 +1,30 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://contracts.auto-trading.local/v1/protocol-error.schema.json",
+  "title": "ProtocolError v1.0",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["schema_version", "request_id", "occurred_at", "error"],
+  "properties": {
+    "schema_version": {"$ref": "common.schema.json#/$defs/schemaVersion"},
+    "request_id": {
+      "oneOf": [{"$ref": "common.schema.json#/$defs/requestId"}, {"type": "null"}]
+    },
+    "occurred_at": {"$ref": "common.schema.json#/$defs/shanghaiDateTime"},
+    "error": {"$ref": "common.schema.json#/$defs/error"},
+    "field_errors": {
+      "type": "array",
+      "maxItems": 64,
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["field", "code", "message"],
+        "properties": {
+          "field": {"type": "string", "minLength": 1, "maxLength": 160},
+          "code": {"$ref": "common.schema.json#/$defs/reasonCode"},
+          "message": {"type": "string", "minLength": 1, "maxLength": 256}
+        }
+      }
+    }
+  }
+}

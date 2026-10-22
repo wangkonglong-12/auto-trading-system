@@ -1,0 +1,212 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://contracts.auto-trading.local/v1/trade-plan.schema.json",
+  "title": "TradePlan v1.0",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schema_version",
+    "plan_id",
+    "plan_type",
+    "account_id",
+    "strategy_id",
+    "trade_date",
+    "timezone",
+    "status",
+    "execution_mode",
+    "live_eligible",
+    "source",
+    "generated_at",
+    "valid_from",
+    "entry_start",
+    "stop_new_orders_at",
+    "expire_at",
+    "portfolio",
+    "items",
+    "plan_hash"
+  ],
+  "properties": {
+    "schema_version": {"const": "1.0"},
+    "plan_id": {"type": "string", "pattern": "^plan_[A-Za-z0-9_-]{8,64}$"},
+    "plan_type": {"const": "TAIL_1431_D0_ENTRY_D1_EXIT"},
+    "account_id": {"type": "string", "pattern": "^acct_[A-Za-z0-9_-]{3,48}$"},
+    "strategy_id": {"type": "string", "pattern": "^[A-Z][A-Z0-9_]{2,31}$"},
+    "trade_date": {"type": "string", "format": "date"},
+    "timezone": {"const": "Asia/Shanghai"},
+    "status": {
+      "enum": ["DRAFT", "READY", "NO_TRADE", "CANCELLED", "EXPIRED"]
+    },
+    "execution_mode": {
+      "enum": ["READ_ONLY", "PAPER", "SHADOW", "ASSISTED", "LIVE_EXIT_ONLY", "LIVE"]
+    },
+    "live_eligible": {"type": "boolean"},
+    "no_trade_reason": {
+      "enum": [
+        "ZERO_ELIGIBLE",
+        "SOURCE_FAILED",
+        "SOURCE_TIMEOUT",
+        "DATA_INCOMPLETE",
+        "MANUAL_HALT"
+      ]
+    },
+    "source": {"$ref": "#/$defs/source"},
+    "generated_at": {"$ref": "#/$defs/shanghaiDateTime"},
+    "valid_from": {"$ref": "#/$defs/shanghaiDateTime"},
+    "entry_start": {"$ref": "#/$defs/shanghaiDateTime"},
+    "stop_new_orders_at": {"$ref": "#/$defs/shanghaiDateTime"},
+    "expire_at": {"$ref": "#/$defs/shanghaiDateTime"},
+    "portfolio": {"$ref": "#/$defs/portfolio"},
+    "items": {
+      "type": "array",
+      "maxItems": 6,
+      "uniqueItems": true,
+      "items": {"$ref": "#/$defs/item"}
+    },
+    "plan_hash": {
+      "type": "string",
+      "pattern": "^sha256:[0-9a-f]{64}$"
+    }
+  },
+  "$defs": {
+    "shanghaiDateTime": {
+      "type": "string",
+      "format": "date-time",
+      "pattern": "\\+08:00$"
+    },
+    "ratio": {
+      "type": "string",
+      "pattern": "^(0(\\.[0-9]{1,8})?|1(\\.0{1,8})?)$"
+    },
+    "nonNegativeDecimal": {
+      "type": "string",
+      "pattern": "^(0|[1-9][0-9]*)(\\.[0-9]{1,8})?$"
+    },
+    "positiveDecimal": {
+      "type": "string",
+      "pattern": "^(?!0(?:\\.0{1,8})?$)(0|[1-9][0-9]*)(\\.[0-9]{1,8})?$"
+    },
+    "positiveMoney": {
+      "type": "string",
+      "pattern": "^(?!0(?:\\.0{1,2})?$)(0|[1-9][0-9]*)(\\.[0-9]{1,2})?$"
+    },
+    "source": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["run_id", "run_status", "data_completeness", "algorithm_version"],
+      "properties": {
+        "run_id": {"type": "string", "minLength": 8, "maxLength": 96},
+        "run_status": {"enum": ["succeeded", "failed", "timeout"]},
+        "data_completeness": {"enum": ["full", "partial", "unknown"]},
+        "algorithm_version": {"type": "string", "minLength": 3, "maxLength": 96}
+      }
+    },
+    "portfolio": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "target_exposure",
+        "hard_max_exposure",
+        "cash_reserve",
+        "max_positions",
+        "max_active_orders"
+      ],
+      "properties": {
+        "target_exposure": {"$ref": "#/$defs/ratio"},
+        "hard_max_exposure": {"$ref": "#/$defs/ratio"},
+        "cash_reserve": {"$ref": "#/$defs/ratio"},
+        "max_positions": {"type": "integer", "minimum": 1, "maximum": 15},
+        "max_active_orders": {"type": "integer", "minimum": 1, "maximum": 3}
+      }
+    },
+    "item": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "intent_id",
+        "symbol",
+        "market_bucket",
+        "rank",
+        "score",
+        "side",
+        "target_weight",
+        "max_notional",
+        "lot_size",
+        "entry_policy",
+        "exit_policy",
+        "risk_policy",
+        "execution_policy",
+        "price_guard"
+      ],
+      "properties": {
+        "intent_id": {"type": "string", "pattern": "^intent_[A-Za-z0-9_-]{8,64}$"},
+        "symbol": {"type": "string", "pattern": "^[0-9]{6}\\.(SZ|SH|BJ)$"},
+        "market_bucket": {"enum": ["10cm", "20cm", "30cm"]},
+        "rank": {"type": "integer", "minimum": 1, "maximum": 6},
+        "score": {"$ref": "#/$defs/nonNegativeDecimal"},
+        "side": {"const": "BUY"},
+        "target_weight": {"$ref": "#/$defs/ratio"},
+        "max_notional": {"$ref": "#/$defs/positiveMoney"},
+        "lot_size": {"type": "integer", "minimum": 100, "multipleOf": 100},
+        "entry_policy": {"const": "TAIL_ENTRY_V1"},
+        "exit_policy": {"const": "T1_EXIT_V1"},
+        "risk_policy": {"type": "string", "pattern": "^[A-Z][A-Z0-9_]{2,47}$"},
+        "execution_policy": {"type": "string", "pattern": "^[A-Z][A-Z0-9_]{2,47}$"},
+        "price_guard": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["reference_price", "max_deviation_bps"],
+          "properties": {
+            "reference_price": {"$ref": "#/$defs/positiveDecimal"},
+            "max_deviation_bps": {"type": "integer", "minimum": 0, "maximum": 2000}
+          }
+        }
+      }
+    }
+  },
+  "allOf": [
+    {
+      "if": {"properties": {"status": {"const": "READY"}}},
+      "then": {"properties": {"items": {"minItems": 1}}}
+    },
+    {
+      "if": {"properties": {"status": {"const": "NO_TRADE"}}},
+      "then": {
+        "required": ["no_trade_reason"],
+        "properties": {
+          "items": {"maxItems": 0},
+          "live_eligible": {"const": false}
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "source": {
+            "properties": {"data_completeness": {"enum": ["partial", "unknown"]}}
+          }
+        }
+      },
+      "then": {
+        "properties": {
+          "live_eligible": {"const": false},
+          "execution_mode": {"enum": ["READ_ONLY", "SHADOW"]}
+        }
+      }
+    },
+    {
+      "if": {"properties": {"live_eligible": {"const": true}}},
+      "then": {
+        "properties": {
+          "status": {"const": "READY"},
+          "execution_mode": {"enum": ["ASSISTED", "LIVE_EXIT_ONLY", "LIVE"]},
+          "source": {
+            "properties": {
+              "run_status": {"const": "succeeded"},
+              "data_completeness": {"const": "full"}
+            }
+          }
+        }
+      }
+    }
+  ]
+}

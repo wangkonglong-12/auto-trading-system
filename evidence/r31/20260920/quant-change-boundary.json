@@ -1,0 +1,35 @@
+{
+  "root": "E:\\workspace\\ai-stock-assistant",
+  "added": [
+    "backend/app/core/auto_trading/v2_budget.py",
+    "backend/app/core/auto_trading/v2_publisher_job.py",
+    "backend/app/protocol/auto_trading/v2/openapi.py",
+    "backend/app/repositories/auto_trading/v2_source_repository.py",
+    "backend/app/services/auto_trading/v2_plan_publisher.py",
+    "backend/docs/auto_trading/v2_implementation_20260920.md",
+    "backend/scripts/auto_trading/migrate_v2.py",
+    "backend/scripts/auto_trading/migrations/20260920_auto_trade_v2_migrations.sql",
+    "backend/scripts/auto_trading/migrations/20260920_auto_trade_v2_sources.sql",
+    "backend/tests/auto_trading/test_v2_https_end_to_end.py",
+    "backend/tests/auto_trading/test_v2_migration.py",
+    "backend/tests/auto_trading/test_v2_publisher.py",
+    "backend/tests/auto_trading/test_v2_resource_boundaries.py"
+  ],
+  "deleted": [],
+  "modified": [
+    "backend/app/api/auto_trading/v2_routes.py",
+    "backend/app/core/auto_trading/scheduler.py",
+    "backend/app/core/auto_trading/settings.py",
+    "backend/app/core/auto_trading/v2_auth.py",
+    "backend/app/core/auto_trading/v2_integration.py",
+    "backend/app/protocol/auto_trading/v2/daily_sync.py",
+    "backend/app/protocol/auto_trading/v2/records.py",
+    "backend/app/repositories/auto_trading/auto_trade_daily_repository.py",
+    "backend/app/repositories/auto_trading/v2_connection.py",
+    "backend/app/repositories/auto_trading/v2_identity_repository.py",
+    "backend/app/repositories/auto_trading/v2_plan_repository.py",
+    "backend/tests/auto_trading/test_v2_http_api.py",
+    "backend/tests/auto_trading/test_v2_mysql_integration.py",
+    "backend/tests/auto_trading/v2_support.py"
+  ]
+}

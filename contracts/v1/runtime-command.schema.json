@@ -1,0 +1,60 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://contracts.auto-trading.local/v1/runtime-command.schema.json",
+  "title": "RuntimeCommand v1.0",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schema_version", "command_id", "command_seq", "node_id", "account_id", "command_type",
+    "scope", "issued_at", "expires_at", "actor", "reason_code", "reason"
+  ],
+  "properties": {
+    "schema_version": {"$ref": "common.schema.json#/$defs/schemaVersion"},
+    "command_id": {"$ref": "common.schema.json#/$defs/commandId"},
+    "command_seq": {"type": "integer", "minimum": 1, "maximum": 9223372036854775807},
+    "node_id": {"$ref": "common.schema.json#/$defs/nodeId"},
+    "account_id": {"$ref": "common.schema.json#/$defs/accountId"},
+    "command_type": {
+      "enum": [
+        "PAUSE_BUY", "SELL_ONLY", "MANUAL_TAKEOVER", "EMERGENCY_HALT",
+        "REQUEST_RECONCILIATION", "CANCEL_ORDER", "CANCEL_ACTIVE_ORDERS",
+        "FREEZE_SYMBOL", "UNFREEZE_SYMBOL", "REQUEST_AUTO_RESUME"
+      ]
+    },
+    "scope": {"$ref": "#/$defs/scope"},
+    "issued_at": {"$ref": "common.schema.json#/$defs/shanghaiDateTime"},
+    "expires_at": {"$ref": "common.schema.json#/$defs/shanghaiDateTime"},
+    "actor": {"$ref": "#/$defs/actor"},
+    "reason_code": {"$ref": "common.schema.json#/$defs/reasonCode"},
+    "reason": {"type": "string", "minLength": 1, "maxLength": 512},
+    "parameters": {"$ref": "#/$defs/parameters"}
+  },
+  "$defs": {
+    "scope": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["type", "id"],
+      "properties": {
+        "type": {"enum": ["NODE", "ACCOUNT", "SYMBOL", "ORDER", "PLAN"]},
+        "id": {"type": "string", "minLength": 3, "maxLength": 96}
+      }
+    },
+    "actor": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["type", "id"],
+      "properties": {
+        "type": {"enum": ["SYSTEM", "OPERATOR", "RISK_ENGINE"]},
+        "id": {"type": "string", "minLength": 3, "maxLength": 96}
+      }
+    },
+    "parameters": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "cancel_active_orders": {"type": "boolean"},
+        "reconciliation_scope": {"enum": ["FULL", "ASSET", "POSITION", "ORDER", "TRADE"]}
+      }
+    }
+  }
+}

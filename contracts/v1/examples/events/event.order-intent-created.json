@@ -1,0 +1,32 @@
+{
+  "schema_version": "1.0",
+  "event_id": "evt_00000000000000000000000000000003",
+  "event_hash": "sha256:d2e8e49303445201a49f6978ada43caf996997c29d77302205840a9d40d63a94",
+  "node_id": "node-demo-001",
+  "account_id": "acct_demo_001",
+  "boot_id": "boot_11111111111111111111111111111111",
+  "local_seq": 3,
+  "correlation_id": "corr_plan_20260904_0001",
+  "causation_id": "intent_01K43TAIL000000001",
+  "source": "RUNTIME",
+  "severity": "INFO",
+  "event_type": "ORDER_INTENT_CREATED",
+  "aggregate_type": "ORDER",
+  "aggregate_id": "ord_01K43TAIL000000001",
+  "trade_date": "2026-09-04",
+  "occurred_at": "2026-09-04T14:35:01+08:00",
+  "recorded_at": "2026-09-04T14:35:01.001+08:00",
+  "payload": {
+    "client_order_id": "ord_01K43TAIL000000001",
+    "plan_id": "plan_01K43TAIL20260904001",
+    "intent_id": "intent_01K43TAIL000000001",
+    "symbol": "000001.SZ",
+    "side": "BUY",
+    "order_type": "LIMIT",
+    "quantity": 100,
+    "limit_price": "12.34",
+    "max_notional": "1500.00",
+    "remark_token": "ATS000000000000000000001",
+    "execution_policy": "EXEC_BALANCED_V1"
+  }
+}

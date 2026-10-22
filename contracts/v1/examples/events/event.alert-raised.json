@@ -1,0 +1,25 @@
+{
+  "schema_version": "1.0",
+  "event_id": "evt_00000000000000000000000000000009",
+  "event_hash": "sha256:db959e486ba10e528d280ea68d8a5ad60c3d470fa37156a97bc6562af190482b",
+  "node_id": "node-demo-001",
+  "account_id": "acct_demo_001",
+  "boot_id": "boot_11111111111111111111111111111111",
+  "local_seq": 9,
+  "correlation_id": "corr_alert_20260904_0001",
+  "source": "RUNTIME",
+  "severity": "CRITICAL",
+  "event_type": "ALERT_RAISED",
+  "aggregate_type": "ALERT",
+  "aggregate_id": "alert_01K43ALERT0000001",
+  "trade_date": "2026-09-04",
+  "occurred_at": "2026-09-04T14:41:00+08:00",
+  "recorded_at": "2026-09-04T14:41:00.001+08:00",
+  "payload": {
+    "alert_id": "alert_01K43ALERT0000001",
+    "alert_code": "PERSISTENCE_DEGRADED",
+    "component": "JOURNAL",
+    "dedup_key": "journal:persistence-degraded",
+    "message": "LocalJournal commit failed; new order creation is paused"
+  }
+}

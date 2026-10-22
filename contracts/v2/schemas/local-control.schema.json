@@ -1,0 +1,222 @@
+{
+  "$defs": {
+    "SessionGrant": {
+      "additionalProperties": false,
+      "properties": {
+        "account_id": {
+          "pattern": "^[A-Za-z0-9_.:-]{1,96}$",
+          "title": "Account Id",
+          "type": "string"
+        },
+        "confirmed_by": {
+          "pattern": "^[A-Za-z0-9_.:-]{1,96}$",
+          "title": "Confirmed By",
+          "type": "string"
+        },
+        "directions": {
+          "items": {
+            "enum": [
+              "BUY",
+              "SELL"
+            ],
+            "type": "string"
+          },
+          "maxItems": 2,
+          "minItems": 1,
+          "title": "Directions",
+          "type": "array"
+        },
+        "engine_boot_id": {
+          "pattern": "^[A-Za-z0-9_.:-]{1,96}$",
+          "title": "Engine Boot Id",
+          "type": "string"
+        },
+        "grant_id": {
+          "pattern": "^[A-Za-z0-9_.:-]{1,96}$",
+          "title": "Grant Id",
+          "type": "string"
+        },
+        "max_buy_value": {
+          "description": "人民币元，最多2位小数",
+          "pattern": "^(0|[1-9][0-9]{0,11})(\\.[0-9]{1,2})?$",
+          "title": "Max Buy Value",
+          "type": "string"
+        },
+        "max_order_value": {
+          "description": "人民币元，最多2位小数",
+          "pattern": "^(0|[1-9][0-9]{0,11})(\\.[0-9]{1,2})?$",
+          "title": "Max Order Value",
+          "type": "string"
+        },
+        "max_positions": {
+          "maximum": 15,
+          "minimum": 0,
+          "title": "Max Positions",
+          "type": "integer"
+        },
+        "mode": {
+          "enum": [
+            "PAPER",
+            "SHADOW",
+            "ASSISTED",
+            "LIVE_EXIT_ONLY",
+            "LIVE"
+          ],
+          "title": "Mode",
+          "type": "string"
+        },
+        "recovery_report_hash": {
+          "pattern": "^sha256:[a-f0-9]{64}$",
+          "title": "Recovery Report Hash",
+          "type": "string"
+        },
+        "session_generation": {
+          "minimum": 1,
+          "title": "Session Generation",
+          "type": "integer"
+        },
+        "valid_from": {
+          "format": "date-time",
+          "title": "Valid From",
+          "type": "string"
+        },
+        "valid_until": {
+          "format": "date-time",
+          "title": "Valid Until",
+          "type": "string"
+        }
+      },
+      "required": [
+        "grant_id",
+        "account_id",
+        "engine_boot_id",
+        "session_generation",
+        "mode",
+        "directions",
+        "max_buy_value",
+        "max_order_value",
+        "max_positions",
+        "valid_from",
+        "valid_until",
+        "confirmed_by",
+        "recovery_report_hash"
+      ],
+      "title": "SessionGrant",
+      "type": "object"
+    }
+  },
+  "additionalProperties": false,
+  "properties": {
+    "action": {
+      "enum": [
+        "HALT",
+        "PAUSE",
+        "SNAPSHOT",
+        "REQUEST_RECOVERY",
+        "LOAD_PLAN",
+        "ARM",
+        "RESUME",
+        "CONFIRM_RECOVERY",
+        "EXPORT_DAILY",
+        "MAINTENANCE"
+      ],
+      "title": "Action",
+      "type": "string"
+    },
+    "artifact_hash": {
+      "anyOf": [
+        {
+          "pattern": "^sha256:[a-f0-9]{64}$",
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Artifact Hash"
+    },
+    "deadline": {
+      "format": "date-time",
+      "title": "Deadline",
+      "type": "string"
+    },
+    "engine_boot_id": {
+      "pattern": "^[A-Za-z0-9_.:-]{1,96}$",
+      "title": "Engine Boot Id",
+      "type": "string"
+    },
+    "expected_state_version": {
+      "minimum": 0,
+      "title": "Expected State Version",
+      "type": "integer"
+    },
+    "grant": {
+      "anyOf": [
+        {
+          "$ref": "#/$defs/SessionGrant"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null
+    },
+    "operator_authorization_id": {
+      "anyOf": [
+        {
+          "pattern": "^[A-Za-z0-9_.:-]{1,96}$",
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "description": "本地操作台已核实的一次性授权ID；消息角色不是身份凭证",
+      "title": "Operator Authorization Id"
+    },
+    "protocol_major": {
+      "const": 2,
+      "default": 2,
+      "title": "Protocol Major",
+      "type": "integer"
+    },
+    "request_id": {
+      "pattern": "^[A-Za-z0-9_.:-]{1,96}$",
+      "title": "Request Id",
+      "type": "string"
+    },
+    "sender_role": {
+      "enum": [
+        "agent",
+        "supervisor"
+      ],
+      "title": "Sender Role",
+      "type": "string"
+    },
+    "trade_date": {
+      "anyOf": [
+        {
+          "format": "date",
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Trade Date"
+    }
+  },
+  "required": [
+    "request_id",
+    "engine_boot_id",
+    "sender_role",
+    "deadline",
+    "expected_state_version",
+    "action"
+  ],
+  "title": "LocalControlRequest",
+  "type": "object"
+}

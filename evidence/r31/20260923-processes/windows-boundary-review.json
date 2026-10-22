@@ -1,0 +1,43 @@
+{
+  "root": "E:\\workspace\\auto-trading-system",
+  "added": [
+    "config/v2/node-config.schema.json",
+    "config/v2/node.mock.example.json",
+    "docs/design/v3.1/进程通信与定时任务实施报告_20260923.md",
+    "evidence/r31/20260923-processes/artifact-verification.json",
+    "evidence/r31/20260923-processes/coverage-all.json",
+    "evidence/r31/20260923-processes/installed-process-tests.xml",
+    "evidence/r31/20260923-processes/python-tests.xml",
+    "evidence/r31/20260923-processes/quant-boundary.json",
+    "scripts/export-node-config.py",
+    "scripts/windows/install-node-tasks.ps1",
+    "src/auto_trading_system/apps/node_process/__init__.py",
+    "src/auto_trading_system/apps/node_process/__main__.py",
+    "src/auto_trading_system/config/node_v2.py",
+    "src/auto_trading_system/control/ipc_protocol.py",
+    "src/auto_trading_system/control/owner_mailbox.py",
+    "src/auto_trading_system/control/windows_pipe.py",
+    "src/auto_trading_system/runtime/node_engine.py",
+    "src/auto_trading_system/runtime/node_layout.py",
+    "src/auto_trading_system/runtime/node_tasks.py",
+    "src/auto_trading_system/sync/daily_catalog.py",
+    "src/auto_trading_system/sync/node_agent.py",
+    "tests/v31/node_fixture_process.py",
+    "tests/v31/test_node_processes.py"
+  ],
+  "deleted": [],
+  "modified": [
+    "README.md",
+    "docs/design/v3.1/开发修订计划与推进记录.md",
+    "docs/design/v3.1/详细设计方案.md",
+    "pyproject.toml",
+    "requirements/dev.lock",
+    "requirements/runtime.lock",
+    "src/auto_trading_system/apps/credential_admin/__main__.py",
+    "src/auto_trading_system/runtime/engine_v2.py",
+    "src/auto_trading_system/runtime/observation_v2.py",
+    "src/auto_trading_system/sync/http_v2.py",
+    "src/auto_trading_system/version.py",
+    "开发计划与推进记录.md"
+  ]
+}

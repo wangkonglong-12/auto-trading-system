@@ -1,0 +1,3333 @@
+{
+  "components": {
+    "schemas": {
+      "Allocation": {
+        "additionalProperties": false,
+        "properties": {
+          "allocation_id": {
+            "pattern": "^[A-Za-z0-9_.:-]{1,96}$",
+            "title": "Allocation Id",
+            "type": "string"
+          },
+          "max_qty": {
+            "description": "数量上限，整数股",
+            "maximum": 2147483647,
+            "minimum": 1,
+            "title": "Max Qty",
+            "type": "integer"
+          },
+          "max_value": {
+            "description": "硬金额上限，元，十进制字符串",
+            "pattern": "^(0|[1-9][0-9]{0,11})(\\.[0-9]{1,2})?$",
+            "title": "Max Value",
+            "type": "string"
+          },
+          "rank": {
+            "maximum": 500,
+            "minimum": 1,
+            "title": "Rank",
+            "type": "integer"
+          },
+          "symbol": {
+            "description": "带市场后缀的证券代码",
+            "pattern": "^[0-9]{6}\\.(SH|SZ|BJ)$",
+            "title": "Symbol",
+            "type": "string"
+          },
+          "target_value": {
+            "description": "目标金额，元，十进制字符串",
+            "pattern": "^(0|[1-9][0-9]{0,11})(\\.[0-9]{1,2})?$",
+            "title": "Target Value",
+            "type": "string"
+          }
+        },
+        "required": [
+          "allocation_id",
+          "symbol",
+          "rank",
+          "target_value",
+          "max_value",
+          "max_qty"
+        ],
+        "title": "Allocation",
+        "type": "object"
+      },
+      "ApiError": {
+        "additionalProperties": false,
+        "properties": {
+          "code": {
+            "pattern": "^[A-Za-z0-9_.:-]{1,96}$",
+            "title": "Code",
+            "type": "string"
+          },
+          "message": {
+            "maxLength": 512,
+            "minLength": 1,
+            "title": "Message",
+            "type": "string"
+          },
+          "request_id": {
+            "pattern": "^[A-Za-z0-9_.:-]{1,96}$",
+            "title": "Request Id",
+            "type": "string"
+          },
+          "retryable": {
+            "title": "Retryable",
+            "type": "boolean"
+          }
+        },
+        "required": [
+          "request_id",
+          "code",
+          "message",
+          "retryable"
+        ],
+        "title": "ApiError",
+        "type": "object"
+      },
+      "AppliedReceipt": {
+        "additionalProperties": false,
+        "properties": {
+          "account_id": {
+            "pattern": "^[A-Za-z0-9_.:-]{1,96}$",
+            "title": "Account Id",
+            "type": "string"
+          },
+          "applied_at": {
+            "format": "date-time",
+            "title": "Applied At",
+            "type": "string"
+          },
+          "batch_id": {
+            "pattern": "^[A-Za-z0-9_.:-]{1,96}$",
+            "title": "Batch Id",
+            "type": "string"
+          },
+          "business_status": {
+            "enum": [
+              "COMPLETE",
+              "INCOMPLETE"
+            ],
+            "title": "Business Status",
+            "type": "string"
+          },
+          "financial_status": {
+            "enum": [
+              "PROVISIONAL",
+              "SETTLED"
+            ],
+            "title": "Financial Status",
+            "type": "string"
+          },
+          "manifest_hash": {
+            "pattern": "^sha256:[a-f0-9]{64}$",
+            "title": "Manifest Hash",
+            "type": "string"
+          },
+          "revision": {
+            "minimum": 1,
+            "title": "Revision",
+            "type": "integer"
+          },
+          "state": {
+            "const": "APPLIED",
+            "default": "APPLIED",
+            "title": "State",
+            "type": "string"
+          },
+          "trade_date": {
+            "format": "date",
+            "title": "Trade Date",
+            "type": "string"
+          }
+        },
+        "required": [
+          "batch_id",
+          "account_id",
+          "trade_date",
+          "revision",
+          "manifest_hash",
+          "business_status",
+          "financial_status",
+          "applied_at"
+        ],
+        "title": "AppliedReceipt",
+        "type": "object"
+      },
+      "AssetRecord": {
+        "additionalProperties": false,
+        "properties": {
+          "account_id": {
+            "description": "内部账户标识，必须与上传清单一致",
+            "pattern": "^[A-Za-z0-9_.:-]{1,96}$",
+            "title": "Account Id",
+            "type": "string"
+          },
+          "cash_available": {
+            "description": "人民币元，最多2位小数",
+            "pattern": "^(0|[1-9][0-9]{0,11})(\\.[0-9]{1,2})?$",
+            "title": "Cash Available",
+            "type": "string"
+          },
+          "cash_frozen": {
+            "description": "人民币元，最多2位小数",
+            "pattern": "^(0|[1-9][0-9]{0,11})(\\.[0-9]{1,2})?$",
+            "title": "Cash Frozen",
+            "type": "string"
+          },
+          "currency": {
+            "const": "CNY",
+            "default": "CNY",
+            "title": "Currency",
+            "type": "string"
+          },
+          "market_value": {
+            "description": "人民币元，最多2位小数",
+            "pattern": "^(0|[1-9][0-9]{0,11})(\\.[0-9]{1,2})?$",
+            "title": "Market Value",
+            "type": "string"
+          },
+          "observed_at": {
+            "description": "该条事实的观测时点",
+            "format": "date-time",
+            "title": "Observed At",
+            "type": "string"
+          },
+          "quality": {
+            "enum": [
+              "CONFIRMED",
+              "INDETERMINATE"
+            ],
+            "title": "Quality",
+            "type": "string"
+          },
+          "snapshot_id": {
+            "pattern": "^[A-Za-z0-9_.:-]{1,96}$",
+            "title": "Snapshot Id",
+            "type": "string"
+          },
+          "total_equity": {
+            "description": "人民币元，最多2位小数",
+            "pattern": "^(0|[1-9][0-9]{0,11})(\\.[0-9]{1,2})?$",
+            "title": "Total Equity",
+            "type": "string"
+          },
+          "trade_date": {
+            "description": "所属交易日",
+            "format": "date",
+            "title": "Trade Date",
+            "type": "string"
+          }
+        },
+        "required": [
+          "account_id",
+          "trade_date",
+          "observed_at",
+          "snapshot_id",
+          "cash_available",
+          "cash_frozen",
+          "market_value",
+          "total_equity",
+          "quality"
+        ],
+        "title": "AssetRecord",
+        "type": "object"
+      },
+      "BrokerOrderRecord": {
+        "additionalProperties": false,
+        "properties": {
+          "account_id": {
+            "description": "内部账户标识，必须与上传清单一致",
+            "pattern": "^[A-Za-z0-9_.:-]{1,96}$",
+            "title": "Account Id",
+            "type": "string"
+          },
+          "broker_order_id": {
+            "pattern": "^[A-Za-z0-9_.:-]{1,96}$",
+            "title": "Broker Order Id",
+            "type": "string"
+          },
+          "cancelled_quantity": {
+            "description": "整数股",
+            "maximum": 2147483647,
+            "minimum": 0,
+            "title": "Cancelled Quantity",
+            "type": "integer"
+          },
+          "client_order_id": {
+            "anyOf": [
+              {
+                "pattern": "^[A-Za-z0-9_.:-]{1,96}$",
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "title": "Client Order Id"
+          },
+          "filled_quantity": {
+            "description": "整数股",
+            "maximum": 2147483647,
+            "minimum": 0,
+            "title": "Filled Quantity",
+            "type": "integer"
+          },
+          "limit_price": {
+            "description": "每股人民币元，最多8位小数",
+            "pattern": "^(0|[1-9][0-9]{0,9})(\\.[0-9]{1,8})?$",
+            "title": "Limit Price",
+            "type": "string"
+          },
+          "market": {
+            "enum": [
+              "SH",
+              "SZ",
+              "BJ"
+            ],
+            "title": "Market",
+            "type": "string"
+          },
+          "observed_at": {
+            "description": "该条事实的观测时点",
+            "format": "date-time",
+            "title": "Observed At",
+            "type": "string"
+          },
+          "quantity": {
+            "description": "整数股",
+            "maximum": 2147483647,
+            "minimum": 0,
+            "title": "Quantity",
+            "type": "integer"
+          },
+          "raw_status": {
+            "description": "券商原始状态值原文",
+            "maxLength": 96,
+            "minLength": 1,
+            "title": "Raw Status",
+            "type": "string"
+          },
+          "remark_token": {
+            "default": "",
+            "maxLength": 24,
+            "title": "Remark Token",
+            "type": "string"
+          },
+          "side": {
+            "enum": [
+              "BUY",
+              "SELL"
+            ],
+            "title": "Side",
+            "type": "string"
+          },
+          "status": {
+            "enum": [
+              "ACTIVE",
+              "PARTIAL",
+              "FILLED",
+              "CANCELLED",
+              "REJECTED",
+              "UNKNOWN"
+            ],
+            "title": "Status",
+            "type": "string"
+          },
+          "symbol": {
+            "description": "带市场后缀的证券代码",
+            "pattern": "^[0-9]{6}\\.(SH|SZ|BJ)$",
+            "title": "Symbol",
+            "type": "string"
+          },
+          "trade_date": {
+            "description": "所属交易日",
+            "format": "date",
+            "title": "Trade Date",
+            "type": "string"
+          }
+        },
+        "required": [
+          "account_id",
+          "trade_date",
+          "observed_at",
+          "broker_order_id",
+          "market",
+          "symbol",
+          "side",
+          "quantity",
+          "filled_quantity",
+          "cancelled_quantity",
+          "limit_price",
+          "status",
+          "raw_status"
+        ],
+        "title": "BrokerOrderRecord",
+        "type": "object"
+      },
+      "BrokerTradeRecord": {
+        "additionalProperties": false,
+        "properties": {
+          "account_id": {
+            "description": "内部账户标识，必须与上传清单一致",
+            "pattern": "^[A-Za-z0-9_.:-]{1,96}$",
+            "title": "Account Id",
+            "type": "string"
+          },
+          "broker_order_id": {
+            "pattern": "^[A-Za-z0-9_.:-]{1,96}$",
+            "title": "Broker Order Id",
+            "type": "string"
+          },
+          "broker_trade_id": {
+            "pattern": "^[A-Za-z0-9_.:-]{1,96}$",
+            "title": "Broker Trade Id",
+            "type": "string"
+          },
+          "client_order_id": {
+            "anyOf": [
+              {
+                "pattern": "^[A-Za-z0-9_.:-]{1,96}$",
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "title": "Client Order Id"
+          },
+          "gross_amount": {
+            "description": "券商原始成交金额，元；费用单独核对",
+            "pattern": "^(0|[1-9][0-9]{0,11})(\\.[0-9]{1,2})?$",
+            "title": "Gross Amount",
+            "type": "string"
+          },
+          "market": {
+            "enum": [
+              "SH",
+              "SZ",
+              "BJ"
+            ],
+            "title": "Market",
+            "type": "string"
+          },
+          "observed_at": {
+            "description": "该条事实的观测时点",
+            "format": "date-time",
+            "title": "Observed At",
+            "type": "string"
+          },
+          "origin": {
+            "enum": [
+              "STRATEGY",
+              "MANUAL",
+              "UNKNOWN"
+            ],
+            "title": "Origin",
+            "type": "string"
+          },
+          "price": {
+            "description": "每股人民币元，最多8位小数",
+            "pattern": "^(0|[1-9][0-9]{0,9})(\\.[0-9]{1,8})?$",
+            "title": "Price",
+            "type": "string"
+          },
+          "quantity": {
+            "description": "整数股",
+            "maximum": 2147483647,
+            "minimum": 0,
+            "title": "Quantity",
+            "type": "integer"
+          },
+          "side": {
+            "enum": [
+              "BUY",
+              "SELL"
+            ],
+            "title": "Side",
+            "type": "string"
+          },
+          "symbol": {
+            "description": "带市场后缀的证券代码",
+            "pattern": "^[0-9]{6}\\.(SH|SZ|BJ)$",
+            "title": "Symbol",
+            "type": "string"
+          },
+          "trade_date": {
+            "description": "所属交易日",
+            "format": "date",
+            "title": "Trade Date",
+            "type": "string"
+          },
+          "traded_at": {
+            "format": "date-time",
+            "title": "Traded At",
+            "type": "string"
+          }
+        },
+        "required": [
+          "account_id",
+          "trade_date",
+          "observed_at",
+          "broker_trade_id",
+          "broker_order_id",
+          "market",
+          "symbol",
+          "side",
+          "quantity",
+          "price",
+          "gross_amount",
+          "traded_at",
+          "origin"
+        ],
+        "title": "BrokerTradeRecord",
+        "type": "object"
+      },
+      "CapabilityManifest": {
+        "additionalProperties": false,
+        "properties": {
+          "capabilities": {
+            "items": {
+              "pattern": "^[A-Za-z0-9_.:-]{1,96}$",
+              "type": "string"
+            },
+            "maxItems": 32,
+            "title": "Capabilities",
+            "type": "array"
+          },
+          "generated_at": {
+            "format": "date-time",
+            "title": "Generated At",
+            "type": "string"
+          },
+          "manifest_version": {
+            "pattern": "^[A-Za-z0-9_.:-]{1,96}$",
+            "title": "Manifest Version",
+            "type": "string"
+          },
+          "maximum_batch_bytes": {
+            "default": 16777216,
+            "maximum": 16777216,
+            "minimum": 1,
+            "title": "Maximum Batch Bytes",
+            "type": "integer"
+          },
+          "maximum_part_bytes": {
+            "default": 524288,
+            "maximum": 524288,
+            "minimum": 1,
+            "title": "Maximum Part Bytes",
+            "type": "integer"
+          },
+          "maximum_part_records": {
+            "default": 200,
+            "maximum": 200,
+            "minimum": 1,
+            "title": "Maximum Part Records",
+            "type": "integer"
+          },
+          "rulebook_versions": {
+            "items": {
+              "pattern": "^[A-Za-z0-9_.:-]{1,96}$",
+              "type": "string"
+            },
+            "maxItems": 16,
+            "title": "Rulebook Versions",
+            "type": "array"
+          },
+          "schema_major": {
+            "const": 2,
+            "default": 2,
+            "title": "Schema Major",
+            "type": "integer"
+          },
+          "trusted_plan_key_ids": {
+            "items": {
+              "pattern": "^[A-Za-z0-9_.:-]{1,96}$",
+              "type": "string"
+            },
+            "maxItems": 8,
+            "title": "Trusted Plan Key Ids",
+            "type": "array"
+          }
+        },
+        "required": [
+          "manifest_version",
+          "generated_at",
+          "capabilities",
+          "trusted_plan_key_ids",
+          "rulebook_versions"
+        ],
+        "title": "CapabilityManifest",
+        "type": "object"
+      },
+      "CompleteDaily": {
+        "additionalProperties": false,
+        "properties": {
+          "manifest_hash": {
+            "pattern": "^sha256:[a-f0-9]{64}$",
+            "title": "Manifest Hash",
+            "type": "string"
+          }
+        },
+        "required": [
+          "manifest_hash"
+        ],
+        "title": "CompleteDaily",
+        "type": "object"
+      },
+      "DailyManifest": {
+        "additionalProperties": false,
+        "properties": {
+          "account_id": {
+            "pattern": "^[A-Za-z0-9_.:-]{1,96}$",
+            "title": "Account Id",
+            "type": "string"
+          },
+          "batch_id": {
+            "pattern": "^[A-Za-z0-9_.:-]{1,96}$",
+            "title": "Batch Id",
+            "type": "string"
+          },
+          "data_as_of": {
+            "format": "date-time",
+            "title": "Data As Of",
+            "type": "string"
+          },
+          "dataset_status": {
+            "items": {
+              "$ref": "#/components/schemas/DatasetStatus"
+            },
+            "maxItems": 8,
+            "minItems": 8,
+            "title": "Dataset Status",
+            "type": "array"
+          },
+          "generated_at": {
+            "format": "date-time",
+            "title": "Generated At",
+            "type": "string"
+          },
+          "journal_generation": {
+            "pattern": "^[A-Za-z0-9_.:-]{1,96}$",
+            "title": "Journal Generation",
+            "type": "string"
+          },
+          "last_record_seq": {
+            "minimum": 0,
+            "title": "Last Record Seq",
+            "type": "integer"
+          },
+          "manifest_hash": {
+            "pattern": "^sha256:[a-f0-9]{64}$",
+            "title": "Manifest Hash",
+            "type": "string"
+          },
+          "node_generation": {
+            "minimum": 1,
+            "title": "Node Generation",
+            "type": "integer"
+          },
+          "node_id": {
+            "pattern": "^[A-Za-z0-9_.:-]{1,96}$",
+            "title": "Node Id",
+            "type": "string"
+          },
+          "parts": {
+            "items": {
+              "$ref": "#/components/schemas/PartDescription"
+            },
+            "maxItems": 2048,
+            "title": "Parts",
+            "type": "array"
+          },
+          "revision": {
+            "minimum": 1,
+            "title": "Revision",
+            "type": "integer"
+          },
+          "schema_major": {
+            "const": 2,
+            "default": 2,
+            "title": "Schema Major",
+            "type": "integer"
+          },
+          "supersedes_batch_id": {
+            "anyOf": [
+              {
+                "pattern": "^[A-Za-z0-9_.:-]{1,96}$",
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "title": "Supersedes Batch Id"
+          },
+          "trade_date": {
+            "format": "date",
+            "title": "Trade Date",
+            "type": "string"
+          }
+        },
+        "required": [
+          "batch_id",
+          "node_id",
+          "node_generation",
+          "account_id",
+          "trade_date",
+          "revision",
+          "generated_at",
+          "data_as_of",
+          "journal_generation",
+          "last_record_seq",
+          "parts",
+          "dataset_status",
+          "manifest_hash"
+        ],
+        "title": "DailyManifest",
+        "type": "object"
+      },
+      "DailyProgress": {
+        "additionalProperties": false,
+        "properties": {
+          "batch_id": {
+            "pattern": "^[A-Za-z0-9_.:-]{1,96}$",
+            "title": "Batch Id",
+            "type": "string"
+          },
+          "manifest_hash": {
+            "pattern": "^sha256:[a-f0-9]{64}$",
+            "title": "Manifest Hash",
+            "type": "string"
+          },
+          "missing_parts": {
+            "items": {
+              "pattern": "^[A-Za-z0-9_.:-]{1,96}$",
+              "type": "string"
+            },
+            "maxItems": 2048,
+            "title": "Missing Parts",
+            "type": "array"
+          },
+          "state": {
+            "enum": [
+              "CREATED",
+              "RECEIVING",
+              "RECEIVED",
+              "APPLYING",
+              "APPLIED",
+              "REJECTED"
+            ],
+            "title": "State",
+            "type": "string"
+          }
+        },
+        "required": [
+          "batch_id",
+          "manifest_hash",
+          "state",
+          "missing_parts"
+        ],
+        "title": "DailyProgress",
+        "type": "object"
+      },
+      "DailyRecord": {
+        "additionalProperties": false,
+        "properties": {
+          "data": {
+            "additionalProperties": {
+              "$ref": "#/components/schemas/JsonValue"
+            },
+            "title": "Data",
+            "type": "object"
+          },
+          "record_id": {
+            "pattern": "^[A-Za-z0-9_.:-]{1,96}$",
+            "title": "Record Id",
+            "type": "string"
+          }
+        },
+        "required": [
+          "record_id",
+          "data"
+        ],
+        "title": "DailyRecord",
+        "type": "object"
+      },
+      "DatasetStatus": {
+        "additionalProperties": false,
+        "properties": {
+          "dataset": {
+            "enum": [
+              "plan_results",
+              "submission_records",
+              "broker_orders",
+              "broker_trades",
+              "positions",
+              "assets",
+              "reconciliations",
+              "incidents"
+            ],
+            "title": "Dataset",
+            "type": "string"
+          },
+          "reason": {
+            "default": "",
+            "maxLength": 256,
+            "title": "Reason",
+            "type": "string"
+          },
+          "record_count": {
+            "maximum": 409600,
+            "minimum": 0,
+            "title": "Record Count",
+            "type": "integer"
+          },
+          "status": {
+            "enum": [
+              "COMPLETE",
+              "INCOMPLETE",
+              "UNAVAILABLE"
+            ],
+            "title": "Status",
+            "type": "string"
+          }
+        },
+        "required": [
+          "dataset",
+          "status",
+          "record_count"
+        ],
+        "title": "DatasetStatus",
+        "type": "object"
+      },
+      "ExecutionWindow": {
+        "additionalProperties": false,
+        "properties": {
+          "cancel_by": {
+            "format": "date-time",
+            "title": "Cancel By",
+            "type": "string"
+          },
+          "entry_not_before": {
+            "format": "date-time",
+            "title": "Entry Not Before",
+            "type": "string"
+          },
+          "min_execution_seconds": {
+            "maximum": 1200,
+            "minimum": 1,
+            "title": "Min Execution Seconds",
+            "type": "integer"
+          },
+          "stop_new_buy_at": {
+            "format": "date-time",
+            "title": "Stop New Buy At",
+            "type": "string"
+          }
+        },
+        "required": [
+          "entry_not_before",
+          "stop_new_buy_at",
+          "cancel_by",
+          "min_execution_seconds"
+        ],
+        "title": "ExecutionWindow",
+        "type": "object"
+      },
+      "IncidentRecord": {
+        "additionalProperties": false,
+        "properties": {
+          "account_id": {
+            "description": "内部账户标识，必须与上传清单一致",
+            "pattern": "^[A-Za-z0-9_.:-]{1,96}$",
+            "title": "Account Id",
+            "type": "string"
+          },
+          "code": {
+            "pattern": "^[A-Za-z0-9_.:-]{1,96}$",
+            "title": "Code",
+            "type": "string"
+          },
+          "incident_id": {
+            "pattern": "^[A-Za-z0-9_.:-]{1,96}$",
+            "title": "Incident Id",
+            "type": "string"
+          },
+          "observed_at": {
+            "description": "该条事实的观测时点",
+            "format": "date-time",
+            "title": "Observed At",
+            "type": "string"
+          },
+          "related_ids": {
+            "default": [],
+            "items": {
+              "pattern": "^[A-Za-z0-9_.:-]{1,96}$",
+              "type": "string"
+            },
+            "maxItems": 200,
+            "title": "Related Ids",
+            "type": "array"
+          },
+          "severity": {
+            "enum": [
+              "INFO",
+              "WARNING",
+              "CRITICAL"
+            ],
+            "title": "Severity",
+            "type": "string"
+          },
+          "status": {
+            "enum": [
+              "OPEN",
+              "ACKNOWLEDGED",
+              "RESOLVED"
+            ],
+            "title": "Status",
+            "type": "string"
+          },
+          "summary": {
+            "description": "脱敏说明，禁止凭据和完整账号",
+            "maxLength": 2048,
+            "minLength": 1,
+            "title": "Summary",
+            "type": "string"
+          },
+          "trade_date": {
+            "description": "所属交易日",
+            "format": "date",
+            "title": "Trade Date",
+            "type": "string"
+          }
+        },
+        "required": [
+          "account_id",
+          "trade_date",
+          "observed_at",
+          "incident_id",
+          "severity",
+          "status",
+          "code",
+          "summary"
+        ],
+        "title": "IncidentRecord",
+        "type": "object"
+      },
+      "JsonValue": {},
+      "OfflineAuthorization": {
+        "additionalProperties": false,
+        "properties": {
+          "directions": {
+            "items": {
+              "enum": [
+                "BUY",
+                "SELL"
+              ],
+              "type": "string"
+            },
+            "maxItems": 2,
+            "minItems": 1,
+            "title": "Directions",
+            "type": "array"
+          },
+          "valid_until": {
+            "format": "date-time",
+            "title": "Valid Until",
+            "type": "string"
+          }
+        },
+        "required": [
+          "directions",
+          "valid_until"
+        ],
+        "title": "OfflineAuthorization",
+        "type": "object"
+      },
+      "PartDescription": {
+        "additionalProperties": false,
+        "properties": {
+          "dataset": {
+            "enum": [
+              "plan_results",
+              "submission_records",
+              "broker_orders",
+              "broker_trades",
+              "positions",
+              "assets",
+              "reconciliations",
+              "incidents"
+            ],
+            "title": "Dataset",
+            "type": "string"
+          },
+          "part_hash": {
+            "pattern": "^sha256:[a-f0-9]{64}$",
+            "title": "Part Hash",
+            "type": "string"
+          },
+          "part_id": {
+            "pattern": "^[A-Za-z0-9_.:-]{1,96}$",
+            "title": "Part Id",
+            "type": "string"
+          },
+          "record_count": {
+            "maximum": 200,
+            "minimum": 1,
+            "title": "Record Count",
+            "type": "integer"
+          },
+          "uncompressed_bytes": {
+            "maximum": 524288,
+            "minimum": 2,
+            "title": "Uncompressed Bytes",
+            "type": "integer"
+          }
+        },
+        "required": [
+          "part_id",
+          "dataset",
+          "record_count",
+          "uncompressed_bytes",
+          "part_hash"
+        ],
+        "title": "PartDescription",
+        "type": "object"
+      },
+      "PlanEnvelope": {
+        "additionalProperties": false,
+        "properties": {
+          "envelope": {
+            "$ref": "#/components/schemas/PlanSignature"
+          },
+          "payload": {
+            "$ref": "#/components/schemas/PlanPayload"
+          }
+        },
+        "required": [
+          "payload",
+          "envelope"
+        ],
+        "title": "PlanEnvelope",
+        "type": "object"
+      },
+      "PlanLookup": {
+        "additionalProperties": false,
+        "properties": {
+          "account_id": {
+            "pattern": "^[A-Za-z0-9_.:-]{1,96}$",
+            "title": "Account Id",
+            "type": "string"
+          },
+          "etag": {
+            "pattern": "^sha256:[a-f0-9]{64}$",
+            "title": "Etag",
+            "type": "string"
+          },
+          "plan": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/PlanEnvelope"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null
+          },
+          "plan_id": {
+            "pattern": "^[A-Za-z0-9_.:-]{1,96}$",
+            "title": "Plan Id",
+            "type": "string"
+          },
+          "state": {
+            "enum": [
+              "PUBLISHED",
+              "WITHDRAWN"
+            ],
+            "title": "State",
+            "type": "string"
+          },
+          "state_version": {
+            "minimum": 1,
+            "title": "State Version",
+            "type": "integer"
+          },
+          "strategy_id": {
+            "pattern": "^[A-Za-z0-9_.:-]{1,96}$",
+            "title": "Strategy Id",
+            "type": "string"
+          },
+          "trade_date": {
+            "format": "date",
+            "title": "Trade Date",
+            "type": "string"
+          }
+        },
+        "required": [
+          "account_id",
+          "strategy_id",
+          "trade_date",
+          "plan_id",
+          "state",
+          "state_version",
+          "etag"
+        ],
+        "title": "PlanLookup",
+        "type": "object"
+      },
+      "PlanPayload": {
+        "additionalProperties": false,
+        "properties": {
+          "account_id": {
+            "pattern": "^[A-Za-z0-9_.:-]{1,96}$",
+            "title": "Account Id",
+            "type": "string"
+          },
+          "allocations": {
+            "items": {
+              "$ref": "#/components/schemas/Allocation"
+            },
+            "maxItems": 500,
+            "title": "Allocations",
+            "type": "array"
+          },
+          "execution_window": {
+            "$ref": "#/components/schemas/ExecutionWindow"
+          },
+          "offline_authorization": {
+            "$ref": "#/components/schemas/OfflineAuthorization"
+          },
+          "plan_id": {
+            "pattern": "^[A-Za-z0-9_.:-]{1,96}$",
+            "title": "Plan Id",
+            "type": "string"
+          },
+          "policy_bundle": {
+            "items": {
+              "$ref": "#/components/schemas/PolicyVersion"
+            },
+            "maxItems": 4,
+            "minItems": 4,
+            "title": "Policy Bundle",
+            "type": "array"
+          },
+          "risk_budget": {
+            "$ref": "#/components/schemas/RiskBudget"
+          },
+          "rulebook_version": {
+            "pattern": "^[A-Za-z0-9_.:-]{1,96}$",
+            "title": "Rulebook Version",
+            "type": "string"
+          },
+          "schema_major": {
+            "const": 2,
+            "default": 2,
+            "title": "Schema Major",
+            "type": "integer"
+          },
+          "source": {
+            "$ref": "#/components/schemas/SourceRevision"
+          },
+          "strategy_id": {
+            "pattern": "^[A-Za-z0-9_.:-]{1,96}$",
+            "title": "Strategy Id",
+            "type": "string"
+          },
+          "target_node_generation": {
+            "minimum": 1,
+            "title": "Target Node Generation",
+            "type": "integer"
+          },
+          "trade_date": {
+            "format": "date",
+            "title": "Trade Date",
+            "type": "string"
+          }
+        },
+        "required": [
+          "plan_id",
+          "account_id",
+          "strategy_id",
+          "trade_date",
+          "source",
+          "execution_window",
+          "allocations",
+          "policy_bundle",
+          "risk_budget",
+          "offline_authorization",
+          "rulebook_version",
+          "target_node_generation"
+        ],
+        "title": "PlanPayload",
+        "type": "object"
+      },
+      "PlanReceipt": {
+        "additionalProperties": false,
+        "properties": {
+          "account_id": {
+            "pattern": "^[A-Za-z0-9_.:-]{1,96}$",
+            "title": "Account Id",
+            "type": "string"
+          },
+          "engine_boot_id": {
+            "pattern": "^[A-Za-z0-9_.:-]{1,96}$",
+            "title": "Engine Boot Id",
+            "type": "string"
+          },
+          "node_generation": {
+            "minimum": 1,
+            "title": "Node Generation",
+            "type": "integer"
+          },
+          "node_id": {
+            "pattern": "^[A-Za-z0-9_.:-]{1,96}$",
+            "title": "Node Id",
+            "type": "string"
+          },
+          "observed_at": {
+            "format": "date-time",
+            "title": "Observed At",
+            "type": "string"
+          },
+          "payload_hash": {
+            "pattern": "^sha256:[a-f0-9]{64}$",
+            "title": "Payload Hash",
+            "type": "string"
+          },
+          "plan_id": {
+            "pattern": "^[A-Za-z0-9_.:-]{1,96}$",
+            "title": "Plan Id",
+            "type": "string"
+          },
+          "reason_code": {
+            "pattern": "^[A-Za-z0-9_.:-]{1,96}$",
+            "title": "Reason Code",
+            "type": "string"
+          },
+          "receipt_id": {
+            "pattern": "^[A-Za-z0-9_.:-]{1,96}$",
+            "title": "Receipt Id",
+            "type": "string"
+          },
+          "status": {
+            "enum": [
+              "LOADED",
+              "REJECTED",
+              "WITHDRAWN",
+              "CHANGE_REQUIRES_PAUSE"
+            ],
+            "title": "Status",
+            "type": "string"
+          }
+        },
+        "required": [
+          "receipt_id",
+          "plan_id",
+          "payload_hash",
+          "node_id",
+          "node_generation",
+          "account_id",
+          "engine_boot_id",
+          "status",
+          "reason_code",
+          "observed_at"
+        ],
+        "title": "PlanReceipt",
+        "type": "object"
+      },
+      "PlanResultRecord": {
+        "additionalProperties": false,
+        "properties": {
+          "account_id": {
+            "description": "内部账户标识，必须与上传清单一致",
+            "pattern": "^[A-Za-z0-9_.:-]{1,96}$",
+            "title": "Account Id",
+            "type": "string"
+          },
+          "allocation_id": {
+            "pattern": "^[A-Za-z0-9_.:-]{1,96}$",
+            "title": "Allocation Id",
+            "type": "string"
+          },
+          "filled_quantity": {
+            "description": "整数股",
+            "maximum": 2147483647,
+            "minimum": 0,
+            "title": "Filled Quantity",
+            "type": "integer"
+          },
+          "observed_at": {
+            "description": "该条事实的观测时点",
+            "format": "date-time",
+            "title": "Observed At",
+            "type": "string"
+          },
+          "plan_hash": {
+            "pattern": "^sha256:[a-f0-9]{64}$",
+            "title": "Plan Hash",
+            "type": "string"
+          },
+          "plan_id": {
+            "pattern": "^[A-Za-z0-9_.:-]{1,96}$",
+            "title": "Plan Id",
+            "type": "string"
+          },
+          "reason_code": {
+            "pattern": "^[A-Za-z0-9_.:-]{1,96}$",
+            "title": "Reason Code",
+            "type": "string"
+          },
+          "status": {
+            "enum": [
+              "SKIPPED",
+              "PARTIAL",
+              "COMPLETED",
+              "CANCELLED",
+              "UNRESOLVED"
+            ],
+            "title": "Status",
+            "type": "string"
+          },
+          "symbol": {
+            "description": "带市场后缀的证券代码",
+            "pattern": "^[0-9]{6}\\.(SH|SZ|BJ)$",
+            "title": "Symbol",
+            "type": "string"
+          },
+          "target_quantity": {
+            "description": "整数股",
+            "maximum": 2147483647,
+            "minimum": 0,
+            "title": "Target Quantity",
+            "type": "integer"
+          },
+          "trade_date": {
+            "description": "所属交易日",
+            "format": "date",
+            "title": "Trade Date",
+            "type": "string"
+          }
+        },
+        "required": [
+          "account_id",
+          "trade_date",
+          "observed_at",
+          "plan_id",
+          "plan_hash",
+          "allocation_id",
+          "symbol",
+          "target_quantity",
+          "filled_quantity",
+          "status",
+          "reason_code"
+        ],
+        "title": "PlanResultRecord",
+        "type": "object"
+      },
+      "PlanSignature": {
+        "additionalProperties": false,
+        "properties": {
+          "algorithm": {
+            "const": "Ed25519",
+            "default": "Ed25519",
+            "title": "Algorithm",
+            "type": "string"
+          },
+          "key_id": {
+            "pattern": "^[A-Za-z0-9_.:-]{1,96}$",
+            "title": "Key Id",
+            "type": "string"
+          },
+          "payload_hash": {
+            "pattern": "^sha256:[a-f0-9]{64}$",
+            "title": "Payload Hash",
+            "type": "string"
+          },
+          "signature": {
+            "maxLength": 88,
+            "minLength": 88,
+            "title": "Signature",
+            "type": "string"
+          }
+        },
+        "required": [
+          "key_id",
+          "payload_hash",
+          "signature"
+        ],
+        "title": "PlanSignature",
+        "type": "object"
+      },
+      "PolicyVersion": {
+        "additionalProperties": false,
+        "properties": {
+          "component": {
+            "enum": [
+              "entry",
+              "exit",
+              "execution",
+              "risk"
+            ],
+            "title": "Component",
+            "type": "string"
+          },
+          "payload_hash": {
+            "pattern": "^sha256:[a-f0-9]{64}$",
+            "title": "Payload Hash",
+            "type": "string"
+          },
+          "version": {
+            "pattern": "^[A-Za-z0-9_.:-]{1,96}$",
+            "title": "Version",
+            "type": "string"
+          }
+        },
+        "required": [
+          "component",
+          "version",
+          "payload_hash"
+        ],
+        "title": "PolicyVersion",
+        "type": "object"
+      },
+      "PositionRecord": {
+        "additionalProperties": false,
+        "properties": {
+          "account_id": {
+            "description": "内部账户标识，必须与上传清单一致",
+            "pattern": "^[A-Za-z0-9_.:-]{1,96}$",
+            "title": "Account Id",
+            "type": "string"
+          },
+          "attribution_status": {
+            "enum": [
+              "MATCHED",
+              "UNEXPLAINED",
+              "MANUAL"
+            ],
+            "title": "Attribution Status",
+            "type": "string"
+          },
+          "available_quantity": {
+            "description": "整数股",
+            "maximum": 2147483647,
+            "minimum": 0,
+            "title": "Available Quantity",
+            "type": "integer"
+          },
+          "cost_amount": {
+            "anyOf": [
+              {
+                "description": "人民币元，最多2位小数",
+                "pattern": "^(0|[1-9][0-9]{0,11})(\\.[0-9]{1,2})?$",
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "description": "未知成本为空，不能填零代替",
+            "title": "Cost Amount"
+          },
+          "frozen_quantity": {
+            "description": "整数股",
+            "maximum": 2147483647,
+            "minimum": 0,
+            "title": "Frozen Quantity",
+            "type": "integer"
+          },
+          "market_value": {
+            "description": "人民币元，最多2位小数",
+            "pattern": "^(0|[1-9][0-9]{0,11})(\\.[0-9]{1,2})?$",
+            "title": "Market Value",
+            "type": "string"
+          },
+          "observed_at": {
+            "description": "该条事实的观测时点",
+            "format": "date-time",
+            "title": "Observed At",
+            "type": "string"
+          },
+          "snapshot_id": {
+            "pattern": "^[A-Za-z0-9_.:-]{1,96}$",
+            "title": "Snapshot Id",
+            "type": "string"
+          },
+          "strategy_quantity": {
+            "description": "整数股",
+            "maximum": 2147483647,
+            "minimum": 0,
+            "title": "Strategy Quantity",
+            "type": "integer"
+          },
+          "symbol": {
+            "description": "带市场后缀的证券代码",
+            "pattern": "^[0-9]{6}\\.(SH|SZ|BJ)$",
+            "title": "Symbol",
+            "type": "string"
+          },
+          "total_quantity": {
+            "description": "整数股",
+            "maximum": 2147483647,
+            "minimum": 0,
+            "title": "Total Quantity",
+            "type": "integer"
+          },
+          "trade_date": {
+            "description": "所属交易日",
+            "format": "date",
+            "title": "Trade Date",
+            "type": "string"
+          }
+        },
+        "required": [
+          "account_id",
+          "trade_date",
+          "observed_at",
+          "snapshot_id",
+          "symbol",
+          "total_quantity",
+          "available_quantity",
+          "frozen_quantity",
+          "strategy_quantity",
+          "market_value",
+          "attribution_status"
+        ],
+        "title": "PositionRecord",
+        "type": "object"
+      },
+      "ReconciliationRecord": {
+        "additionalProperties": false,
+        "properties": {
+          "account_id": {
+            "description": "内部账户标识，必须与上传清单一致",
+            "pattern": "^[A-Za-z0-9_.:-]{1,96}$",
+            "title": "Account Id",
+            "type": "string"
+          },
+          "amount_difference": {
+            "anyOf": [
+              {
+                "description": "有符号人民币元",
+                "pattern": "^-?(0|[1-9][0-9]{0,11})(\\.[0-9]{1,2})?$",
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "title": "Amount Difference"
+          },
+          "expected_quantity": {
+            "anyOf": [
+              {
+                "description": "整数股",
+                "maximum": 2147483647,
+                "minimum": 0,
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "title": "Expected Quantity"
+          },
+          "observed_at": {
+            "description": "该条事实的观测时点",
+            "format": "date-time",
+            "title": "Observed At",
+            "type": "string"
+          },
+          "observed_quantity": {
+            "anyOf": [
+              {
+                "description": "整数股",
+                "maximum": 2147483647,
+                "minimum": 0,
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "title": "Observed Quantity"
+          },
+          "reason_code": {
+            "pattern": "^[A-Za-z0-9_.:-]{1,96}$",
+            "title": "Reason Code",
+            "type": "string"
+          },
+          "reconciliation_id": {
+            "pattern": "^[A-Za-z0-9_.:-]{1,96}$",
+            "title": "Reconciliation Id",
+            "type": "string"
+          },
+          "related_ids": {
+            "default": [],
+            "items": {
+              "pattern": "^[A-Za-z0-9_.:-]{1,96}$",
+              "type": "string"
+            },
+            "maxItems": 200,
+            "title": "Related Ids",
+            "type": "array"
+          },
+          "scope": {
+            "enum": [
+              "ORDERS",
+              "TRADES",
+              "POSITIONS",
+              "CASH",
+              "DAILY"
+            ],
+            "title": "Scope",
+            "type": "string"
+          },
+          "status": {
+            "enum": [
+              "MATCHED",
+              "DISCREPANCY",
+              "INDETERMINATE"
+            ],
+            "title": "Status",
+            "type": "string"
+          },
+          "symbol": {
+            "anyOf": [
+              {
+                "description": "带市场后缀的证券代码",
+                "pattern": "^[0-9]{6}\\.(SH|SZ|BJ)$",
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "title": "Symbol"
+          },
+          "trade_date": {
+            "description": "所属交易日",
+            "format": "date",
+            "title": "Trade Date",
+            "type": "string"
+          }
+        },
+        "required": [
+          "account_id",
+          "trade_date",
+          "observed_at",
+          "reconciliation_id",
+          "scope",
+          "status",
+          "reason_code"
+        ],
+        "title": "ReconciliationRecord",
+        "type": "object"
+      },
+      "RiskBudget": {
+        "additionalProperties": false,
+        "properties": {
+          "budget_basis_as_of": {
+            "format": "date-time",
+            "title": "Budget Basis As Of",
+            "type": "string"
+          },
+          "max_buy_value": {
+            "description": "人民币元，最多2位小数",
+            "pattern": "^(0|[1-9][0-9]{0,11})(\\.[0-9]{1,2})?$",
+            "title": "Max Buy Value",
+            "type": "string"
+          }
+        },
+        "required": [
+          "max_buy_value",
+          "budget_basis_as_of"
+        ],
+        "title": "RiskBudget",
+        "type": "object"
+      },
+      "SourceRevision": {
+        "additionalProperties": false,
+        "properties": {
+          "algorithm_version": {
+            "description": "选股算法版本",
+            "pattern": "^[A-Za-z0-9_.:-]{1,96}$",
+            "title": "Algorithm Version",
+            "type": "string"
+          },
+          "completed_at": {
+            "description": "来源生成完成时间",
+            "format": "date-time",
+            "title": "Completed At",
+            "type": "string"
+          },
+          "data_completeness": {
+            "const": "FULL",
+            "title": "Data Completeness",
+            "type": "string"
+          },
+          "finalized": {
+            "const": true,
+            "title": "Finalized",
+            "type": "boolean"
+          },
+          "market_coverage_bps": {
+            "description": "市场覆盖率，万分比整数",
+            "maximum": 10000,
+            "minimum": 0,
+            "title": "Market Coverage Bps",
+            "type": "integer"
+          },
+          "market_data_cutoff": {
+            "description": "来源行情截止时间",
+            "format": "date-time",
+            "title": "Market Data Cutoff",
+            "type": "string"
+          },
+          "publication_status": {
+            "const": "FINAL",
+            "title": "Publication Status",
+            "type": "string"
+          },
+          "published_at": {
+            "description": "来源正式发布时点",
+            "format": "date-time",
+            "title": "Published At",
+            "type": "string"
+          },
+          "run_status": {
+            "const": "SUCCEEDED",
+            "title": "Run Status",
+            "type": "string"
+          },
+          "scheduled_at": {
+            "description": "正式调度计划时点",
+            "format": "date-time",
+            "title": "Scheduled At",
+            "type": "string"
+          },
+          "source_hash": {
+            "description": "同版本来源头和明细摘要",
+            "pattern": "^sha256:[a-f0-9]{64}$",
+            "title": "Source Hash",
+            "type": "string"
+          },
+          "source_revision": {
+            "description": "不可变来源版本",
+            "minimum": 1,
+            "title": "Source Revision",
+            "type": "integer"
+          },
+          "source_run_id": {
+            "description": "正式选股运行编号",
+            "pattern": "^[A-Za-z0-9_.:-]{1,96}$",
+            "title": "Source Run Id",
+            "type": "string"
+          }
+        },
+        "required": [
+          "source_run_id",
+          "source_revision",
+          "source_hash",
+          "algorithm_version",
+          "completed_at",
+          "market_data_cutoff",
+          "scheduled_at",
+          "published_at",
+          "market_coverage_bps",
+          "run_status",
+          "data_completeness",
+          "publication_status",
+          "finalized"
+        ],
+        "title": "SourceRevision",
+        "type": "object"
+      },
+      "SubmissionRecord": {
+        "additionalProperties": false,
+        "properties": {
+          "account_id": {
+            "description": "内部账户标识，必须与上传清单一致",
+            "pattern": "^[A-Za-z0-9_.:-]{1,96}$",
+            "title": "Account Id",
+            "type": "string"
+          },
+          "action_id": {
+            "pattern": "^[A-Za-z0-9_.:-]{1,96}$",
+            "title": "Action Id",
+            "type": "string"
+          },
+          "action_type": {
+            "enum": [
+              "NEW",
+              "CANCEL"
+            ],
+            "title": "Action Type",
+            "type": "string"
+          },
+          "client_order_id": {
+            "pattern": "^[A-Za-z0-9_.:-]{1,96}$",
+            "title": "Client Order Id",
+            "type": "string"
+          },
+          "engine_boot_id": {
+            "pattern": "^[A-Za-z0-9_.:-]{1,96}$",
+            "title": "Engine Boot Id",
+            "type": "string"
+          },
+          "limit_price": {
+            "description": "每股人民币元，最多8位小数",
+            "pattern": "^(0|[1-9][0-9]{0,9})(\\.[0-9]{1,8})?$",
+            "title": "Limit Price",
+            "type": "string"
+          },
+          "maximum_amount": {
+            "description": "人民币元，最多2位小数",
+            "pattern": "^(0|[1-9][0-9]{0,11})(\\.[0-9]{1,2})?$",
+            "title": "Maximum Amount",
+            "type": "string"
+          },
+          "observed_at": {
+            "description": "该条事实的观测时点",
+            "format": "date-time",
+            "title": "Observed At",
+            "type": "string"
+          },
+          "payload_hash": {
+            "pattern": "^sha256:[a-f0-9]{64}$",
+            "title": "Payload Hash",
+            "type": "string"
+          },
+          "permission_epoch": {
+            "minimum": 1,
+            "title": "Permission Epoch",
+            "type": "integer"
+          },
+          "plan_hash": {
+            "pattern": "^sha256:[a-f0-9]{64}$",
+            "title": "Plan Hash",
+            "type": "string"
+          },
+          "quantity": {
+            "description": "整数股",
+            "maximum": 2147483647,
+            "minimum": 0,
+            "title": "Quantity",
+            "type": "integer"
+          },
+          "record_seq": {
+            "description": "关键Journal提交序号",
+            "minimum": 1,
+            "title": "Record Seq",
+            "type": "integer"
+          },
+          "side": {
+            "enum": [
+              "BUY",
+              "SELL"
+            ],
+            "title": "Side",
+            "type": "string"
+          },
+          "status": {
+            "enum": [
+              "SEND_REQUESTED",
+              "NOT_DISPATCHED",
+              "SDK_ACCEPTED",
+              "REJECTED",
+              "UNCERTAIN",
+              "RESOLVED"
+            ],
+            "title": "Status",
+            "type": "string"
+          },
+          "symbol": {
+            "description": "带市场后缀的证券代码",
+            "pattern": "^[0-9]{6}\\.(SH|SZ|BJ)$",
+            "title": "Symbol",
+            "type": "string"
+          },
+          "target_order_id": {
+            "anyOf": [
+              {
+                "pattern": "^[A-Za-z0-9_.:-]{1,96}$",
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "title": "Target Order Id"
+          },
+          "trade_date": {
+            "description": "所属交易日",
+            "format": "date",
+            "title": "Trade Date",
+            "type": "string"
+          }
+        },
+        "required": [
+          "account_id",
+          "trade_date",
+          "observed_at",
+          "client_order_id",
+          "action_type",
+          "action_id",
+          "plan_hash",
+          "symbol",
+          "side",
+          "quantity",
+          "limit_price",
+          "maximum_amount",
+          "payload_hash",
+          "record_seq",
+          "engine_boot_id",
+          "permission_epoch",
+          "status"
+        ],
+        "title": "SubmissionRecord",
+        "type": "object"
+      }
+    },
+    "securitySchemes": {
+      "NodeHmac": {
+        "description": "HMAC-SHA256 over method, canonical target, node/key, time, nonce, request ID and body hash; 30s skew, 10min nonce retention. HTTPS required.",
+        "in": "header",
+        "name": "X-ATS-Signature",
+        "type": "apiKey"
+      }
+    }
+  },
+  "info": {
+    "title": "Automatic trading V2 plan and daily sync",
+    "version": "2.0"
+  },
+  "openapi": "3.1.0",
+  "paths": {
+    "/api/v2/trading/daily-syncs": {
+      "post": {
+        "operationId": "post_daily-syncs",
+        "parameters": [],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/DailyManifest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "201": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/DailyManifest"
+                }
+              }
+            },
+            "description": "Authenticated result"
+          },
+          "400": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiError"
+                }
+              }
+            },
+            "description": "Signed error after authentication; early transport/auth rejection may have no body"
+          },
+          "401": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiError"
+                }
+              }
+            },
+            "description": "Signed error after authentication; early transport/auth rejection may have no body"
+          },
+          "403": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiError"
+                }
+              }
+            },
+            "description": "Signed error after authentication; early transport/auth rejection may have no body"
+          },
+          "404": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiError"
+                }
+              }
+            },
+            "description": "Signed error after authentication; early transport/auth rejection may have no body"
+          },
+          "409": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiError"
+                }
+              }
+            },
+            "description": "Signed error after authentication; early transport/auth rejection may have no body"
+          },
+          "413": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiError"
+                }
+              }
+            },
+            "description": "Signed error after authentication; early transport/auth rejection may have no body"
+          },
+          "415": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiError"
+                }
+              }
+            },
+            "description": "Signed error after authentication; early transport/auth rejection may have no body"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiError"
+                }
+              }
+            },
+            "description": "Signed error after authentication; early transport/auth rejection may have no body"
+          },
+          "426": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiError"
+                }
+              }
+            },
+            "description": "Signed error after authentication; early transport/auth rejection may have no body"
+          },
+          "429": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiError"
+                }
+              }
+            },
+            "description": "Signed error after authentication; early transport/auth rejection may have no body"
+          },
+          "503": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiError"
+                }
+              }
+            },
+            "description": "Signed error after authentication; early transport/auth rejection may have no body"
+          }
+        },
+        "security": [
+          {
+            "NodeHmac": []
+          }
+        ],
+        "tags": [
+          "自动交易V2"
+        ],
+        "x-maximum-request-bytes": 524288
+      }
+    },
+    "/api/v2/trading/daily-syncs/{batch_id}": {
+      "get": {
+        "operationId": "get_daily-syncs_batch_id",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "batch_id",
+            "required": true,
+            "schema": {
+              "pattern": "^[A-Za-z0-9_.:-]{1,96}$",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/DailyProgress"
+                }
+              }
+            },
+            "description": "Authenticated result"
+          },
+          "400": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiError"
+                }
+              }
+            },
+            "description": "Signed error after authentication; early transport/auth rejection may have no body"
+          },
+          "401": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiError"
+                }
+              }
+            },
+            "description": "Signed error after authentication; early transport/auth rejection may have no body"
+          },
+          "403": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiError"
+                }
+              }
+            },
+            "description": "Signed error after authentication; early transport/auth rejection may have no body"
+          },
+          "404": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiError"
+                }
+              }
+            },
+            "description": "Signed error after authentication; early transport/auth rejection may have no body"
+          },
+          "409": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiError"
+                }
+              }
+            },
+            "description": "Signed error after authentication; early transport/auth rejection may have no body"
+          },
+          "413": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiError"
+                }
+              }
+            },
+            "description": "Signed error after authentication; early transport/auth rejection may have no body"
+          },
+          "415": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiError"
+                }
+              }
+            },
+            "description": "Signed error after authentication; early transport/auth rejection may have no body"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiError"
+                }
+              }
+            },
+            "description": "Signed error after authentication; early transport/auth rejection may have no body"
+          },
+          "426": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiError"
+                }
+              }
+            },
+            "description": "Signed error after authentication; early transport/auth rejection may have no body"
+          },
+          "429": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiError"
+                }
+              }
+            },
+            "description": "Signed error after authentication; early transport/auth rejection may have no body"
+          },
+          "503": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiError"
+                }
+              }
+            },
+            "description": "Signed error after authentication; early transport/auth rejection may have no body"
+          }
+        },
+        "security": [
+          {
+            "NodeHmac": []
+          }
+        ],
+        "tags": [
+          "自动交易V2"
+        ],
+        "x-maximum-request-bytes": 524288
+      }
+    },
+    "/api/v2/trading/daily-syncs/{batch_id}/complete": {
+      "post": {
+        "operationId": "post_daily-syncs_batch_id_complete",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "batch_id",
+            "required": true,
+            "schema": {
+              "pattern": "^[A-Za-z0-9_.:-]{1,96}$",
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CompleteDaily"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AppliedReceipt"
+                }
+              }
+            },
+            "description": "Authenticated result"
+          },
+          "400": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiError"
+                }
+              }
+            },
+            "description": "Signed error after authentication; early transport/auth rejection may have no body"
+          },
+          "401": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiError"
+                }
+              }
+            },
+            "description": "Signed error after authentication; early transport/auth rejection may have no body"
+          },
+          "403": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiError"
+                }
+              }
+            },
+            "description": "Signed error after authentication; early transport/auth rejection may have no body"
+          },
+          "404": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiError"
+                }
+              }
+            },
+            "description": "Signed error after authentication; early transport/auth rejection may have no body"
+          },
+          "409": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiError"
+                }
+              }
+            },
+            "description": "Signed error after authentication; early transport/auth rejection may have no body"
+          },
+          "413": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiError"
+                }
+              }
+            },
+            "description": "Signed error after authentication; early transport/auth rejection may have no body"
+          },
+          "415": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiError"
+                }
+              }
+            },
+            "description": "Signed error after authentication; early transport/auth rejection may have no body"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiError"
+                }
+              }
+            },
+            "description": "Signed error after authentication; early transport/auth rejection may have no body"
+          },
+          "426": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiError"
+                }
+              }
+            },
+            "description": "Signed error after authentication; early transport/auth rejection may have no body"
+          },
+          "429": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiError"
+                }
+              }
+            },
+            "description": "Signed error after authentication; early transport/auth rejection may have no body"
+          },
+          "503": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiError"
+                }
+              }
+            },
+            "description": "Signed error after authentication; early transport/auth rejection may have no body"
+          }
+        },
+        "security": [
+          {
+            "NodeHmac": []
+          }
+        ],
+        "tags": [
+          "自动交易V2"
+        ],
+        "x-maximum-request-bytes": 524288
+      }
+    },
+    "/api/v2/trading/daily-syncs/{batch_id}/parts/{part_id}": {
+      "put": {
+        "operationId": "put_daily-syncs_batch_id_parts_part_id",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "batch_id",
+            "required": true,
+            "schema": {
+              "pattern": "^[A-Za-z0-9_.:-]{1,96}$",
+              "type": "string"
+            }
+          },
+          {
+            "in": "path",
+            "name": "part_id",
+            "required": true,
+            "schema": {
+              "pattern": "^[A-Za-z0-9_.:-]{1,96}$",
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "items": {
+                  "$ref": "#/components/schemas/DailyRecord"
+                },
+                "maxItems": 200,
+                "minItems": 1,
+                "type": "array"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/CompleteDaily"
+                }
+              }
+            },
+            "description": "Authenticated result"
+          },
+          "400": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiError"
+                }
+              }
+            },
+            "description": "Signed error after authentication; early transport/auth rejection may have no body"
+          },
+          "401": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiError"
+                }
+              }
+            },
+            "description": "Signed error after authentication; early transport/auth rejection may have no body"
+          },
+          "403": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiError"
+                }
+              }
+            },
+            "description": "Signed error after authentication; early transport/auth rejection may have no body"
+          },
+          "404": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiError"
+                }
+              }
+            },
+            "description": "Signed error after authentication; early transport/auth rejection may have no body"
+          },
+          "409": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiError"
+                }
+              }
+            },
+            "description": "Signed error after authentication; early transport/auth rejection may have no body"
+          },
+          "413": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiError"
+                }
+              }
+            },
+            "description": "Signed error after authentication; early transport/auth rejection may have no body"
+          },
+          "415": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiError"
+                }
+              }
+            },
+            "description": "Signed error after authentication; early transport/auth rejection may have no body"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiError"
+                }
+              }
+            },
+            "description": "Signed error after authentication; early transport/auth rejection may have no body"
+          },
+          "426": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiError"
+                }
+              }
+            },
+            "description": "Signed error after authentication; early transport/auth rejection may have no body"
+          },
+          "429": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiError"
+                }
+              }
+            },
+            "description": "Signed error after authentication; early transport/auth rejection may have no body"
+          },
+          "503": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiError"
+                }
+              }
+            },
+            "description": "Signed error after authentication; early transport/auth rejection may have no body"
+          }
+        },
+        "security": [
+          {
+            "NodeHmac": []
+          }
+        ],
+        "tags": [
+          "自动交易V2"
+        ],
+        "x-maximum-request-bytes": 524288
+      }
+    },
+    "/api/v2/trading/daily-syncs/{batch_id}/receipt": {
+      "get": {
+        "operationId": "get_daily-syncs_batch_id_receipt",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "batch_id",
+            "required": true,
+            "schema": {
+              "pattern": "^[A-Za-z0-9_.:-]{1,96}$",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AppliedReceipt"
+                }
+              }
+            },
+            "description": "Authenticated result"
+          },
+          "400": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiError"
+                }
+              }
+            },
+            "description": "Signed error after authentication; early transport/auth rejection may have no body"
+          },
+          "401": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiError"
+                }
+              }
+            },
+            "description": "Signed error after authentication; early transport/auth rejection may have no body"
+          },
+          "403": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiError"
+                }
+              }
+            },
+            "description": "Signed error after authentication; early transport/auth rejection may have no body"
+          },
+          "404": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiError"
+                }
+              }
+            },
+            "description": "Signed error after authentication; early transport/auth rejection may have no body"
+          },
+          "409": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiError"
+                }
+              }
+            },
+            "description": "Signed error after authentication; early transport/auth rejection may have no body"
+          },
+          "413": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiError"
+                }
+              }
+            },
+            "description": "Signed error after authentication; early transport/auth rejection may have no body"
+          },
+          "415": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiError"
+                }
+              }
+            },
+            "description": "Signed error after authentication; early transport/auth rejection may have no body"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiError"
+                }
+              }
+            },
+            "description": "Signed error after authentication; early transport/auth rejection may have no body"
+          },
+          "426": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiError"
+                }
+              }
+            },
+            "description": "Signed error after authentication; early transport/auth rejection may have no body"
+          },
+          "429": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiError"
+                }
+              }
+            },
+            "description": "Signed error after authentication; early transport/auth rejection may have no body"
+          },
+          "503": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiError"
+                }
+              }
+            },
+            "description": "Signed error after authentication; early transport/auth rejection may have no body"
+          }
+        },
+        "security": [
+          {
+            "NodeHmac": []
+          }
+        ],
+        "tags": [
+          "自动交易V2"
+        ],
+        "x-maximum-request-bytes": 524288
+      }
+    },
+    "/api/v2/trading/manifest": {
+      "get": {
+        "operationId": "get_manifest",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/CapabilityManifest"
+                }
+              }
+            },
+            "description": "Authenticated result"
+          },
+          "400": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiError"
+                }
+              }
+            },
+            "description": "Signed error after authentication; early transport/auth rejection may have no body"
+          },
+          "401": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiError"
+                }
+              }
+            },
+            "description": "Signed error after authentication; early transport/auth rejection may have no body"
+          },
+          "403": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiError"
+                }
+              }
+            },
+            "description": "Signed error after authentication; early transport/auth rejection may have no body"
+          },
+          "404": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiError"
+                }
+              }
+            },
+            "description": "Signed error after authentication; early transport/auth rejection may have no body"
+          },
+          "409": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiError"
+                }
+              }
+            },
+            "description": "Signed error after authentication; early transport/auth rejection may have no body"
+          },
+          "413": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiError"
+                }
+              }
+            },
+            "description": "Signed error after authentication; early transport/auth rejection may have no body"
+          },
+          "415": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiError"
+                }
+              }
+            },
+            "description": "Signed error after authentication; early transport/auth rejection may have no body"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiError"
+                }
+              }
+            },
+            "description": "Signed error after authentication; early transport/auth rejection may have no body"
+          },
+          "426": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiError"
+                }
+              }
+            },
+            "description": "Signed error after authentication; early transport/auth rejection may have no body"
+          },
+          "429": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiError"
+                }
+              }
+            },
+            "description": "Signed error after authentication; early transport/auth rejection may have no body"
+          },
+          "503": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiError"
+                }
+              }
+            },
+            "description": "Signed error after authentication; early transport/auth rejection may have no body"
+          }
+        },
+        "security": [
+          {
+            "NodeHmac": []
+          }
+        ],
+        "tags": [
+          "自动交易V2"
+        ],
+        "x-maximum-request-bytes": 524288
+      }
+    },
+    "/api/v2/trading/plans/current": {
+      "get": {
+        "operationId": "get_plans_current",
+        "parameters": [
+          {
+            "in": "query",
+            "name": "account_id",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "strategy_id",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "trade_date",
+            "required": true,
+            "schema": {
+              "format": "date",
+              "type": "string"
+            }
+          },
+          {
+            "in": "header",
+            "name": "If-None-Match",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/PlanLookup"
+                }
+              }
+            },
+            "description": "Authenticated result"
+          },
+          "204": {
+            "description": "No current plan"
+          },
+          "304": {
+            "description": "Unchanged published plan"
+          },
+          "400": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiError"
+                }
+              }
+            },
+            "description": "Signed error after authentication; early transport/auth rejection may have no body"
+          },
+          "401": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiError"
+                }
+              }
+            },
+            "description": "Signed error after authentication; early transport/auth rejection may have no body"
+          },
+          "403": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiError"
+                }
+              }
+            },
+            "description": "Signed error after authentication; early transport/auth rejection may have no body"
+          },
+          "404": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiError"
+                }
+              }
+            },
+            "description": "Signed error after authentication; early transport/auth rejection may have no body"
+          },
+          "409": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiError"
+                }
+              }
+            },
+            "description": "Signed error after authentication; early transport/auth rejection may have no body"
+          },
+          "413": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiError"
+                }
+              }
+            },
+            "description": "Signed error after authentication; early transport/auth rejection may have no body"
+          },
+          "415": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiError"
+                }
+              }
+            },
+            "description": "Signed error after authentication; early transport/auth rejection may have no body"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiError"
+                }
+              }
+            },
+            "description": "Signed error after authentication; early transport/auth rejection may have no body"
+          },
+          "426": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiError"
+                }
+              }
+            },
+            "description": "Signed error after authentication; early transport/auth rejection may have no body"
+          },
+          "429": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiError"
+                }
+              }
+            },
+            "description": "Signed error after authentication; early transport/auth rejection may have no body"
+          },
+          "503": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiError"
+                }
+              }
+            },
+            "description": "Signed error after authentication; early transport/auth rejection may have no body"
+          }
+        },
+        "security": [
+          {
+            "NodeHmac": []
+          }
+        ],
+        "tags": [
+          "自动交易V2"
+        ],
+        "x-maximum-request-bytes": 524288
+      }
+    },
+    "/api/v2/trading/plans/{plan_id}": {
+      "get": {
+        "operationId": "get_plans_plan_id",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "plan_id",
+            "required": true,
+            "schema": {
+              "pattern": "^[A-Za-z0-9_.:-]{1,96}$",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/PlanEnvelope"
+                }
+              }
+            },
+            "description": "Authenticated result"
+          },
+          "400": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiError"
+                }
+              }
+            },
+            "description": "Signed error after authentication; early transport/auth rejection may have no body"
+          },
+          "401": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiError"
+                }
+              }
+            },
+            "description": "Signed error after authentication; early transport/auth rejection may have no body"
+          },
+          "403": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiError"
+                }
+              }
+            },
+            "description": "Signed error after authentication; early transport/auth rejection may have no body"
+          },
+          "404": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiError"
+                }
+              }
+            },
+            "description": "Signed error after authentication; early transport/auth rejection may have no body"
+          },
+          "409": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiError"
+                }
+              }
+            },
+            "description": "Signed error after authentication; early transport/auth rejection may have no body"
+          },
+          "413": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiError"
+                }
+              }
+            },
+            "description": "Signed error after authentication; early transport/auth rejection may have no body"
+          },
+          "415": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiError"
+                }
+              }
+            },
+            "description": "Signed error after authentication; early transport/auth rejection may have no body"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiError"
+                }
+              }
+            },
+            "description": "Signed error after authentication; early transport/auth rejection may have no body"
+          },
+          "426": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiError"
+                }
+              }
+            },
+            "description": "Signed error after authentication; early transport/auth rejection may have no body"
+          },
+          "429": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiError"
+                }
+              }
+            },
+            "description": "Signed error after authentication; early transport/auth rejection may have no body"
+          },
+          "503": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiError"
+                }
+              }
+            },
+            "description": "Signed error after authentication; early transport/auth rejection may have no body"
+          }
+        },
+        "security": [
+          {
+            "NodeHmac": []
+          }
+        ],
+        "tags": [
+          "自动交易V2"
+        ],
+        "x-maximum-request-bytes": 524288
+      }
+    },
+    "/api/v2/trading/plans/{plan_id}/receipts": {
+      "post": {
+        "operationId": "post_plans_plan_id_receipts",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "plan_id",
+            "required": true,
+            "schema": {
+              "pattern": "^[A-Za-z0-9_.:-]{1,96}$",
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/PlanReceipt"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/PlanReceipt"
+                }
+              }
+            },
+            "description": "Authenticated result"
+          },
+          "400": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiError"
+                }
+              }
+            },
+            "description": "Signed error after authentication; early transport/auth rejection may have no body"
+          },
+          "401": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiError"
+                }
+              }
+            },
+            "description": "Signed error after authentication; early transport/auth rejection may have no body"
+          },
+          "403": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiError"
+                }
+              }
+            },
+            "description": "Signed error after authentication; early transport/auth rejection may have no body"
+          },
+          "404": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiError"
+                }
+              }
+            },
+            "description": "Signed error after authentication; early transport/auth rejection may have no body"
+          },
+          "409": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiError"
+                }
+              }
+            },
+            "description": "Signed error after authentication; early transport/auth rejection may have no body"
+          },
+          "413": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiError"
+                }
+              }
+            },
+            "description": "Signed error after authentication; early transport/auth rejection may have no body"
+          },
+          "415": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiError"
+                }
+              }
+            },
+            "description": "Signed error after authentication; early transport/auth rejection may have no body"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiError"
+                }
+              }
+            },
+            "description": "Signed error after authentication; early transport/auth rejection may have no body"
+          },
+          "426": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiError"
+                }
+              }
+            },
+            "description": "Signed error after authentication; early transport/auth rejection may have no body"
+          },
+          "429": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiError"
+                }
+              }
+            },
+            "description": "Signed error after authentication; early transport/auth rejection may have no body"
+          },
+          "503": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiError"
+                }
+              }
+            },
+            "description": "Signed error after authentication; early transport/auth rejection may have no body"
+          }
+        },
+        "security": [
+          {
+            "NodeHmac": []
+          }
+        ],
+        "tags": [
+          "自动交易V2"
+        ],
+        "x-maximum-request-bytes": 524288
+      }
+    }
+  },
+  "x-dataset-schemas": {
+    "assets": {
+      "$ref": "#/components/schemas/AssetRecord"
+    },
+    "broker_orders": {
+      "$ref": "#/components/schemas/BrokerOrderRecord"
+    },
+    "broker_trades": {
+      "$ref": "#/components/schemas/BrokerTradeRecord"
+    },
+    "incidents": {
+      "$ref": "#/components/schemas/IncidentRecord"
+    },
+    "plan_results": {
+      "$ref": "#/components/schemas/PlanResultRecord"
+    },
+    "positions": {
+      "$ref": "#/components/schemas/PositionRecord"
+    },
+    "reconciliations": {
+      "$ref": "#/components/schemas/ReconciliationRecord"
+    },
+    "submission_records": {
+      "$ref": "#/components/schemas/SubmissionRecord"
+    }
+  },
+  "x-response-signing": "Request ID, status, timestamp and body hash are authenticated."
+}

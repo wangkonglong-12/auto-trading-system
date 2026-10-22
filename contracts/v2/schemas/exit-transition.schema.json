@@ -1,0 +1,120 @@
+{
+  "$defs": {
+    "DurableExitState": {
+      "additionalProperties": false,
+      "properties": {
+        "fired_rules": {
+          "description": "已执行的一次性规则及检查标记",
+          "items": {
+            "pattern": "^[A-Za-z0-9_.:-]{1,96}$",
+            "type": "string"
+          },
+          "maxItems": 32,
+          "title": "Fired Rules",
+          "type": "array"
+        },
+        "path_uncertain": {
+          "description": "历史行情路径缺口状态，仅可收紧",
+          "title": "Path Uncertain",
+          "type": "boolean"
+        },
+        "profit_armed": {
+          "description": "是否已达到收益回撤跟踪激活条件",
+          "title": "Profit Armed",
+          "type": "boolean"
+        },
+        "target_remaining": {
+          "description": "批次目标剩余股数",
+          "maximum": 2147483647,
+          "minimum": 0,
+          "title": "Target Remaining",
+          "type": "integer"
+        }
+      },
+      "required": [
+        "target_remaining",
+        "fired_rules",
+        "profit_armed",
+        "path_uncertain"
+      ],
+      "title": "DurableExitState",
+      "type": "object"
+    }
+  },
+  "additionalProperties": false,
+  "properties": {
+    "account_id": {
+      "description": "唯一所属账户",
+      "pattern": "^[A-Za-z0-9_.:-]{1,96}$",
+      "title": "Account Id",
+      "type": "string"
+    },
+    "boot_id": {
+      "description": "产生本次状态变化的进程代际",
+      "pattern": "^[A-Za-z0-9_.:-]{1,96}$",
+      "title": "Boot Id",
+      "type": "string"
+    },
+    "context_hash": {
+      "description": "本次冻结退出上下文摘要",
+      "pattern": "^sha256:[a-f0-9]{64}$",
+      "title": "Context Hash",
+      "type": "string"
+    },
+    "lot_id": {
+      "description": "此次状态改变的持仓批次",
+      "pattern": "^[A-Za-z0-9_.:-]{1,96}$",
+      "title": "Lot Id",
+      "type": "string"
+    },
+    "observed_at": {
+      "description": "本地评估时间，含时区",
+      "format": "date-time",
+      "title": "Observed At",
+      "type": "string"
+    },
+    "previous_hash": {
+      "anyOf": [
+        {
+          "pattern": "^sha256:[a-f0-9]{64}$",
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "description": "上一条状态正文摘要，首条为空",
+      "title": "Previous Hash"
+    },
+    "revision": {
+      "description": "上下文内连续状态记录序号",
+      "maximum": 256,
+      "minimum": 1,
+      "title": "Revision",
+      "type": "integer"
+    },
+    "state": {
+      "$ref": "#/$defs/DurableExitState",
+      "description": "已计算且待持久化的离散退出状态"
+    },
+    "trade_date": {
+      "description": "策略状态所属交易日",
+      "format": "date",
+      "title": "Trade Date",
+      "type": "string"
+    }
+  },
+  "required": [
+    "revision",
+    "previous_hash",
+    "context_hash",
+    "account_id",
+    "trade_date",
+    "lot_id",
+    "boot_id",
+    "observed_at",
+    "state"
+  ],
+  "title": "ExitTransition",
+  "type": "object"
+}

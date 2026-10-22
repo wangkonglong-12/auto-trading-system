@@ -1,0 +1,14 @@
+{
+  "environment": "DEVELOPER_ISOLATION_ONLY",
+  "python": "3.11.16",
+  "apsw": "3.53.4.0",
+  "sqlite": "3.53.4",
+  "samples": 200,
+  "metric": "owner queue plus J1 plus receipt round-trip milliseconds",
+  "p50_ms": 0.568,
+  "p95_ms": 0.789,
+  "p99_ms": 0.886,
+  "maximum_ms": 2.453,
+  "target_qmt_storage_qualified": false,
+  "caveat": "This test does not simulate physical power loss, disk firmware stalls or live QMT load."
+}

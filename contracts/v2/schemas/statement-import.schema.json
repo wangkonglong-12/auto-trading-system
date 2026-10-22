@@ -1,0 +1,56 @@
+{
+  "additionalProperties": false,
+  "properties": {
+    "account_id": {
+      "pattern": "^[A-Za-z0-9_.:-]{1,96}$",
+      "title": "Account Id",
+      "type": "string"
+    },
+    "byte_length": {
+      "maximum": 20971520,
+      "minimum": 1,
+      "title": "Byte Length",
+      "type": "integer"
+    },
+    "file_hash": {
+      "pattern": "^sha256:[a-f0-9]{64}$",
+      "title": "File Hash",
+      "type": "string"
+    },
+    "media_type": {
+      "enum": [
+        "text/csv",
+        "application/pdf"
+      ],
+      "title": "Media Type",
+      "type": "string"
+    },
+    "original_filename": {
+      "maxLength": 128,
+      "minLength": 1,
+      "title": "Original Filename",
+      "type": "string"
+    },
+    "statement_revision": {
+      "minimum": 1,
+      "title": "Statement Revision",
+      "type": "integer"
+    },
+    "trade_date": {
+      "format": "date",
+      "title": "Trade Date",
+      "type": "string"
+    }
+  },
+  "required": [
+    "account_id",
+    "trade_date",
+    "file_hash",
+    "statement_revision",
+    "original_filename",
+    "media_type",
+    "byte_length"
+  ],
+  "title": "StatementImport",
+  "type": "object"
+}

@@ -1,0 +1,89 @@
+{
+  "additionalProperties": false,
+  "properties": {
+    "account_id": {
+      "description": "内部账户标识，必须与上传清单一致",
+      "pattern": "^[A-Za-z0-9_.:-]{1,96}$",
+      "title": "Account Id",
+      "type": "string"
+    },
+    "allocation_id": {
+      "pattern": "^[A-Za-z0-9_.:-]{1,96}$",
+      "title": "Allocation Id",
+      "type": "string"
+    },
+    "filled_quantity": {
+      "description": "整数股",
+      "maximum": 2147483647,
+      "minimum": 0,
+      "title": "Filled Quantity",
+      "type": "integer"
+    },
+    "observed_at": {
+      "description": "该条事实的观测时点",
+      "format": "date-time",
+      "title": "Observed At",
+      "type": "string"
+    },
+    "plan_hash": {
+      "pattern": "^sha256:[a-f0-9]{64}$",
+      "title": "Plan Hash",
+      "type": "string"
+    },
+    "plan_id": {
+      "pattern": "^[A-Za-z0-9_.:-]{1,96}$",
+      "title": "Plan Id",
+      "type": "string"
+    },
+    "reason_code": {
+      "pattern": "^[A-Za-z0-9_.:-]{1,96}$",
+      "title": "Reason Code",
+      "type": "string"
+    },
+    "status": {
+      "enum": [
+        "SKIPPED",
+        "PARTIAL",
+        "COMPLETED",
+        "CANCELLED",
+        "UNRESOLVED"
+      ],
+      "title": "Status",
+      "type": "string"
+    },
+    "symbol": {
+      "description": "带市场后缀的证券代码",
+      "pattern": "^[0-9]{6}\\.(SH|SZ|BJ)$",
+      "title": "Symbol",
+      "type": "string"
+    },
+    "target_quantity": {
+      "description": "整数股",
+      "maximum": 2147483647,
+      "minimum": 0,
+      "title": "Target Quantity",
+      "type": "integer"
+    },
+    "trade_date": {
+      "description": "所属交易日",
+      "format": "date",
+      "title": "Trade Date",
+      "type": "string"
+    }
+  },
+  "required": [
+    "account_id",
+    "trade_date",
+    "observed_at",
+    "plan_id",
+    "plan_hash",
+    "allocation_id",
+    "symbol",
+    "target_quantity",
+    "filled_quantity",
+    "status",
+    "reason_code"
+  ],
+  "title": "PlanResultRecord",
+  "type": "object"
+}

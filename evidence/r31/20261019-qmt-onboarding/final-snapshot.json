@@ -1,0 +1,409 @@
+{
+  "cleanup_failure_codes": [],
+  "collection_mode": "READ_ONLY",
+  "completed_at": "2026-10-19T22:40:39.033285+08:00",
+  "config_hash": "8239dc378e6ee22da1d4829e295e2d4b19ee36a84e7f3577dcbbd87f05d84ed2",
+  "datasets": [
+    {
+      "dataset": "ASSET",
+      "duplicate_identity_count": 0,
+      "fields": [
+        {
+          "invalid_count": 0,
+          "missing_count": 0,
+          "name": "account_type",
+          "negative_count": 0,
+          "non_finite_count": 0,
+          "none_count": 0,
+          "observed_types": [
+            "int"
+          ],
+          "required": true
+        },
+        {
+          "invalid_count": 0,
+          "missing_count": 0,
+          "name": "account_id",
+          "negative_count": 0,
+          "non_finite_count": 0,
+          "none_count": 0,
+          "observed_types": [
+            "str"
+          ],
+          "required": true
+        },
+        {
+          "invalid_count": 0,
+          "missing_count": 0,
+          "name": "cash",
+          "negative_count": 0,
+          "non_finite_count": 0,
+          "none_count": 0,
+          "observed_types": [
+            "float"
+          ],
+          "required": true
+        },
+        {
+          "invalid_count": 0,
+          "missing_count": 0,
+          "name": "frozen_cash",
+          "negative_count": 0,
+          "non_finite_count": 0,
+          "none_count": 0,
+          "observed_types": [
+            "float"
+          ],
+          "required": true
+        },
+        {
+          "invalid_count": 0,
+          "missing_count": 0,
+          "name": "market_value",
+          "negative_count": 0,
+          "non_finite_count": 0,
+          "none_count": 0,
+          "observed_types": [
+            "float"
+          ],
+          "required": true
+        },
+        {
+          "invalid_count": 0,
+          "missing_count": 0,
+          "name": "total_asset",
+          "negative_count": 0,
+          "non_finite_count": 0,
+          "none_count": 0,
+          "observed_types": [
+            "float"
+          ],
+          "required": true
+        },
+        {
+          "invalid_count": 0,
+          "missing_count": 1,
+          "name": "fetch_balance",
+          "negative_count": 0,
+          "non_finite_count": 0,
+          "none_count": 0,
+          "observed_types": [],
+          "required": false
+        },
+        {
+          "invalid_count": 0,
+          "missing_count": 1,
+          "name": "current_balance",
+          "negative_count": 0,
+          "non_finite_count": 0,
+          "none_count": 0,
+          "observed_types": [],
+          "required": false
+        }
+      ],
+      "record_count": 1,
+      "result_kind": "OBJECT",
+      "structurally_valid": true
+    },
+    {
+      "dataset": "POSITIONS",
+      "duplicate_identity_count": 0,
+      "fields": [
+        {
+          "invalid_count": 0,
+          "missing_count": 0,
+          "name": "account_type",
+          "negative_count": 0,
+          "non_finite_count": 0,
+          "none_count": 0,
+          "observed_types": [
+            "int"
+          ],
+          "required": true
+        },
+        {
+          "invalid_count": 0,
+          "missing_count": 0,
+          "name": "account_id",
+          "negative_count": 0,
+          "non_finite_count": 0,
+          "none_count": 0,
+          "observed_types": [
+            "str"
+          ],
+          "required": true
+        },
+        {
+          "invalid_count": 0,
+          "missing_count": 0,
+          "name": "stock_code",
+          "negative_count": 0,
+          "non_finite_count": 0,
+          "none_count": 0,
+          "observed_types": [
+            "str"
+          ],
+          "required": true
+        },
+        {
+          "invalid_count": 0,
+          "missing_count": 0,
+          "name": "volume",
+          "negative_count": 0,
+          "non_finite_count": 0,
+          "none_count": 0,
+          "observed_types": [
+            "int"
+          ],
+          "required": true
+        },
+        {
+          "invalid_count": 0,
+          "missing_count": 0,
+          "name": "can_use_volume",
+          "negative_count": 0,
+          "non_finite_count": 0,
+          "none_count": 0,
+          "observed_types": [
+            "int"
+          ],
+          "required": true
+        },
+        {
+          "invalid_count": 0,
+          "missing_count": 0,
+          "name": "open_price",
+          "negative_count": 0,
+          "non_finite_count": 0,
+          "none_count": 0,
+          "observed_types": [
+            "float"
+          ],
+          "required": true
+        },
+        {
+          "invalid_count": 0,
+          "missing_count": 0,
+          "name": "market_value",
+          "negative_count": 0,
+          "non_finite_count": 0,
+          "none_count": 0,
+          "observed_types": [
+            "float"
+          ],
+          "required": true
+        },
+        {
+          "invalid_count": 0,
+          "missing_count": 0,
+          "name": "frozen_volume",
+          "negative_count": 0,
+          "non_finite_count": 0,
+          "none_count": 0,
+          "observed_types": [
+            "int"
+          ],
+          "required": true
+        },
+        {
+          "invalid_count": 0,
+          "missing_count": 0,
+          "name": "on_road_volume",
+          "negative_count": 0,
+          "non_finite_count": 0,
+          "none_count": 0,
+          "observed_types": [
+            "int"
+          ],
+          "required": true
+        },
+        {
+          "invalid_count": 0,
+          "missing_count": 0,
+          "name": "yesterday_volume",
+          "negative_count": 0,
+          "non_finite_count": 0,
+          "none_count": 0,
+          "observed_types": [
+            "int"
+          ],
+          "required": true
+        },
+        {
+          "invalid_count": 0,
+          "missing_count": 0,
+          "name": "avg_price",
+          "negative_count": 0,
+          "non_finite_count": 0,
+          "none_count": 0,
+          "observed_types": [
+            "float"
+          ],
+          "required": true
+        }
+      ],
+      "record_count": 1,
+      "result_kind": "LIST",
+      "structurally_valid": true
+    },
+    {
+      "dataset": "ORDERS",
+      "duplicate_identity_count": 0,
+      "fields": [],
+      "record_count": 0,
+      "result_kind": "EMPTY_LIST",
+      "structurally_valid": true
+    },
+    {
+      "dataset": "TRADES",
+      "duplicate_identity_count": 0,
+      "fields": [],
+      "record_count": 0,
+      "result_kind": "EMPTY_LIST",
+      "structurally_valid": true
+    }
+  ],
+  "duration_milliseconds": 63,
+  "evidence_truncated": false,
+  "failure_code": null,
+  "outcome": "PASS",
+  "phases": [
+    {
+      "elapsed_milliseconds": 0,
+      "phase": "CALLBACK_REGISTERED"
+    },
+    {
+      "elapsed_milliseconds": 63,
+      "phase": "TRADER_STARTED"
+    },
+    {
+      "elapsed_milliseconds": 63,
+      "phase": "CONNECT_RETURNED",
+      "result_code": 0
+    },
+    {
+      "elapsed_milliseconds": 63,
+      "phase": "SUBSCRIBE_RETURNED",
+      "result_code": 0
+    },
+    {
+      "elapsed_milliseconds": 63,
+      "phase": "ACCOUNT_STATUS_QUERY_RETURNED",
+      "result_code": 1
+    },
+    {
+      "elapsed_milliseconds": 63,
+      "phase": "ASSET_QUERY_RETURNED",
+      "result_code": 1
+    },
+    {
+      "elapsed_milliseconds": 63,
+      "phase": "ACCOUNT_STATUS_QUERY_RETURNED",
+      "result_code": 1
+    },
+    {
+      "elapsed_milliseconds": 63,
+      "phase": "POSITIONS_QUERY_RETURNED",
+      "result_code": 1
+    },
+    {
+      "elapsed_milliseconds": 63,
+      "phase": "ACCOUNT_STATUS_QUERY_RETURNED",
+      "result_code": 1
+    },
+    {
+      "elapsed_milliseconds": 63,
+      "phase": "ORDERS_QUERY_RETURNED",
+      "result_code": 0
+    },
+    {
+      "elapsed_milliseconds": 63,
+      "phase": "ACCOUNT_STATUS_QUERY_RETURNED",
+      "result_code": 1
+    },
+    {
+      "elapsed_milliseconds": 63,
+      "phase": "TRADES_QUERY_RETURNED",
+      "result_code": 0
+    },
+    {
+      "elapsed_milliseconds": 63,
+      "phase": "ACCOUNT_STATUS_QUERY_RETURNED",
+      "result_code": 1
+    },
+    {
+      "elapsed_milliseconds": 63,
+      "phase": "UNSUBSCRIBE_RETURNED",
+      "result_code": 0
+    },
+    {
+      "elapsed_milliseconds": 63,
+      "phase": "TRADER_STOPPED"
+    }
+  ],
+  "primary_failure_code": null,
+  "privacy": {
+    "exception_messages_omitted": true,
+    "financial_values_omitted": true,
+    "full_broker_account_omitted": true,
+    "order_and_trade_identifiers_omitted": true,
+    "sdk_objects_omitted": true,
+    "security_codes_omitted": true,
+    "userdata_path_omitted": true
+  },
+  "qmt": {
+    "account_type": "STOCK",
+    "connect_result": 0,
+    "sdk_version": null,
+    "session_id": 6101903,
+    "subscribe_result": 0,
+    "unsubscribe_result": 0,
+    "userdata_mini_fingerprint": "1a707d2e5df5b9d4"
+  },
+  "schema": "qmt-snapshot-probe/v1",
+  "started_at": "2026-10-19T22:40:38.970354+08:00",
+  "status": {
+    "disconnect_callback_count": 0,
+    "invalid_callback_count": 0,
+    "observations": [
+      {
+        "account_type": 2,
+        "elapsed_milliseconds": 63,
+        "source": "QUERY",
+        "status": 0,
+        "status_name": "OK"
+      },
+      {
+        "account_type": 2,
+        "elapsed_milliseconds": 63,
+        "source": "QUERY",
+        "status": 0,
+        "status_name": "OK"
+      },
+      {
+        "account_type": 2,
+        "elapsed_milliseconds": 63,
+        "source": "QUERY",
+        "status": 0,
+        "status_name": "OK"
+      },
+      {
+        "account_type": 2,
+        "elapsed_milliseconds": 63,
+        "source": "QUERY",
+        "status": 0,
+        "status_name": "OK"
+      },
+      {
+        "account_type": 2,
+        "elapsed_milliseconds": 63,
+        "source": "QUERY",
+        "status": 0,
+        "status_name": "OK"
+      }
+    ],
+    "query_count": 5
+  },
+  "target_account_fingerprint": "16d151a5410d41d0",
+  "work_item": "QMT-002"
+}

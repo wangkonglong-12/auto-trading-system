@@ -1,0 +1,421 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://contracts.auto-trading.local/v1/domain-event.schema.json",
+  "title": "DomainEvent v1.0",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schema_version",
+    "event_id",
+    "event_hash",
+    "node_id",
+    "account_id",
+    "boot_id",
+    "local_seq",
+    "correlation_id",
+    "source",
+    "severity",
+    "event_type",
+    "aggregate_type",
+    "aggregate_id",
+    "trade_date",
+    "occurred_at",
+    "recorded_at",
+    "payload"
+  ],
+  "properties": {
+    "schema_version": {"const": "1.0"},
+    "event_id": {"$ref": "#/$defs/eventId"},
+    "event_hash": {"$ref": "#/$defs/contentHash"},
+    "node_id": {"type": "string", "pattern": "^node-[a-z0-9][a-z0-9-]{2,47}$"},
+    "account_id": {"type": "string", "pattern": "^acct_[A-Za-z0-9_-]{3,48}$"},
+    "boot_id": {"type": "string", "pattern": "^boot_[0-9a-f]{32}$"},
+    "local_seq": {"type": "integer", "minimum": 1, "maximum": 9223372036854775807},
+    "correlation_id": {
+      "type": "string",
+      "pattern": "^corr_[A-Za-z0-9_-]{8,64}$"
+    },
+    "causation_id": {
+      "type": "string",
+      "pattern": "^[A-Za-z][A-Za-z0-9_.:-]{7,95}$"
+    },
+    "source": {
+      "enum": [
+        "RUNTIME",
+        "BROKER_CALLBACK",
+        "BROKER_QUERY",
+        "MARKET_DATA",
+        "RISK_ENGINE",
+        "RECONCILIATION",
+        "OPERATOR",
+        "CENTRAL_COMMAND",
+        "WATCHDOG"
+      ]
+    },
+    "severity": {"enum": ["INFO", "WARNING", "CRITICAL"]},
+    "event_type": {
+      "enum": [
+        "RUNTIME_STATE_CHANGED",
+        "PLAN_STATUS_CHANGED",
+        "ORDER_INTENT_CREATED",
+        "ORDER_STATUS_CHANGED",
+        "TRADE_RECORDED",
+        "RISK_DECISION",
+        "CONTROL_COMMAND_APPLIED",
+        "RECONCILIATION_DISCREPANCY",
+        "ALERT_RAISED"
+      ]
+    },
+    "aggregate_type": {
+      "enum": ["RUNTIME", "PLAN", "ORDER", "TRADE", "RISK", "CONTROL", "RECONCILIATION", "ALERT"]
+    },
+    "aggregate_id": {"type": "string", "minLength": 4, "maxLength": 96},
+    "trade_date": {"type": "string", "format": "date"},
+    "occurred_at": {"$ref": "#/$defs/shanghaiDateTime"},
+    "recorded_at": {"$ref": "#/$defs/shanghaiDateTime"},
+    "payload": {"type": "object"}
+  },
+  "allOf": [
+    {
+      "if": {"properties": {"event_type": {"const": "RUNTIME_STATE_CHANGED"}}, "required": ["event_type"]},
+      "then": {
+        "properties": {
+          "aggregate_type": {"const": "RUNTIME"},
+          "payload": {"$ref": "#/$defs/runtimeStateChanged"}
+        }
+      }
+    },
+    {
+      "if": {"properties": {"event_type": {"const": "PLAN_STATUS_CHANGED"}}, "required": ["event_type"]},
+      "then": {
+        "properties": {
+          "aggregate_type": {"const": "PLAN"},
+          "payload": {"$ref": "#/$defs/planStatusChanged"}
+        }
+      }
+    },
+    {
+      "if": {"properties": {"event_type": {"const": "ORDER_INTENT_CREATED"}}, "required": ["event_type"]},
+      "then": {
+        "properties": {
+          "aggregate_type": {"const": "ORDER"},
+          "payload": {"$ref": "#/$defs/orderIntentCreated"}
+        }
+      }
+    },
+    {
+      "if": {"properties": {"event_type": {"const": "ORDER_STATUS_CHANGED"}}, "required": ["event_type"]},
+      "then": {
+        "properties": {
+          "aggregate_type": {"const": "ORDER"},
+          "payload": {"$ref": "#/$defs/orderStatusChanged"}
+        }
+      }
+    },
+    {
+      "if": {"properties": {"event_type": {"const": "TRADE_RECORDED"}}, "required": ["event_type"]},
+      "then": {
+        "properties": {
+          "aggregate_type": {"const": "TRADE"},
+          "payload": {"$ref": "#/$defs/tradeRecorded"}
+        }
+      }
+    },
+    {
+      "if": {"properties": {"event_type": {"const": "RISK_DECISION"}}, "required": ["event_type"]},
+      "then": {
+        "properties": {
+          "aggregate_type": {"const": "RISK"},
+          "payload": {"$ref": "#/$defs/riskDecision"}
+        }
+      }
+    },
+    {
+      "if": {"properties": {"event_type": {"const": "CONTROL_COMMAND_APPLIED"}}, "required": ["event_type"]},
+      "then": {
+        "properties": {
+          "aggregate_type": {"const": "CONTROL"},
+          "payload": {"$ref": "#/$defs/controlCommandApplied"}
+        }
+      }
+    },
+    {
+      "if": {"properties": {"event_type": {"const": "RECONCILIATION_DISCREPANCY"}}, "required": ["event_type"]},
+      "then": {
+        "properties": {
+          "aggregate_type": {"const": "RECONCILIATION"},
+          "payload": {"$ref": "#/$defs/reconciliationDiscrepancy"}
+        }
+      }
+    },
+    {
+      "if": {"properties": {"event_type": {"const": "ALERT_RAISED"}}, "required": ["event_type"]},
+      "then": {
+        "properties": {
+          "aggregate_type": {"const": "ALERT"},
+          "payload": {"$ref": "#/$defs/alertRaised"}
+        }
+      }
+    }
+  ],
+  "$defs": {
+    "eventId": {"type": "string", "pattern": "^evt_[0-9a-f]{32}$"},
+    "contentHash": {"type": "string", "pattern": "^sha256:[0-9a-f]{64}$"},
+    "shanghaiDateTime": {
+      "type": "string",
+      "format": "date-time",
+      "pattern": "^[0-9]{4}-[0-9]{2}-[0-9]{2}T[0-9]{2}:[0-9]{2}:[0-9]{2}(\\.[0-9]{1,6})?\\+08:00$"
+    },
+    "reasonCode": {"type": "string", "pattern": "^[A-Z][A-Z0-9_]{2,63}$"},
+    "securityCode": {"type": "string", "pattern": "^[0-9]{6}\\.(SH|SZ|BJ)$"},
+    "quantity": {"type": "integer", "minimum": 0, "maximum": 9223372036854775807},
+    "positiveQuantity": {"type": "integer", "minimum": 1, "maximum": 9223372036854775807},
+    "price": {
+      "type": "string",
+      "pattern": "^(?!0(?:\\.0{1,8})?$)(0|[1-9][0-9]{0,9})(\\.[0-9]{1,8})?$"
+    },
+    "money": {
+      "type": "string",
+      "pattern": "^(0|[1-9][0-9]{0,11})(\\.[0-9]{1,2})?$"
+    },
+    "positiveMoney": {
+      "type": "string",
+      "pattern": "^(?!0(?:\\.0{1,2})?$)(0|[1-9][0-9]{0,11})(\\.[0-9]{1,2})?$"
+    },
+    "runtimeState": {
+      "enum": [
+        "BOOTING",
+        "CONNECTING",
+        "RECONCILING",
+        "READY_PAUSED",
+        "AUTO",
+        "PAUSE_BUY",
+        "SELL_ONLY",
+        "MANUAL",
+        "HALT",
+        "STOPPING",
+        "STOPPED"
+      ]
+    },
+    "executionMode": {
+      "enum": ["READ_ONLY", "PAPER", "SHADOW", "ASSISTED", "LIVE_EXIT_ONLY", "LIVE"]
+    },
+    "planStatus": {
+      "enum": ["RECEIVED", "VALIDATED", "ACKED", "RUNNING", "COMPLETED", "REJECTED", "EXPIRED", "CANCELLED"]
+    },
+    "orderStatus": {
+      "enum": [
+        "CREATED",
+        "PERSISTED",
+        "SUBMITTING",
+        "ACKED",
+        "CANCEL_PENDING",
+        "PARTIAL_FILL_CANCEL_PENDING",
+        "PARTIALLY_FILLED",
+        "PARTIALLY_FILLED_CANCELLED",
+        "FILLED",
+        "CANCELLED",
+        "REJECTED",
+        "UNKNOWN",
+        "ERROR_HOLD"
+      ]
+    },
+    "runtimeStateChanged": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["previous_state", "new_state", "reason_code", "execution_mode"],
+      "properties": {
+        "previous_state": {"oneOf": [{"$ref": "#/$defs/runtimeState"}, {"type": "null"}]},
+        "new_state": {"$ref": "#/$defs/runtimeState"},
+        "reason_code": {"$ref": "#/$defs/reasonCode"},
+        "execution_mode": {"$ref": "#/$defs/executionMode"}
+      }
+    },
+    "planStatusChanged": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["plan_id", "plan_hash", "previous_status", "new_status", "reason_code"],
+      "properties": {
+        "plan_id": {"type": "string", "pattern": "^plan_[A-Za-z0-9_-]{8,64}$"},
+        "plan_hash": {"$ref": "#/$defs/contentHash"},
+        "previous_status": {"oneOf": [{"$ref": "#/$defs/planStatus"}, {"type": "null"}]},
+        "new_status": {"$ref": "#/$defs/planStatus"},
+        "reason_code": {"$ref": "#/$defs/reasonCode"}
+      }
+    },
+    "orderIntentCreated": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "client_order_id",
+        "plan_id",
+        "intent_id",
+        "symbol",
+        "side",
+        "order_type",
+        "quantity",
+        "limit_price",
+        "max_notional",
+        "remark_token",
+        "execution_policy"
+      ],
+      "properties": {
+        "client_order_id": {"type": "string", "pattern": "^ord_[A-Za-z0-9_-]{8,64}$"},
+        "plan_id": {"type": "string", "pattern": "^plan_[A-Za-z0-9_-]{8,64}$"},
+        "intent_id": {"type": "string", "pattern": "^intent_[A-Za-z0-9_-]{8,64}$"},
+        "symbol": {"$ref": "#/$defs/securityCode"},
+        "side": {"enum": ["BUY", "SELL"]},
+        "order_type": {"enum": ["LIMIT"]},
+        "quantity": {"$ref": "#/$defs/positiveQuantity"},
+        "limit_price": {"$ref": "#/$defs/price"},
+        "max_notional": {"$ref": "#/$defs/positiveMoney"},
+        "remark_token": {"type": "string", "pattern": "^[A-Za-z0-9_-]{1,24}$"},
+        "execution_policy": {"type": "string", "pattern": "^[A-Z][A-Z0-9_]{2,63}$"}
+      }
+    },
+    "orderStatusChanged": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "client_order_id",
+        "broker_order_id",
+        "previous_status",
+        "new_status",
+        "order_quantity",
+        "filled_quantity",
+        "remaining_quantity",
+        "broker_status_code",
+        "status_reason"
+      ],
+      "properties": {
+        "client_order_id": {"type": "string", "pattern": "^ord_[A-Za-z0-9_-]{8,64}$"},
+        "broker_order_id": {
+          "oneOf": [
+            {"type": "string", "pattern": "^[A-Za-z0-9._:-]{1,64}$"},
+            {"type": "null"}
+          ]
+        },
+        "previous_status": {"oneOf": [{"$ref": "#/$defs/orderStatus"}, {"type": "null"}]},
+        "new_status": {"$ref": "#/$defs/orderStatus"},
+        "order_quantity": {"$ref": "#/$defs/positiveQuantity"},
+        "filled_quantity": {"$ref": "#/$defs/quantity"},
+        "remaining_quantity": {"$ref": "#/$defs/quantity"},
+        "broker_status_code": {
+          "oneOf": [
+            {"type": "integer", "minimum": 0, "maximum": 2147483647},
+            {"type": "null"}
+          ]
+        },
+        "status_reason": {"$ref": "#/$defs/reasonCode"}
+      }
+    },
+    "tradeRecorded": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "trade_id",
+        "client_order_id",
+        "broker_order_id",
+        "symbol",
+        "side",
+        "price",
+        "quantity",
+        "notional",
+        "traded_at"
+      ],
+      "properties": {
+        "trade_id": {"type": "string", "pattern": "^trade_[A-Za-z0-9_.:-]{4,80}$"},
+        "client_order_id": {"type": "string", "pattern": "^ord_[A-Za-z0-9_-]{8,64}$"},
+        "broker_order_id": {"type": "string", "pattern": "^[A-Za-z0-9._:-]{1,64}$"},
+        "symbol": {"$ref": "#/$defs/securityCode"},
+        "side": {"enum": ["BUY", "SELL"]},
+        "price": {"$ref": "#/$defs/price"},
+        "quantity": {"$ref": "#/$defs/positiveQuantity"},
+        "notional": {"$ref": "#/$defs/positiveMoney"},
+        "traded_at": {"$ref": "#/$defs/shanghaiDateTime"}
+      }
+    },
+    "riskRuleResult": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["rule_code", "outcome"],
+      "properties": {
+        "rule_code": {"$ref": "#/$defs/reasonCode"},
+        "outcome": {"enum": ["PASS", "FAIL"]},
+        "observed_value": {"type": "string", "maxLength": 96},
+        "limit_value": {"type": "string", "maxLength": 96}
+      }
+    },
+    "riskDecision": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["decision_id", "scope", "subject_id", "decision", "policy_version", "rules"],
+      "properties": {
+        "decision_id": {"type": "string", "pattern": "^risk_[A-Za-z0-9_-]{8,64}$"},
+        "scope": {"enum": ["PLAN", "ORDER", "RUNTIME"]},
+        "subject_id": {"type": "string", "minLength": 4, "maxLength": 96},
+        "decision": {"enum": ["ALLOW", "REJECT", "PAUSE_BUY", "SELL_ONLY", "HALT"]},
+        "policy_version": {"type": "string", "pattern": "^[A-Z][A-Z0-9_]{2,63}$"},
+        "rules": {
+          "type": "array",
+          "minItems": 1,
+          "maxItems": 32,
+          "items": {"$ref": "#/$defs/riskRuleResult"}
+        }
+      }
+    },
+    "controlCommandApplied": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["command_id", "command_type", "actor_id", "result", "reason_code"],
+      "properties": {
+        "command_id": {"type": "string", "pattern": "^cmd_[A-Za-z0-9_-]{8,64}$"},
+        "command_type": {
+          "enum": [
+            "PAUSE_BUY",
+            "SELL_ONLY",
+            "MANUAL_TAKEOVER",
+            "EMERGENCY_HALT",
+            "CLEAR_HALT",
+            "CANCEL_ORDER",
+            "RECONCILE_NOW",
+            "REQUEST_AUTO",
+            "ACK_ALERT"
+          ]
+        },
+        "actor_id": {"type": "string", "minLength": 3, "maxLength": 96},
+        "result": {"enum": ["APPLIED", "REJECTED", "NOOP"]},
+        "reason_code": {"$ref": "#/$defs/reasonCode"},
+        "previous_state": {"$ref": "#/$defs/runtimeState"},
+        "new_state": {"$ref": "#/$defs/runtimeState"}
+      }
+    },
+    "reconciliationDiscrepancy": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["reconciliation_id", "category", "outcome", "summary"],
+      "properties": {
+        "reconciliation_id": {"type": "string", "pattern": "^recon_[A-Za-z0-9_-]{8,64}$"},
+        "category": {"enum": ["ORDER", "TRADE", "POSITION", "ASSET"]},
+        "outcome": {"enum": ["MISSING_LOCAL", "MISSING_BROKER", "VALUE_MISMATCH", "UNKNOWN"]},
+        "local_reference": {"type": "string", "minLength": 1, "maxLength": 96},
+        "broker_reference": {"type": "string", "minLength": 1, "maxLength": 96},
+        "summary": {"type": "string", "minLength": 1, "maxLength": 512}
+      }
+    },
+    "alertRaised": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["alert_id", "alert_code", "component", "dedup_key", "message"],
+      "properties": {
+        "alert_id": {"type": "string", "pattern": "^alert_[A-Za-z0-9_-]{8,64}$"},
+        "alert_code": {"$ref": "#/$defs/reasonCode"},
+        "component": {
+          "enum": ["RUNTIME", "BROKER", "MARKET", "JOURNAL", "SYNC", "RECORDER", "RISK", "RECONCILIATION"]
+        },
+        "dedup_key": {"type": "string", "minLength": 4, "maxLength": 128},
+        "message": {"type": "string", "minLength": 1, "maxLength": 512}
+      }
+    }
+  }
+}

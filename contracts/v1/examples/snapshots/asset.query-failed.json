@@ -1,0 +1,16 @@
+{
+  "schema_version": "1.0",
+  "snapshot_id": "asset_20260904_151000_002",
+  "request_id": "req_abababababababababababababababab",
+  "node_id": "node-shanghai-001",
+  "account_id": "acct_primary_001",
+  "trade_date": "2026-09-04",
+  "as_of": "2026-09-04T15:10:02+08:00",
+  "query_status": "QUERY_FAILED",
+  "broker_account_status": "UNKNOWN",
+  "error": {
+    "code": "BROKER_QUERY_FAILED",
+    "message": "QMT asset query returned no reliable result after retry",
+    "retryable": true
+  }
+}

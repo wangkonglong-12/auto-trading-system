@@ -1,0 +1,100 @@
+{
+  "additionalProperties": false,
+  "properties": {
+    "account_id": {
+      "description": "所属账户内部别名",
+      "pattern": "^[A-Za-z0-9_.:-]{1,96}$",
+      "title": "Account Id",
+      "type": "string"
+    },
+    "allocation_id": {
+      "description": "不可重复初始化的分配编号",
+      "pattern": "^[A-Za-z0-9_.:-]{1,96}$",
+      "title": "Allocation Id",
+      "type": "string"
+    },
+    "arrival_price": {
+      "anyOf": [
+        {
+          "description": "每股人民币元，最多8位小数",
+          "pattern": "^(0|[1-9][0-9]{0,9})(\\.[0-9]{1,8})?$",
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "description": "首次合格盘口的卖一价；无盘口跳过时为空",
+      "title": "Arrival Price"
+    },
+    "boot_id": {
+      "description": "首次确定目标时的进程代际",
+      "pattern": "^[A-Za-z0-9_.:-]{1,96}$",
+      "title": "Boot Id",
+      "type": "string"
+    },
+    "decided_at": {
+      "description": "首次确定目标或跳过决定的时间",
+      "format": "date-time",
+      "title": "Decided At",
+      "type": "string"
+    },
+    "plan_hash": {
+      "description": "已验签冻结计划的正文摘要",
+      "pattern": "^sha256:[a-f0-9]{64}$",
+      "title": "Plan Hash",
+      "type": "string"
+    },
+    "policy_hash": {
+      "description": "计划引用的已安装买入策略正文摘要",
+      "pattern": "^sha256:[a-f0-9]{64}$",
+      "title": "Policy Hash",
+      "type": "string"
+    },
+    "reason": {
+      "description": "初始化决定，跳过决定在重启后保持",
+      "enum": [
+        "ELIGIBLE",
+        "SKIPPED_MIN_ORDER",
+        "POSITION_CAPACITY",
+        "MISSED_ENTRY_WINDOW"
+      ],
+      "title": "Reason",
+      "type": "string"
+    },
+    "symbol": {
+      "description": "分配所属证券",
+      "pattern": "^[0-9]{6}\\.(SH|SZ|BJ)$",
+      "title": "Symbol",
+      "type": "string"
+    },
+    "target_quantity": {
+      "description": "一次性目标股数，跳过为零",
+      "maximum": 2147483647,
+      "minimum": 0,
+      "title": "Target Quantity",
+      "type": "integer"
+    },
+    "trade_date": {
+      "description": "所属交易日",
+      "format": "date",
+      "title": "Trade Date",
+      "type": "string"
+    }
+  },
+  "required": [
+    "plan_hash",
+    "policy_hash",
+    "account_id",
+    "trade_date",
+    "allocation_id",
+    "symbol",
+    "boot_id",
+    "decided_at",
+    "arrival_price",
+    "target_quantity",
+    "reason"
+  ],
+  "title": "EntryTarget",
+  "type": "object"
+}

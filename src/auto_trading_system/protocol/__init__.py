@@ -1,0 +1,80 @@
+"""Versioned cross-project protocol primitives."""
+
+from auto_trading_system.protocol.canonical_json import (
+    calculate_event_hash,
+    calculate_plan_hash,
+    verify_event_hash,
+    verify_plan_hash,
+)
+from auto_trading_system.protocol.compat import ProtocolVersion, require_supported_major
+from auto_trading_system.protocol.events import (
+    new_boot_id,
+    new_event_id,
+    new_request_id,
+    validate_domain_event_semantics,
+    validate_event_batch_result_semantics,
+    validate_event_batch_semantics,
+)
+from auto_trading_system.protocol.node_messages import (
+    validate_asset_snapshot_semantics,
+    validate_position_snapshot_semantics,
+    validate_protocol_error_semantics,
+    validate_reconciliation_report_semantics,
+    validate_runtime_command_batch_semantics,
+    validate_runtime_command_result_semantics,
+    validate_runtime_command_semantics,
+    validate_runtime_heartbeat_semantics,
+)
+from auto_trading_system.protocol.signing import (
+    InMemoryNonceStore,
+    MappingKeyResolver,
+    SignatureError,
+    VerifiedRequestSignature,
+    VerifiedResponseSignature,
+    calculate_content_sha256,
+    canonical_request_string,
+    canonical_response_string,
+    new_signature_nonce,
+    sign_request,
+    sign_response,
+    verify_request,
+    verify_response,
+)
+from auto_trading_system.protocol.trade_plan import validate_trade_plan_semantics
+
+__all__ = [
+    "InMemoryNonceStore",
+    "MappingKeyResolver",
+    "ProtocolVersion",
+    "SignatureError",
+    "VerifiedRequestSignature",
+    "VerifiedResponseSignature",
+    "calculate_content_sha256",
+    "calculate_event_hash",
+    "calculate_plan_hash",
+    "canonical_request_string",
+    "canonical_response_string",
+    "new_boot_id",
+    "new_event_id",
+    "new_request_id",
+    "new_signature_nonce",
+    "require_supported_major",
+    "sign_request",
+    "sign_response",
+    "validate_asset_snapshot_semantics",
+    "validate_domain_event_semantics",
+    "validate_event_batch_result_semantics",
+    "validate_event_batch_semantics",
+    "validate_position_snapshot_semantics",
+    "validate_protocol_error_semantics",
+    "validate_reconciliation_report_semantics",
+    "validate_runtime_command_batch_semantics",
+    "validate_runtime_command_result_semantics",
+    "validate_runtime_command_semantics",
+    "validate_runtime_heartbeat_semantics",
+    "validate_trade_plan_semantics",
+    "verify_event_hash",
+    "verify_plan_hash",
+    "verify_request",
+    "verify_response",
+]

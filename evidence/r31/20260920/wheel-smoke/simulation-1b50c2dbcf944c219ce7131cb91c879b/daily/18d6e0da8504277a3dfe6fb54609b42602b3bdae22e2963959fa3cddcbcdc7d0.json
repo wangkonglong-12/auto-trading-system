@@ -1,0 +1,1 @@
+[{"data":{"account_id":"simulation-account","amount_difference":null,"expected_quantity":50,"observed_at":"2026-09-07T15:30:00+08:00","observed_quantity":50,"reason_code":"MOCK_SHARES_MATCH","reconciliation_id":"mock-close","related_ids":[],"scope":"POSITIONS","status":"MATCHED","symbol":"000001.SZ","trade_date":"2026-09-07"},"record_id":"closing"}]

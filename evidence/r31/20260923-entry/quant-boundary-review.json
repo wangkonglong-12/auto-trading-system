@@ -1,0 +1,13 @@
+{
+  "root": "E:\\workspace\\ai-stock-assistant",
+  "added": [
+    "docs/analysis/20260923_risk_v8_replacement_diagnosis.md",
+    "docs/analysis/test_risk_v8_replacements_20260923.py"
+  ],
+  "deleted": [],
+  "modified": [
+    "PROGRESS.md",
+    "docs/CODEX_CONTEXT.md",
+    "docs/analysis/risk_v8_replacements_20260923.py"
+  ]
+}

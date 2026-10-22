@@ -1,0 +1,30 @@
+{
+  "schema_version": "1.0",
+  "event_id": "evt_00000000000000000000000000000004",
+  "event_hash": "sha256:c93026c2b2277125ffb0a2fa0961904946477fb11daf7552460a0d5219ba758b",
+  "node_id": "node-demo-001",
+  "account_id": "acct_demo_001",
+  "boot_id": "boot_11111111111111111111111111111111",
+  "local_seq": 4,
+  "correlation_id": "corr_plan_20260904_0001",
+  "causation_id": "evt_00000000000000000000000000000003",
+  "source": "BROKER_CALLBACK",
+  "severity": "INFO",
+  "event_type": "ORDER_STATUS_CHANGED",
+  "aggregate_type": "ORDER",
+  "aggregate_id": "ord_01K43TAIL000000001",
+  "trade_date": "2026-09-04",
+  "occurred_at": "2026-09-04T14:35:01.100+08:00",
+  "recorded_at": "2026-09-04T14:35:01.103+08:00",
+  "payload": {
+    "client_order_id": "ord_01K43TAIL000000001",
+    "broker_order_id": "QMT20260904000001",
+    "previous_status": "SUBMITTING",
+    "new_status": "ACKED",
+    "order_quantity": 100,
+    "filled_quantity": 0,
+    "remaining_quantity": 100,
+    "broker_status_code": 50,
+    "status_reason": "BROKER_REPORTED"
+  }
+}

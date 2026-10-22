@@ -1,0 +1,25 @@
+{
+  "schema_version": "1.0",
+  "reconciliation_id": "recon_20260904_151000_003",
+  "request_id": "req_cececececececececececececececece",
+  "node_id": "node-shanghai-001",
+  "account_id": "acct_primary_001",
+  "trade_date": "2026-09-04",
+  "trigger": "STARTUP",
+  "started_at": "2026-09-04T08:55:00+08:00",
+  "completed_at": "2026-09-04T08:55:12+08:00",
+  "status": "INDETERMINATE",
+  "inputs": [
+    {"kind": "ASSET", "query_status": "AVAILABLE", "as_of": "2026-09-04T08:55:02+08:00", "reference_id": "asset_20260904_085502_001"},
+    {"kind": "POSITION", "query_status": "UNKNOWN", "as_of": "2026-09-04T08:55:10+08:00", "error": {"code": "BROKER_QUERY_AMBIGUOUS", "message": "None cannot prove an empty position set", "retryable": true}},
+    {"kind": "ORDER", "query_status": "AVAILABLE", "as_of": "2026-09-04T08:55:04+08:00", "reference_id": "orders_20260904_085504_001"},
+    {"kind": "TRADE", "query_status": "AVAILABLE", "as_of": "2026-09-04T08:55:05+08:00", "reference_id": "trades_20260904_085505_001"}
+  ],
+  "discrepancies": [],
+  "summary": {
+    "compared_subjects": 12,
+    "total_discrepancies": 0,
+    "open_discrepancies": 0,
+    "critical_discrepancies": 0
+  }
+}

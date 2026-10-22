@@ -1,0 +1,17 @@
+{
+  "root": "E:\\workspace\\ai-stock-assistant",
+  "added": [
+    "backend/app/protocol/auto_trading/v2/__init__.py",
+    "backend/app/protocol/auto_trading/v2/authentication.py",
+    "backend/app/protocol/auto_trading/v2/base.py",
+    "backend/app/protocol/auto_trading/v2/canonical.py",
+    "backend/app/protocol/auto_trading/v2/daily_sync.py",
+    "backend/app/repositories/auto_trading/auto_trade_daily_repository.py",
+    "backend/app/services/auto_trading/auto_trade_daily_service.py",
+    "backend/docs/auto_trading/v31_daily_sync_implementation.md",
+    "backend/scripts/auto_trading/migrations/20260907_auto_trade_daily_sync_v2.sql",
+    "backend/tests/auto_trading/test_auto_trade_daily_v2.py"
+  ],
+  "deleted": [],
+  "modified": []
+}

@@ -1,0 +1,19 @@
+{
+  "ed25519_public_key_base64": "A6EHv/POEL4dcN0Y50vAmWfk1jCbpQ1fHdyGZBJVMbg=",
+  "hmac_sha256": "555195c99865b6b4613ba3d3ac1bbf8878567550afd2fccefcdd095d6d0f2539",
+  "notice": "Public deterministic TEST key only. Never deploy this key.",
+  "plan_payload_hash": "sha256:a069f57dc4c28d91158224a6fdfb0afc6933bdf3f975bb6b8491c4aadec4f1fe",
+  "plan_signature": "9WeF+WU/v7qdIBUPMX37ETWctNSbR32JLrSkd/eKO6M3KPint6kCDickCdyBAlk9zZEjOdmfsHRieMVF/pCHBg==",
+  "request": {
+    "body": "",
+    "key_id": "public-test-key",
+    "method": "GET",
+    "node_id": "test-node",
+    "nonce": "test-nonce",
+    "request_id": "test-request",
+    "target": "/api/v2/trading/plans/current?strategy_id=tail&account_id=test-account",
+    "timestamp": 1000
+  },
+  "request_preimage_utf8": "AUTO-TRADING/REQUEST/V2\nGET\n/api/v2/trading/plans/current?account_id=test-account&strategy_id=tail\ntest-node\npublic-test-key\n1000\ntest-nonce\ntest-request\nsha256:e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+  "test_key_hex": "000102030405060708090a0b0c0d0e0f101112131415161718191a1b1c1d1e1f"
+}

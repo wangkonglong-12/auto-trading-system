@@ -1,0 +1,12 @@
+VSVersionInfo(
+  ffi=FixedFileInfo(filevers=(0, 1, 0, 54), prodvers=(0, 1, 0, 54),
+    mask=0x3f, flags=0, OS=0x40004, fileType=0x1, subtype=0, date=(0, 0)),
+  kids=[StringFileInfo([StringTable('080404b0', [
+    StringStruct('FileDescription', '自动交易系统 - 离线模拟版'),
+    StringStruct('FileVersion', '0.1.0.dev56'),
+    StringStruct('ProductName', '自动交易系统'),
+    StringStruct('ProductVersion', '0.1.0.dev56'),
+    StringStruct('OriginalFilename', 'AutoTradingSystem-0.1.0-dev56.exe'),
+    StringStruct('Comments', 'Windows交易节点；默认MOCK/零额度，真实QMT另行接入')
+  ])]), VarFileInfo([VarStruct('Translation', [2052, 1200])])]
+)

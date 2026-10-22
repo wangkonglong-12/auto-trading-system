@@ -1,0 +1,34 @@
+{
+  "schema_version": "1.0",
+  "event_id": "evt_00000000000000000000000000000006",
+  "event_hash": "sha256:76987779025f3e73895d8eff2ed40b77d50aceb25062664e9a4802b06a028a97",
+  "node_id": "node-demo-001",
+  "account_id": "acct_demo_001",
+  "boot_id": "boot_11111111111111111111111111111111",
+  "local_seq": 6,
+  "correlation_id": "corr_plan_20260904_0001",
+  "causation_id": "intent_01K43TAIL000000001",
+  "source": "RISK_ENGINE",
+  "severity": "INFO",
+  "event_type": "RISK_DECISION",
+  "aggregate_type": "RISK",
+  "aggregate_id": "risk_01K43TAIL000000001",
+  "trade_date": "2026-09-04",
+  "occurred_at": "2026-09-04T14:35:00.900+08:00",
+  "recorded_at": "2026-09-04T14:35:00.901+08:00",
+  "payload": {
+    "decision_id": "risk_01K43TAIL000000001",
+    "scope": "ORDER",
+    "subject_id": "ord_01K43TAIL000000001",
+    "decision": "ALLOW",
+    "policy_version": "STOCK_RISK_V1",
+    "rules": [
+      {
+        "rule_code": "MAX_SINGLE_ORDER_NOTIONAL",
+        "outcome": "PASS",
+        "observed_value": "1234.00",
+        "limit_value": "5000.00"
+      }
+    ]
+  }
+}

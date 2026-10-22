@@ -1,0 +1,404 @@
+{
+  "$defs": {
+    "Allocation": {
+      "additionalProperties": false,
+      "properties": {
+        "allocation_id": {
+          "pattern": "^[A-Za-z0-9_.:-]{1,96}$",
+          "title": "Allocation Id",
+          "type": "string"
+        },
+        "max_qty": {
+          "description": "数量上限，整数股",
+          "maximum": 2147483647,
+          "minimum": 1,
+          "title": "Max Qty",
+          "type": "integer"
+        },
+        "max_value": {
+          "description": "硬金额上限，元，十进制字符串",
+          "pattern": "^(0|[1-9][0-9]{0,11})(\\.[0-9]{1,2})?$",
+          "title": "Max Value",
+          "type": "string"
+        },
+        "rank": {
+          "maximum": 500,
+          "minimum": 1,
+          "title": "Rank",
+          "type": "integer"
+        },
+        "symbol": {
+          "description": "带市场后缀的证券代码",
+          "pattern": "^[0-9]{6}\\.(SH|SZ|BJ)$",
+          "title": "Symbol",
+          "type": "string"
+        },
+        "target_value": {
+          "description": "目标金额，元，十进制字符串",
+          "pattern": "^(0|[1-9][0-9]{0,11})(\\.[0-9]{1,2})?$",
+          "title": "Target Value",
+          "type": "string"
+        }
+      },
+      "required": [
+        "allocation_id",
+        "symbol",
+        "rank",
+        "target_value",
+        "max_value",
+        "max_qty"
+      ],
+      "title": "Allocation",
+      "type": "object"
+    },
+    "ExecutionWindow": {
+      "additionalProperties": false,
+      "properties": {
+        "cancel_by": {
+          "format": "date-time",
+          "title": "Cancel By",
+          "type": "string"
+        },
+        "entry_not_before": {
+          "format": "date-time",
+          "title": "Entry Not Before",
+          "type": "string"
+        },
+        "min_execution_seconds": {
+          "maximum": 1200,
+          "minimum": 1,
+          "title": "Min Execution Seconds",
+          "type": "integer"
+        },
+        "stop_new_buy_at": {
+          "format": "date-time",
+          "title": "Stop New Buy At",
+          "type": "string"
+        }
+      },
+      "required": [
+        "entry_not_before",
+        "stop_new_buy_at",
+        "cancel_by",
+        "min_execution_seconds"
+      ],
+      "title": "ExecutionWindow",
+      "type": "object"
+    },
+    "OfflineAuthorization": {
+      "additionalProperties": false,
+      "properties": {
+        "directions": {
+          "items": {
+            "enum": [
+              "BUY",
+              "SELL"
+            ],
+            "type": "string"
+          },
+          "maxItems": 2,
+          "minItems": 1,
+          "title": "Directions",
+          "type": "array"
+        },
+        "valid_until": {
+          "format": "date-time",
+          "title": "Valid Until",
+          "type": "string"
+        }
+      },
+      "required": [
+        "directions",
+        "valid_until"
+      ],
+      "title": "OfflineAuthorization",
+      "type": "object"
+    },
+    "PlanPayload": {
+      "additionalProperties": false,
+      "properties": {
+        "account_id": {
+          "pattern": "^[A-Za-z0-9_.:-]{1,96}$",
+          "title": "Account Id",
+          "type": "string"
+        },
+        "allocations": {
+          "items": {
+            "$ref": "#/$defs/Allocation"
+          },
+          "maxItems": 500,
+          "title": "Allocations",
+          "type": "array"
+        },
+        "execution_window": {
+          "$ref": "#/$defs/ExecutionWindow"
+        },
+        "offline_authorization": {
+          "$ref": "#/$defs/OfflineAuthorization"
+        },
+        "plan_id": {
+          "pattern": "^[A-Za-z0-9_.:-]{1,96}$",
+          "title": "Plan Id",
+          "type": "string"
+        },
+        "policy_bundle": {
+          "items": {
+            "$ref": "#/$defs/PolicyVersion"
+          },
+          "maxItems": 4,
+          "minItems": 4,
+          "title": "Policy Bundle",
+          "type": "array"
+        },
+        "risk_budget": {
+          "$ref": "#/$defs/RiskBudget"
+        },
+        "rulebook_version": {
+          "pattern": "^[A-Za-z0-9_.:-]{1,96}$",
+          "title": "Rulebook Version",
+          "type": "string"
+        },
+        "schema_major": {
+          "const": 2,
+          "default": 2,
+          "title": "Schema Major",
+          "type": "integer"
+        },
+        "source": {
+          "$ref": "#/$defs/SourceRevision"
+        },
+        "strategy_id": {
+          "pattern": "^[A-Za-z0-9_.:-]{1,96}$",
+          "title": "Strategy Id",
+          "type": "string"
+        },
+        "target_node_generation": {
+          "minimum": 1,
+          "title": "Target Node Generation",
+          "type": "integer"
+        },
+        "trade_date": {
+          "format": "date",
+          "title": "Trade Date",
+          "type": "string"
+        }
+      },
+      "required": [
+        "plan_id",
+        "account_id",
+        "strategy_id",
+        "trade_date",
+        "source",
+        "execution_window",
+        "allocations",
+        "policy_bundle",
+        "risk_budget",
+        "offline_authorization",
+        "rulebook_version",
+        "target_node_generation"
+      ],
+      "title": "PlanPayload",
+      "type": "object"
+    },
+    "PlanSignature": {
+      "additionalProperties": false,
+      "properties": {
+        "algorithm": {
+          "const": "Ed25519",
+          "default": "Ed25519",
+          "title": "Algorithm",
+          "type": "string"
+        },
+        "key_id": {
+          "pattern": "^[A-Za-z0-9_.:-]{1,96}$",
+          "title": "Key Id",
+          "type": "string"
+        },
+        "payload_hash": {
+          "pattern": "^sha256:[a-f0-9]{64}$",
+          "title": "Payload Hash",
+          "type": "string"
+        },
+        "signature": {
+          "maxLength": 88,
+          "minLength": 88,
+          "title": "Signature",
+          "type": "string"
+        }
+      },
+      "required": [
+        "key_id",
+        "payload_hash",
+        "signature"
+      ],
+      "title": "PlanSignature",
+      "type": "object"
+    },
+    "PolicyVersion": {
+      "additionalProperties": false,
+      "properties": {
+        "component": {
+          "enum": [
+            "entry",
+            "exit",
+            "execution",
+            "risk"
+          ],
+          "title": "Component",
+          "type": "string"
+        },
+        "payload_hash": {
+          "pattern": "^sha256:[a-f0-9]{64}$",
+          "title": "Payload Hash",
+          "type": "string"
+        },
+        "version": {
+          "pattern": "^[A-Za-z0-9_.:-]{1,96}$",
+          "title": "Version",
+          "type": "string"
+        }
+      },
+      "required": [
+        "component",
+        "version",
+        "payload_hash"
+      ],
+      "title": "PolicyVersion",
+      "type": "object"
+    },
+    "RiskBudget": {
+      "additionalProperties": false,
+      "properties": {
+        "budget_basis_as_of": {
+          "format": "date-time",
+          "title": "Budget Basis As Of",
+          "type": "string"
+        },
+        "max_buy_value": {
+          "description": "人民币元，最多2位小数",
+          "pattern": "^(0|[1-9][0-9]{0,11})(\\.[0-9]{1,2})?$",
+          "title": "Max Buy Value",
+          "type": "string"
+        }
+      },
+      "required": [
+        "max_buy_value",
+        "budget_basis_as_of"
+      ],
+      "title": "RiskBudget",
+      "type": "object"
+    },
+    "SourceRevision": {
+      "additionalProperties": false,
+      "properties": {
+        "algorithm_version": {
+          "description": "选股算法版本",
+          "pattern": "^[A-Za-z0-9_.:-]{1,96}$",
+          "title": "Algorithm Version",
+          "type": "string"
+        },
+        "completed_at": {
+          "description": "来源生成完成时间",
+          "format": "date-time",
+          "title": "Completed At",
+          "type": "string"
+        },
+        "data_completeness": {
+          "const": "FULL",
+          "title": "Data Completeness",
+          "type": "string"
+        },
+        "finalized": {
+          "const": true,
+          "title": "Finalized",
+          "type": "boolean"
+        },
+        "market_coverage_bps": {
+          "description": "市场覆盖率，万分比整数",
+          "maximum": 10000,
+          "minimum": 0,
+          "title": "Market Coverage Bps",
+          "type": "integer"
+        },
+        "market_data_cutoff": {
+          "description": "来源行情截止时间",
+          "format": "date-time",
+          "title": "Market Data Cutoff",
+          "type": "string"
+        },
+        "publication_status": {
+          "const": "FINAL",
+          "title": "Publication Status",
+          "type": "string"
+        },
+        "published_at": {
+          "description": "来源正式发布时点",
+          "format": "date-time",
+          "title": "Published At",
+          "type": "string"
+        },
+        "run_status": {
+          "const": "SUCCEEDED",
+          "title": "Run Status",
+          "type": "string"
+        },
+        "scheduled_at": {
+          "description": "正式调度计划时点",
+          "format": "date-time",
+          "title": "Scheduled At",
+          "type": "string"
+        },
+        "source_hash": {
+          "description": "同版本来源头和明细摘要",
+          "pattern": "^sha256:[a-f0-9]{64}$",
+          "title": "Source Hash",
+          "type": "string"
+        },
+        "source_revision": {
+          "description": "不可变来源版本",
+          "minimum": 1,
+          "title": "Source Revision",
+          "type": "integer"
+        },
+        "source_run_id": {
+          "description": "正式选股运行编号",
+          "pattern": "^[A-Za-z0-9_.:-]{1,96}$",
+          "title": "Source Run Id",
+          "type": "string"
+        }
+      },
+      "required": [
+        "source_run_id",
+        "source_revision",
+        "source_hash",
+        "algorithm_version",
+        "completed_at",
+        "market_data_cutoff",
+        "scheduled_at",
+        "published_at",
+        "market_coverage_bps",
+        "run_status",
+        "data_completeness",
+        "publication_status",
+        "finalized"
+      ],
+      "title": "SourceRevision",
+      "type": "object"
+    }
+  },
+  "additionalProperties": false,
+  "properties": {
+    "envelope": {
+      "$ref": "#/$defs/PlanSignature"
+    },
+    "payload": {
+      "$ref": "#/$defs/PlanPayload"
+    }
+  },
+  "required": [
+    "payload",
+    "envelope"
+  ],
+  "title": "PlanEnvelope",
+  "type": "object"
+}

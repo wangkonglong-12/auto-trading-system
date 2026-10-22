@@ -1,0 +1,24 @@
+{
+  "schema_version": "1.0",
+  "event_id": "evt_00000000000000000000000000000001",
+  "event_hash": "sha256:f850e7c49676c7ddce738afc607900a3d3a3757b4da3f4c80e1f60beedd25ca4",
+  "node_id": "node-demo-001",
+  "account_id": "acct_demo_001",
+  "boot_id": "boot_11111111111111111111111111111111",
+  "local_seq": 1,
+  "correlation_id": "corr_runtime_20260904_0001",
+  "source": "RUNTIME",
+  "severity": "INFO",
+  "event_type": "RUNTIME_STATE_CHANGED",
+  "aggregate_type": "RUNTIME",
+  "aggregate_id": "node-demo-001",
+  "trade_date": "2026-09-04",
+  "occurred_at": "2026-09-04T08:45:00+08:00",
+  "recorded_at": "2026-09-04T08:45:00.001+08:00",
+  "payload": {
+    "previous_state": "RECONCILING",
+    "new_state": "READY_PAUSED",
+    "reason_code": "STARTUP_RECONCILED",
+    "execution_mode": "SHADOW"
+  }
+}

@@ -1,0 +1,15 @@
+{
+  "version": "0.1.0.dev47",
+  "installed_package_verified": true,
+  "public_cli_results": {
+    "confirm-recovery": 0,
+    "arm": 0,
+    "result-lookup": 0,
+    "halt": 0
+  },
+  "broker": "MOCK",
+  "order_limit": "0",
+  "prompts": "test-only injected in process memory",
+  "real_trading_enabled": false,
+  "secrets_in_output": false
+}

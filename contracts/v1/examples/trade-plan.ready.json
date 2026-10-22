@@ -1,0 +1,52 @@
+{
+  "schema_version": "1.0",
+  "plan_id": "plan_01K43TAIL20260903001",
+  "plan_type": "TAIL_1431_D0_ENTRY_D1_EXIT",
+  "account_id": "acct_demo_001",
+  "strategy_id": "TAIL_CLOSE",
+  "trade_date": "2026-09-03",
+  "timezone": "Asia/Shanghai",
+  "status": "READY",
+  "execution_mode": "SHADOW",
+  "live_eligible": false,
+  "source": {
+    "run_id": "tail_run_20260903_1431",
+    "run_status": "succeeded",
+    "data_completeness": "full",
+    "algorithm_version": "tail_1431_v5_6_selection_eligibility_guard"
+  },
+  "generated_at": "2026-09-03T14:34:20.218+08:00",
+  "valid_from": "2026-09-03T14:34:30+08:00",
+  "entry_start": "2026-09-03T14:35:00+08:00",
+  "stop_new_orders_at": "2026-09-03T14:56:30+08:00",
+  "expire_at": "2026-09-03T15:00:00+08:00",
+  "portfolio": {
+    "target_exposure": "0.30",
+    "hard_max_exposure": "0.60",
+    "cash_reserve": "0.05",
+    "max_positions": 15,
+    "max_active_orders": 3
+  },
+  "items": [
+    {
+      "intent_id": "intent_01K43TAIL000000001",
+      "symbol": "000001.SZ",
+      "market_bucket": "10cm",
+      "rank": 1,
+      "score": "88.60",
+      "side": "BUY",
+      "target_weight": "0.05",
+      "max_notional": "5000.00",
+      "lot_size": 100,
+      "entry_policy": "TAIL_ENTRY_V1",
+      "exit_policy": "T1_EXIT_V1",
+      "risk_policy": "STOCK_RISK_V1",
+      "execution_policy": "EXEC_BALANCED_V1",
+      "price_guard": {
+        "reference_price": "12.34",
+        "max_deviation_bps": 120
+      }
+    }
+  ],
+  "plan_hash": "sha256:051fbebaf24664e3037e73c3926b6b3867c78fad018b3566855f12e877daf466"
+}

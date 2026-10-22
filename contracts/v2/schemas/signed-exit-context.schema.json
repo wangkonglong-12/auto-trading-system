@@ -1,0 +1,313 @@
+{
+  "$defs": {
+    "ExitLotContext": {
+      "additionalProperties": false,
+      "properties": {
+        "allow_odd_liquidation": {
+          "description": "规则包是否允许一次清仓卖出零股",
+          "title": "Allow Odd Liquidation",
+          "type": "boolean"
+        },
+        "cost": {
+          "description": "经来源核对的单位持仓成本，元",
+          "pattern": "^(0|[1-9][0-9]{0,9})(\\.[0-9]{1,8})?$",
+          "title": "Cost",
+          "type": "string"
+        },
+        "lot_id": {
+          "description": "开盘检查点中唯一持仓批次",
+          "pattern": "^[A-Za-z0-9_.:-]{1,96}$",
+          "title": "Lot Id",
+          "type": "string"
+        },
+        "lower_price": {
+          "description": "当日可申报价下界，元",
+          "pattern": "^(0|[1-9][0-9]{0,9})(\\.[0-9]{1,8})?$",
+          "title": "Lower Price",
+          "type": "string"
+        },
+        "open_price": {
+          "description": "当日正式开盘价，元",
+          "pattern": "^(0|[1-9][0-9]{0,9})(\\.[0-9]{1,8})?$",
+          "title": "Open Price",
+          "type": "string"
+        },
+        "previous_close": {
+          "description": "同复权口径前收盘价，元",
+          "pattern": "^(0|[1-9][0-9]{0,9})(\\.[0-9]{1,8})?$",
+          "title": "Previous Close",
+          "type": "string"
+        },
+        "price_tick": {
+          "description": "已验证规则包规定的价格档位，元",
+          "pattern": "^(0|[1-9][0-9]{0,9})(\\.[0-9]{1,8})?$",
+          "title": "Price Tick",
+          "type": "string"
+        },
+        "sell_step": {
+          "description": "正常卖出数量步长，整数股",
+          "maximum": 1000,
+          "minimum": 1,
+          "title": "Sell Step",
+          "type": "integer"
+        },
+        "source_hash": {
+          "description": "开盘价、成本及市场规则来源证据摘要",
+          "pattern": "^sha256:[a-f0-9]{64}$",
+          "title": "Source Hash",
+          "type": "string"
+        },
+        "symbol": {
+          "description": "批次证券及交易所",
+          "pattern": "^[0-9]{6}\\.(SH|SZ|BJ)$",
+          "title": "Symbol",
+          "type": "string"
+        },
+        "upper_price": {
+          "description": "当日可申报价上界，元",
+          "pattern": "^(0|[1-9][0-9]{0,9})(\\.[0-9]{1,8})?$",
+          "title": "Upper Price",
+          "type": "string"
+        }
+      },
+      "required": [
+        "lot_id",
+        "symbol",
+        "cost",
+        "previous_close",
+        "open_price",
+        "price_tick",
+        "lower_price",
+        "upper_price",
+        "sell_step",
+        "allow_odd_liquidation",
+        "source_hash"
+      ],
+      "title": "ExitLotContext",
+      "type": "object"
+    },
+    "ExitSessionContext": {
+      "additionalProperties": false,
+      "properties": {
+        "account_id": {
+          "description": "绑定账户内部别名",
+          "pattern": "^[A-Za-z0-9_.:-]{1,96}$",
+          "title": "Account Id",
+          "type": "string"
+        },
+        "calendar_hash": {
+          "description": "完整交易日日历规范正文摘要",
+          "pattern": "^sha256:[a-f0-9]{64}$",
+          "title": "Calendar Hash",
+          "type": "string"
+        },
+        "cancel_after_seconds": {
+          "default": 30,
+          "description": "在途订单连续未更新多少秒后请求撤单",
+          "maximum": 300,
+          "minimum": 1,
+          "title": "Cancel After Seconds",
+          "type": "integer"
+        },
+        "cancel_by": {
+          "description": "允许提交撤单的截止时间",
+          "format": "date-time",
+          "title": "Cancel By",
+          "type": "string"
+        },
+        "context_id": {
+          "description": "不可变退出会话编号",
+          "pattern": "^[A-Za-z0-9_.:-]{1,96}$",
+          "title": "Context Id",
+          "type": "string"
+        },
+        "issued_at": {
+          "description": "来源证据完成并签发的时间",
+          "format": "date-time",
+          "title": "Issued At",
+          "type": "string"
+        },
+        "lots": {
+          "description": "本会话允许退出的批次及价格规则",
+          "items": {
+            "$ref": "#/$defs/ExitLotContext"
+          },
+          "maxItems": 15,
+          "minItems": 1,
+          "title": "Lots",
+          "type": "array"
+        },
+        "max_order_quantity": {
+          "description": "上下文单笔数量上限，股",
+          "maximum": 2147483647,
+          "minimum": 1,
+          "title": "Max Order Quantity",
+          "type": "integer"
+        },
+        "max_order_value": {
+          "description": "上下文单笔卖出名义金额上限，元",
+          "pattern": "^(0|[1-9][0-9]{0,11})(\\.[0-9]{1,2})?$",
+          "title": "Max Order Value",
+          "type": "string"
+        },
+        "opening_hash": {
+          "description": "已验证前日封存持仓正文摘要",
+          "pattern": "^sha256:[a-f0-9]{64}$",
+          "title": "Opening Hash",
+          "type": "string"
+        },
+        "rule_id": {
+          "default": "T1_EXIT_BASELINE_V3",
+          "description": "退出规则版本",
+          "enum": [
+            "T1_EXIT_BASELINE_V3",
+            "COST_EXIT_V1"
+          ],
+          "title": "Rule Id",
+          "type": "string"
+        },
+        "schema_version": {
+          "const": 1,
+          "default": 1,
+          "description": "开盘退出上下文版本",
+          "title": "Schema Version",
+          "type": "integer"
+        },
+        "sell_rules": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/SellRules"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "按本批买入成本执行的三项卖出规则"
+        },
+        "stop_new_at": {
+          "description": "停止新增SELL子单的时间",
+          "format": "date-time",
+          "title": "Stop New At",
+          "type": "string"
+        },
+        "strategy_id": {
+          "description": "责任策略编号",
+          "pattern": "^[A-Za-z0-9_.:-]{1,96}$",
+          "title": "Strategy Id",
+          "type": "string"
+        },
+        "trade_date": {
+          "description": "Asia/Shanghai交易日",
+          "format": "date",
+          "title": "Trade Date",
+          "type": "string"
+        },
+        "valid_from": {
+          "description": "最早允许退出的时间",
+          "format": "date-time",
+          "title": "Valid From",
+          "type": "string"
+        },
+        "valid_until": {
+          "description": "本上下文最终失效时间",
+          "format": "date-time",
+          "title": "Valid Until",
+          "type": "string"
+        }
+      },
+      "required": [
+        "context_id",
+        "account_id",
+        "strategy_id",
+        "trade_date",
+        "opening_hash",
+        "calendar_hash",
+        "issued_at",
+        "valid_from",
+        "stop_new_at",
+        "cancel_by",
+        "valid_until",
+        "max_order_value",
+        "max_order_quantity",
+        "lots"
+      ],
+      "title": "ExitSessionContext",
+      "type": "object"
+    },
+    "SellRules": {
+      "additionalProperties": false,
+      "description": "Percent values are human percentages (7 means 7%), never fractions.",
+      "properties": {
+        "sell_by": {
+          "description": "Asia/Shanghai trading-day deadline, HH:MM",
+          "format": "time",
+          "title": "Sell By",
+          "type": "string"
+        },
+        "stop_loss_pct": {
+          "anyOf": [
+            {
+              "exclusiveMaximum": 100.0,
+              "exclusiveMinimum": 0.0,
+              "type": "number"
+            },
+            {
+              "pattern": "^(?!^[-+.]*$)[+-]?0*(?:\\d{0,3}|(?=[\\d.]{1,6}0*$)\\d{0,3}\\.\\d{0,2}0*$)",
+              "type": "string"
+            }
+          ],
+          "title": "Stop Loss Pct"
+        },
+        "take_profit_pct": {
+          "anyOf": [
+            {
+              "exclusiveMinimum": 0.0,
+              "maximum": 100.0,
+              "type": "number"
+            },
+            {
+              "pattern": "^(?!^[-+.]*$)[+-]?0*(?:\\d{0,3}|(?=[\\d.]{1,6}0*$)\\d{0,3}\\.\\d{0,2}0*$)",
+              "type": "string"
+            }
+          ],
+          "title": "Take Profit Pct"
+        }
+      },
+      "required": [
+        "take_profit_pct",
+        "stop_loss_pct",
+        "sell_by"
+      ],
+      "title": "SellRules",
+      "type": "object"
+    }
+  },
+  "additionalProperties": false,
+  "properties": {
+    "key_id": {
+      "description": "本地已信任的签名公钥标识",
+      "pattern": "^[A-Za-z0-9_.:-]{1,96}$",
+      "title": "Key Id",
+      "type": "string"
+    },
+    "payload": {
+      "$ref": "#/$defs/ExitSessionContext",
+      "description": "冻结的开盘退出上下文"
+    },
+    "signature": {
+      "description": "域分离Ed25519签名，Base64",
+      "maxLength": 88,
+      "minLength": 88,
+      "title": "Signature",
+      "type": "string"
+    }
+  },
+  "required": [
+    "payload",
+    "key_id",
+    "signature"
+  ],
+  "title": "SignedExitContext",
+  "type": "object"
+}

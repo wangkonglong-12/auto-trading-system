@@ -1,0 +1,20 @@
+{
+  "root": "E:\\workspace\\ai-stock-assistant",
+  "added": [
+    "docs/analysis/20260923_risk_v8_results.md",
+    "docs/analysis/review_risk_v8_20260923.py",
+    "scripts/test_risk_progress_v8.cjs"
+  ],
+  "deleted": [],
+  "modified": [
+    "PROGRESS.md",
+    "docs/ALIYUN_SERVER_HANDOFF.md",
+    "docs/CODEX_CONTEXT.md",
+    "docs/SELECTION_RESEARCH_USER_GUIDE.md",
+    "docs/analysis/20260921_risk_v8_stage.md",
+    "docs/analysis/20260923_risk_v8_runtime_blocker.md",
+    "frontend/src/router/index.ts",
+    "frontend/vite.config.ts",
+    "scripts/local_risk_research.js"
+  ]
+}

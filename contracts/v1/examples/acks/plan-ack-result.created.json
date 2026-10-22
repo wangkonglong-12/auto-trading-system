@@ -1,0 +1,9 @@
+{
+  "schema_version": "1.0",
+  "request_id": "req_0123456789abcdeffedcba9876543210",
+  "ack_id": "ack_0123456789abcdeffedcba9876543210",
+  "plan_id": "plan_01K43TAIL20260903001",
+  "ack_status": "ACCEPTED",
+  "duplicate": false,
+  "received_at": "2026-09-04T14:45:00.100+08:00"
+}

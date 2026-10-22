@@ -1,0 +1,95 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://contracts.auto-trading.local/v1/reconciliation-report.schema.json",
+  "title": "ReconciliationReport v1.0",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schema_version", "reconciliation_id", "request_id", "node_id", "account_id",
+    "trade_date", "trigger", "started_at", "completed_at", "status", "inputs",
+    "discrepancies", "summary"
+  ],
+  "properties": {
+    "schema_version": {"$ref": "common.schema.json#/$defs/schemaVersion"},
+    "reconciliation_id": {"$ref": "common.schema.json#/$defs/reconciliationId"},
+    "request_id": {"$ref": "common.schema.json#/$defs/requestId"},
+    "node_id": {"$ref": "common.schema.json#/$defs/nodeId"},
+    "account_id": {"$ref": "common.schema.json#/$defs/accountId"},
+    "trade_date": {"$ref": "common.schema.json#/$defs/tradeDate"},
+    "trigger": {"enum": ["STARTUP", "RECONNECT", "PERIODIC", "POST_TRADE", "EOD_1510", "MANUAL", "CENTRAL_COMMAND"]},
+    "started_at": {"$ref": "common.schema.json#/$defs/shanghaiDateTime"},
+    "completed_at": {"$ref": "common.schema.json#/$defs/shanghaiDateTime"},
+    "status": {"enum": ["MATCHED", "DISCREPANCIES", "INDETERMINATE"]},
+    "inputs": {
+      "type": "array",
+      "minItems": 4,
+      "maxItems": 4,
+      "items": {"$ref": "#/$defs/input"}
+    },
+    "discrepancies": {
+      "type": "array",
+      "maxItems": 10000,
+      "items": {"$ref": "#/$defs/discrepancy"}
+    },
+    "summary": {"$ref": "#/$defs/summary"}
+  },
+  "allOf": [
+    {
+      "if": {"properties": {"status": {"const": "MATCHED"}}, "required": ["status"]},
+      "then": {"properties": {"discrepancies": {"maxItems": 0}}}
+    },
+    {
+      "if": {"properties": {"status": {"const": "DISCREPANCIES"}}, "required": ["status"]},
+      "then": {"properties": {"discrepancies": {"minItems": 1}}}
+    }
+  ],
+  "$defs": {
+    "input": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["kind", "query_status", "as_of"],
+      "properties": {
+        "kind": {"enum": ["ASSET", "POSITION", "ORDER", "TRADE"]},
+        "query_status": {"$ref": "common.schema.json#/$defs/queryStatus"},
+        "as_of": {"$ref": "common.schema.json#/$defs/shanghaiDateTime"},
+        "reference_id": {"type": "string", "minLength": 4, "maxLength": 96},
+        "error": {"$ref": "common.schema.json#/$defs/error"}
+      },
+      "allOf": [
+        {
+          "if": {"properties": {"query_status": {"const": "AVAILABLE"}}, "required": ["query_status"]},
+          "then": {"required": ["reference_id"], "not": {"required": ["error"]}},
+          "else": {"required": ["error"], "not": {"required": ["reference_id"]}}
+        }
+      ]
+    },
+    "discrepancy": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["discrepancy_id", "category", "outcome", "subject_key", "severity", "resolution_status", "summary"],
+      "properties": {
+        "discrepancy_id": {"type": "string", "pattern": "^diff_[A-Za-z0-9_-]{8,64}$"},
+        "category": {"enum": ["ASSET", "POSITION", "ORDER", "TRADE"]},
+        "outcome": {"enum": ["MISSING_LOCAL", "MISSING_BROKER", "VALUE_MISMATCH", "UNMAPPED_EXTERNAL"]},
+        "subject_key": {"type": "string", "minLength": 1, "maxLength": 128},
+        "field": {"type": "string", "pattern": "^[a-z][a-z0-9_]{0,63}$"},
+        "local_value": {"type": ["string", "integer", "boolean", "null"], "maxLength": 256},
+        "broker_value": {"type": ["string", "integer", "boolean", "null"], "maxLength": 256},
+        "severity": {"enum": ["INFO", "WARNING", "CRITICAL"]},
+        "resolution_status": {"enum": ["OPEN", "RESOLVED", "ACCEPTED_EXTERNAL"]},
+        "summary": {"type": "string", "minLength": 1, "maxLength": 512}
+      }
+    },
+    "summary": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["compared_subjects", "total_discrepancies", "open_discrepancies", "critical_discrepancies"],
+      "properties": {
+        "compared_subjects": {"$ref": "common.schema.json#/$defs/quantity"},
+        "total_discrepancies": {"$ref": "common.schema.json#/$defs/quantity"},
+        "open_discrepancies": {"$ref": "common.schema.json#/$defs/quantity"},
+        "critical_discrepancies": {"$ref": "common.schema.json#/$defs/quantity"}
+      }
+    }
+  }
+}

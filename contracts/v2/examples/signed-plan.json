@@ -1,0 +1,81 @@
+{
+  "envelope": {
+    "algorithm": "Ed25519",
+    "key_id": "public-test-key",
+    "payload_hash": "sha256:a069f57dc4c28d91158224a6fdfb0afc6933bdf3f975bb6b8491c4aadec4f1fe",
+    "signature": "9WeF+WU/v7qdIBUPMX37ETWctNSbR32JLrSkd/eKO6M3KPint6kCDickCdyBAlk9zZEjOdmfsHRieMVF/pCHBg=="
+  },
+  "payload": {
+    "account_id": "simulation-account",
+    "allocations": [
+      {
+        "allocation_id": "simulation-allocation-1",
+        "max_qty": 100,
+        "max_value": "1005",
+        "rank": 1,
+        "symbol": "000001.SZ",
+        "target_value": "1000"
+      }
+    ],
+    "execution_window": {
+      "cancel_by": "2026-09-07T14:56:30+08:00",
+      "entry_not_before": "2026-09-07T14:40:00+08:00",
+      "min_execution_seconds": 30,
+      "stop_new_buy_at": "2026-09-07T14:55:30+08:00"
+    },
+    "offline_authorization": {
+      "directions": [
+        "BUY",
+        "SELL"
+      ],
+      "valid_until": "2026-09-07T15:00:00+08:00"
+    },
+    "plan_id": "simulation-plan-1",
+    "policy_bundle": [
+      {
+        "component": "entry",
+        "payload_hash": "sha256:bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb",
+        "version": "simulation-v1"
+      },
+      {
+        "component": "exit",
+        "payload_hash": "sha256:bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb",
+        "version": "simulation-v1"
+      },
+      {
+        "component": "execution",
+        "payload_hash": "sha256:bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb",
+        "version": "simulation-v1"
+      },
+      {
+        "component": "risk",
+        "payload_hash": "sha256:bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb",
+        "version": "simulation-v1"
+      }
+    ],
+    "risk_budget": {
+      "budget_basis_as_of": "2026-09-07T14:40:00+08:00",
+      "max_buy_value": "1005"
+    },
+    "rulebook_version": "simulation-v1",
+    "schema_major": 2,
+    "source": {
+      "algorithm_version": "simulation-v1",
+      "completed_at": "2026-09-07T14:40:00+08:00",
+      "data_completeness": "FULL",
+      "finalized": true,
+      "market_coverage_bps": 10000,
+      "market_data_cutoff": "2026-09-07T14:40:00+08:00",
+      "publication_status": "FINAL",
+      "published_at": "2026-09-07T14:40:00+08:00",
+      "run_status": "SUCCEEDED",
+      "scheduled_at": "2026-09-07T14:40:00+08:00",
+      "source_hash": "sha256:aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+      "source_revision": 1,
+      "source_run_id": "simulation-source-1"
+    },
+    "strategy_id": "tail-entry",
+    "target_node_generation": 1,
+    "trade_date": "2026-09-07"
+  }
+}

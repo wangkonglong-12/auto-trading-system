@@ -1,0 +1,29 @@
+{
+  "root": "E:\\workspace\\auto-trading-system",
+  "added": [
+    "docs/design/v3.1/ADR-R31-011_维护备份与受控恢复候选.md",
+    "docs/design/v3.1/维护备份与恢复实施报告_20260926.md",
+    "evidence/r31/20260926-backup/README.md",
+    "evidence/r31/20260926-backup/artifact-verification.json",
+    "evidence/r31/20260926-backup/coverage.json",
+    "evidence/r31/20260926-backup/initial-coverage.json",
+    "evidence/r31/20260926-backup/initial-python-tests.xml",
+    "evidence/r31/20260926-backup/installed-tests.xml",
+    "evidence/r31/20260926-backup/python-tests.xml",
+    "src/auto_trading_system/journal/apsw_backup.py",
+    "src/auto_trading_system/runtime/node_backup.py",
+    "tests/v31/test_node_backup.py"
+  ],
+  "deleted": [],
+  "modified": [
+    "README.md",
+    "docs/design/v3.1/开发修订计划与推进记录.md",
+    "docs/design/v3.1/详细设计方案.md",
+    "pyproject.toml",
+    "src/auto_trading_system/apps/node_process/__main__.py",
+    "src/auto_trading_system/runtime/node_layout.py",
+    "src/auto_trading_system/version.py",
+    "tests/unit/test_architecture_layout.py",
+    "开发计划与推进记录.md"
+  ]
+}

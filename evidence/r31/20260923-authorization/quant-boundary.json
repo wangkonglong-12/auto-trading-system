@@ -1,0 +1,12 @@
+{
+  "root": "E:\\workspace\\ai-stock-assistant",
+  "added": [
+    "docs/analysis/review_risk_v8_20260923.py",
+    "scripts/test_risk_progress_v8.cjs"
+  ],
+  "deleted": [],
+  "modified": [
+    "docs/ALIYUN_SERVER_HANDOFF.md",
+    "scripts/local_risk_research.js"
+  ]
+}

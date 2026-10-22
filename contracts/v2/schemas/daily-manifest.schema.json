@@ -1,0 +1,212 @@
+{
+  "$defs": {
+    "DatasetStatus": {
+      "additionalProperties": false,
+      "properties": {
+        "dataset": {
+          "enum": [
+            "plan_results",
+            "submission_records",
+            "broker_orders",
+            "broker_trades",
+            "positions",
+            "assets",
+            "reconciliations",
+            "incidents"
+          ],
+          "title": "Dataset",
+          "type": "string"
+        },
+        "reason": {
+          "default": "",
+          "maxLength": 256,
+          "title": "Reason",
+          "type": "string"
+        },
+        "record_count": {
+          "maximum": 409600,
+          "minimum": 0,
+          "title": "Record Count",
+          "type": "integer"
+        },
+        "status": {
+          "enum": [
+            "COMPLETE",
+            "INCOMPLETE",
+            "UNAVAILABLE"
+          ],
+          "title": "Status",
+          "type": "string"
+        }
+      },
+      "required": [
+        "dataset",
+        "status",
+        "record_count"
+      ],
+      "title": "DatasetStatus",
+      "type": "object"
+    },
+    "PartDescription": {
+      "additionalProperties": false,
+      "properties": {
+        "dataset": {
+          "enum": [
+            "plan_results",
+            "submission_records",
+            "broker_orders",
+            "broker_trades",
+            "positions",
+            "assets",
+            "reconciliations",
+            "incidents"
+          ],
+          "title": "Dataset",
+          "type": "string"
+        },
+        "part_hash": {
+          "pattern": "^sha256:[a-f0-9]{64}$",
+          "title": "Part Hash",
+          "type": "string"
+        },
+        "part_id": {
+          "pattern": "^[A-Za-z0-9_.:-]{1,96}$",
+          "title": "Part Id",
+          "type": "string"
+        },
+        "record_count": {
+          "maximum": 200,
+          "minimum": 1,
+          "title": "Record Count",
+          "type": "integer"
+        },
+        "uncompressed_bytes": {
+          "maximum": 524288,
+          "minimum": 2,
+          "title": "Uncompressed Bytes",
+          "type": "integer"
+        }
+      },
+      "required": [
+        "part_id",
+        "dataset",
+        "record_count",
+        "uncompressed_bytes",
+        "part_hash"
+      ],
+      "title": "PartDescription",
+      "type": "object"
+    }
+  },
+  "additionalProperties": false,
+  "properties": {
+    "account_id": {
+      "pattern": "^[A-Za-z0-9_.:-]{1,96}$",
+      "title": "Account Id",
+      "type": "string"
+    },
+    "batch_id": {
+      "pattern": "^[A-Za-z0-9_.:-]{1,96}$",
+      "title": "Batch Id",
+      "type": "string"
+    },
+    "data_as_of": {
+      "format": "date-time",
+      "title": "Data As Of",
+      "type": "string"
+    },
+    "dataset_status": {
+      "items": {
+        "$ref": "#/$defs/DatasetStatus"
+      },
+      "maxItems": 8,
+      "minItems": 8,
+      "title": "Dataset Status",
+      "type": "array"
+    },
+    "generated_at": {
+      "format": "date-time",
+      "title": "Generated At",
+      "type": "string"
+    },
+    "journal_generation": {
+      "pattern": "^[A-Za-z0-9_.:-]{1,96}$",
+      "title": "Journal Generation",
+      "type": "string"
+    },
+    "last_record_seq": {
+      "minimum": 0,
+      "title": "Last Record Seq",
+      "type": "integer"
+    },
+    "manifest_hash": {
+      "pattern": "^sha256:[a-f0-9]{64}$",
+      "title": "Manifest Hash",
+      "type": "string"
+    },
+    "node_generation": {
+      "minimum": 1,
+      "title": "Node Generation",
+      "type": "integer"
+    },
+    "node_id": {
+      "pattern": "^[A-Za-z0-9_.:-]{1,96}$",
+      "title": "Node Id",
+      "type": "string"
+    },
+    "parts": {
+      "items": {
+        "$ref": "#/$defs/PartDescription"
+      },
+      "maxItems": 2048,
+      "title": "Parts",
+      "type": "array"
+    },
+    "revision": {
+      "minimum": 1,
+      "title": "Revision",
+      "type": "integer"
+    },
+    "schema_major": {
+      "const": 2,
+      "default": 2,
+      "title": "Schema Major",
+      "type": "integer"
+    },
+    "supersedes_batch_id": {
+      "anyOf": [
+        {
+          "pattern": "^[A-Za-z0-9_.:-]{1,96}$",
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Supersedes Batch Id"
+    },
+    "trade_date": {
+      "format": "date",
+      "title": "Trade Date",
+      "type": "string"
+    }
+  },
+  "required": [
+    "batch_id",
+    "node_id",
+    "node_generation",
+    "account_id",
+    "trade_date",
+    "revision",
+    "generated_at",
+    "data_as_of",
+    "journal_generation",
+    "last_record_seq",
+    "parts",
+    "dataset_status",
+    "manifest_hash"
+  ],
+  "title": "DailyManifest",
+  "type": "object"
+}

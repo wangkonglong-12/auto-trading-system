@@ -1,0 +1,30 @@
+{
+  "root": "E:\\workspace\\auto-trading-system",
+  "added": [
+    "docs/design/v3.1/订单观测与持仓批次实施报告_20260921.md",
+    "evidence/r31/20260921-portfolio/artifact-verification.json",
+    "evidence/r31/20260921-portfolio/coverage-all.json",
+    "evidence/r31/20260921-portfolio/python-tests.xml",
+    "evidence/r31/20260921-portfolio/quant-boundary.json",
+    "src/auto_trading_system/apps/trade_runtime/portfolio_simulation.py",
+    "src/auto_trading_system/orders/projection.py",
+    "src/auto_trading_system/reconcile/position_lots.py",
+    "src/auto_trading_system/runtime/observation_v2.py",
+    "tests/v31/test_account_observation.py",
+    "tests/v31/test_portfolio_projection.py"
+  ],
+  "deleted": [],
+  "modified": [
+    "README.md",
+    "docs/architecture-boundaries.md",
+    "docs/design/v3.1/开发修订计划与推进记录.md",
+    "pyproject.toml",
+    "src/auto_trading_system/apps/trade_runtime/__main__.py",
+    "src/auto_trading_system/apps/trade_runtime/engine_simulation.py",
+    "src/auto_trading_system/runtime/engine_v2.py",
+    "src/auto_trading_system/version.py",
+    "tests/unit/test_version.py",
+    "tests/v31/test_engine_v2.py",
+    "开发计划与推进记录.md"
+  ]
+}

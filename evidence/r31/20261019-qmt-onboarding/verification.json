@@ -1,0 +1,174 @@
+{
+  "date": "2026-10-19",
+  "scope": "Real CICC MiniQMT read-only onboarding; source increment based on dev54, EXE unchanged",
+  "result": "PASS_FOR_NORMAL_AFTER_HOURS_READ_ONLY_SCENARIO",
+  "liveTradingReady": false,
+  "releaseChanged": false,
+  "implementation": {
+    "commands": [
+      "python -m auto_trading_system.apps.qmt_onboarding",
+      "scripts/prepare-qmt-readonly.ps1",
+      "scripts/run-qmt-readonly.ps1"
+    ],
+    "safety": [
+      "No order/cancel/transfer API exposed or executed",
+      "Fresh private immutable evidence directories",
+      "SDK runs in a bounded child with private kill-on-close Windows Job",
+      "Installation discovery lock and existing account-scoped mutex",
+      "Accounts selected by fingerprint and STOCK type; shared fund-id across account types allowed",
+      "Discovery/connection/snapshot use fixed base/base+1/base+2 sessions",
+      "Parent final execution report published after own Job closes"
+    ]
+  },
+  "environment": {
+    "root": "E:/中金财富QMT个人版交易端",
+    "clientFileVersion": "2.1.19.3",
+    "preparedEnvironment": ".codex_tmp/qmt-readonly-verified-20261019",
+    "python": "3.11.16 x64",
+    "sdk": "230825b",
+    "sdkArchiveSHA256": "F096D36E0682D1BABEE90148A0124ED2FB98280CBC9FFAEE2631A547D9824205",
+    "comparisonSdk": "250807",
+    "comparisonArchiveSHA256": "905F645C4C0DB2B6F2C598F70C03C2C02EB282C5CEB11B550E63DA702E613C2B",
+    "fileReadiness": "5/5 PASS, technical_ready true"
+  },
+  "fieldHistory": [
+    "Initially both SDKs connected but account info lists were empty.",
+    "User screenshots showed STOCK account awaiting validation login; no password or OTP collected.",
+    "User completed account validation in QMT; SDK discovered one STOCK account.",
+    "First sequential probe reused a stopped SDK session and connect returned -1.",
+    "Changed to three stable distinct phase session IDs with >3s delays; actual end-to-end check then PASS."
+  ],
+  "fieldFinal": {
+    "source": ".codex_tmp/qmt-readonly-verified-20261019/account-after-validation-002",
+    "execution": "PASS",
+    "workerExitCode": 0,
+    "accountCount": 1,
+    "accountType": 2,
+    "activeQueryStatus": 0,
+    "asset": {
+      "records": 1,
+      "structure": "VALID"
+    },
+    "positions": {
+      "records": 1,
+      "structure": "VALID"
+    },
+    "orders": {
+      "records": 0,
+      "result": "EMPTY_LIST"
+    },
+    "trades": {
+      "records": 0,
+      "result": "EMPTY_LIST"
+    },
+    "tick": {
+      "scenario": "CLOSED",
+      "result": "PASS",
+      "subscribeSnapshotUnsubscribe": "PASS"
+    },
+    "cleanupFailures": [],
+    "orderCalls": 0,
+    "cancelCalls": 0
+  },
+  "checks": {
+    "sdkPreparationScript": "PASS actual fresh environment, archive hash, imports and locked dependencies",
+    "runScript": "PASS actual market-only and full read-only",
+    "powerShellParser": "PASS",
+    "ruff": "PASS",
+    "format": "PASS 343 files",
+    "mypy": "PASS 343 files",
+    "secretBoundary": "PASS",
+    "dependencyCheck": "PASS",
+    "fullRegression": {
+      "tests": 2417,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "coveragePercent": 90.59,
+      "coverageFileIsolated": true,
+      "report": "windows-tests.xml",
+      "note": "This full run preceded the final shared-id and stable-session corrections; repeated all affected tests after those fixes."
+    },
+    "finalAffectedRegression": {
+      "tests": 121,
+      "failures": 0,
+      "report": "final-focused.xml",
+      "includes": "31 new onboarding cases, existing QMT adapters/probes and architecture",
+      "validatedFixes": [
+        "Shared account number across distinct account types",
+        "Repeated (id,type) rejected",
+        "Stable session offsets and max base",
+        "None versus empty query results",
+        "Account lock and cleanup errors",
+        "No account APIs in market-only",
+        "Owned Job timeout and late PASS refusal"
+      ]
+    },
+    "frontend": "UNCHANGED, no rebuild required"
+  },
+  "boundary": {
+    "originalCount": 484,
+    "deleted": [],
+    "changed": [
+      {
+        "path": "E:\\workspace\\auto-trading-system\\src\\auto_trading_system\\apps\\qmt_onboarding\\__init__.py",
+        "sha256": "43AFE228271F1A4CDD25BB2B6FFB1D3F95DBAED7338238C5466CE42F41B8ACE9",
+        "change": "ADDED"
+      },
+      {
+        "path": "E:\\workspace\\auto-trading-system\\src\\auto_trading_system\\apps\\qmt_onboarding\\__main__.py",
+        "sha256": "1B2ED747D12093E5085B2932B3684383645AF36B7CE03F7CC9A16C13B28F7ED5",
+        "change": "ADDED"
+      },
+      {
+        "path": "E:\\workspace\\auto-trading-system\\src\\auto_trading_system\\gateways\\broker\\cicc_qmt.py",
+        "sha256": "37479A3EB3223144D60D47B4D534FADE01301C3E567A62EDE75B887763CE2F54",
+        "change": "MODIFIED"
+      },
+      {
+        "path": "E:\\workspace\\auto-trading-system\\tests\\v31\\test_qmt_onboarding.py",
+        "sha256": "85AC436A4DD6B0039766AA5E95DFB68555449D8419CD4DF65C8134B5E3DC93D2",
+        "change": "ADDED"
+      },
+      {
+        "path": "E:\\workspace\\auto-trading-system\\scripts\\prepare-qmt-readonly.ps1",
+        "sha256": "D761DF380AD47884298D7FF0D76B0F1D407B8C44A6B333CE267A0CF3D39220E7",
+        "change": "ADDED"
+      },
+      {
+        "path": "E:\\workspace\\auto-trading-system\\scripts\\run-qmt-readonly.ps1",
+        "sha256": "24DBF5AFF451DF6FFAEEDECE88D6646708045E6B8C8A8A8956BB6BBA358B2FD9",
+        "change": "ADDED"
+      },
+      {
+        "path": "E:\\workspace\\auto-trading-system\\docs\\design\\v3.1\\开发修订计划与推进记录.md",
+        "sha256": "FDFF40EFD098809887743F2E8007847EB1A9730D8CA27FEFDD31831036F3CF6D",
+        "change": "MODIFIED"
+      },
+      {
+        "path": "E:\\workspace\\auto-trading-system\\docs\\design\\v3.1\\QMT真实只读接入实施记录_20261019.md",
+        "sha256": "D02B349F9F24C166D3AB037EF3A7AACCB135CBFFD269E308B84CBC1598603735",
+        "change": "ADDED"
+      }
+    ],
+    "exeSHA256": "B445E7761B5E5E15D12A3CD33161E1E0F9339D90A90AF1F18B12EADD748EDEB5",
+    "additionalRootFiles": [
+      "README.md",
+      "开发计划与推进记录.md",
+      "pyproject.toml"
+    ],
+    "quantBackendWrites": false,
+    "databaseSchemaChanged": false,
+    "taskRegistrationChanged": false,
+    "brokerInstallationConfigurationChangedByAgent": false,
+    "brokerRuntimeFiles": "SDK may create standard queues/logs; user performed login in broker UI",
+    "oldExePreserved": true
+  },
+  "remaining": [
+    "Trading-session tick continuity/freshness, instrument and unit cross-checks",
+    "More QMT account snapshot cases: actual orders/trades, disconnection, status changes and closing transitions",
+    "Real typed read-only Gateway and engine/daily-export integration",
+    "Order/cancel and recovery adapter, then user-approved minimal live test",
+    "Finalized strategy/D1 result contract/actual statements remain separate work items"
+  ]
+}

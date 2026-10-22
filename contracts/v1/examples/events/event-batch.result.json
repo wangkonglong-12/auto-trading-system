@@ -1,0 +1,17 @@
+{
+  "schema_version": "1.0",
+  "request_id": "req_22222222222222222222222222222222",
+  "received_at": "2026-09-04T08:45:01.050+08:00",
+  "accepted": 1,
+  "duplicates": 0,
+  "rejected": 0,
+  "high_watermark": 1,
+  "results": [
+    {
+      "event_id": "evt_00000000000000000000000000000001",
+      "event_hash": "sha256:f850e7c49676c7ddce738afc607900a3d3a3757b4da3f4c80e1f60beedd25ca4",
+      "status": "ACCEPTED",
+      "retryable": false
+    }
+  ]
+}

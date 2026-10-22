@@ -1,0 +1,8 @@
+{
+  "schema": "qmt-sdk-environment/v1",
+  "version": "230825b",
+  "source": "https://dict.thinktrader.net/packages/xtquant_0825b_2023-09-20.rar",
+  "archive_sha256": "F096D36E0682D1BABEE90148A0124ED2FB98280CBC9FFAEE2631A547D9824205",
+  "python": "3.11 x64",
+  "real_trading_enabled": false
+}

@@ -1,0 +1,40 @@
+{
+  "root": "E:\\workspace\\auto-trading-system",
+  "added": [
+    "contracts/v2/schemas/exit-transition.schema.json",
+    "contracts/v2/schemas/signed-exit-context.schema.json",
+    "docs/design/v3.1/ADR-R31-003_D1持续运行与独立状态.md",
+    "docs/design/v3.1/D1策略运行与状态持久化实施报告_20260921.md",
+    "evidence/r31/20260921-exit-owner/artifact-verification-final.json",
+    "evidence/r31/20260921-exit-owner/artifact-verification.json",
+    "evidence/r31/20260921-exit-owner/coverage-all.json",
+    "evidence/r31/20260921-exit-owner/python-final.txt",
+    "evidence/r31/20260921-exit-owner/python-tests.xml",
+    "evidence/r31/20260921-exit-owner/quality-gate-final.txt",
+    "evidence/r31/20260921-exit-owner/quality-gate.txt",
+    "evidence/r31/20260921-exit-owner/quant-boundary.json",
+    "evidence/r31/20260921-exit-owner/windows-boundary-preliminary.json",
+    "src/auto_trading_system/apps/trade_runtime/exit_owner_simulation.py",
+    "src/auto_trading_system/runtime/execution_scope.py",
+    "src/auto_trading_system/strategies/exit_context.py",
+    "src/auto_trading_system/strategies/exit_owner.py",
+    "src/auto_trading_system/strategies/exit_state_store.py",
+    "tests/v31/test_exit_owner.py"
+  ],
+  "deleted": [],
+  "modified": [
+    "README.md",
+    "contracts/v2/schemas/submission-record.schema.json",
+    "docs/design/v3.1/开发修订计划与推进记录.md",
+    "docs/design/v3.1/详细设计方案.md",
+    "pyproject.toml",
+    "scripts/export-v2-contracts.py",
+    "src/auto_trading_system/apps/trade_runtime/__main__.py",
+    "src/auto_trading_system/apps/trade_runtime/engine_simulation.py",
+    "src/auto_trading_system/journal/critical_models.py",
+    "src/auto_trading_system/runtime/engine_v2.py",
+    "src/auto_trading_system/runtime/observation_v2.py",
+    "src/auto_trading_system/version.py",
+    "开发计划与推进记录.md"
+  ]
+}

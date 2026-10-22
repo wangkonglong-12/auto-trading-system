@@ -1,0 +1,25 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://contracts.auto-trading.local/v1/event-batch-request.schema.json",
+  "title": "EventBatchRequest v1.0",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["schema_version", "request_id", "node_id", "account_id", "sent_at", "events"],
+  "properties": {
+    "schema_version": {"const": "1.0"},
+    "request_id": {"type": "string", "pattern": "^req_[0-9a-f]{32}$"},
+    "node_id": {"type": "string", "pattern": "^node-[a-z0-9][a-z0-9-]{2,47}$"},
+    "account_id": {"type": "string", "pattern": "^acct_[A-Za-z0-9_-]{3,48}$"},
+    "sent_at": {
+      "type": "string",
+      "format": "date-time",
+      "pattern": "^[0-9]{4}-[0-9]{2}-[0-9]{2}T[0-9]{2}:[0-9]{2}:[0-9]{2}(\\.[0-9]{1,6})?\\+08:00$"
+    },
+    "events": {
+      "type": "array",
+      "minItems": 1,
+      "maxItems": 50,
+      "items": {"$ref": "domain-event.schema.json"}
+    }
+  }
+}

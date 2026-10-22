@@ -1,0 +1,29 @@
+{
+  "date": "2026-09-07",
+  "version": "0.1.0.dev38",
+  "qualification": "OFFLINE_DEVELOPMENT_ONLY",
+  "python": "3.11.16",
+  "artifacts": [
+    {
+      "path": ".codex_tmp/r31-20260907/final-dist/auto_trading_system-0.1.0.dev38-py3-none-any.whl",
+      "bytes": 637102,
+      "sha256": "7b966fb930b0a695f589866777e3428ceeab072a113bf39261e811d2fb407a55"
+    },
+    {
+      "path": ".codex_tmp/r31-20260907/final-dist/auto_trading_system-0.1.0.dev38.tar.gz",
+      "bytes": 7487853,
+      "sha256": "c4b80f0f1c9d488c46cd40a57602ddedb4781bb89dd7b1a6e861f349112cb3f9"
+    }
+  ],
+  "installed_wheel_test": {
+    "environment": ".codex_tmp/r31-hash-install",
+    "runtime_dependencies_installed_with_hashes": true,
+    "python_isolated_mode": true,
+    "status": "PASS",
+    "result": "evidence/r31/20260907/simulation-result.json",
+    "real_trading_enabled": false,
+    "remote": "IN_MEMORY_TEST_RECEIVER"
+  },
+  "production_migrations_executed": false,
+  "qmt_field_qualified": false
+}

@@ -1,0 +1,38 @@
+{
+  "schema_version": "1.0",
+  "reconciliation_id": "recon_20260904_151000_002",
+  "request_id": "req_cdcdcdcdcdcdcdcdcdcdcdcdcdcdcdcd",
+  "node_id": "node-shanghai-001",
+  "account_id": "acct_primary_001",
+  "trade_date": "2026-09-04",
+  "trigger": "RECONNECT",
+  "started_at": "2026-09-04T14:45:00+08:00",
+  "completed_at": "2026-09-04T14:45:06+08:00",
+  "status": "DISCREPANCIES",
+  "inputs": [
+    {"kind": "ASSET", "query_status": "AVAILABLE", "as_of": "2026-09-04T14:45:00+08:00", "reference_id": "asset_20260904_144500_001"},
+    {"kind": "POSITION", "query_status": "AVAILABLE", "as_of": "2026-09-04T14:45:01+08:00", "reference_id": "position_20260904_144501_001"},
+    {"kind": "ORDER", "query_status": "AVAILABLE", "as_of": "2026-09-04T14:45:02+08:00", "reference_id": "orders_20260904_144502_001"},
+    {"kind": "TRADE", "query_status": "AVAILABLE", "as_of": "2026-09-04T14:45:03+08:00", "reference_id": "trades_20260904_144503_001"}
+  ],
+  "discrepancies": [
+    {
+      "discrepancy_id": "diff_position_600000_001",
+      "category": "POSITION",
+      "outcome": "VALUE_MISMATCH",
+      "subject_key": "600000.SH",
+      "field": "volume",
+      "local_value": 9900,
+      "broker_value": 10000,
+      "severity": "CRITICAL",
+      "resolution_status": "OPEN",
+      "summary": "Local position is missing 100 shares recorded by the broker"
+    }
+  ],
+  "summary": {
+    "compared_subjects": 42,
+    "total_discrepancies": 1,
+    "open_discrepancies": 1,
+    "critical_discrepancies": 1
+  }
+}

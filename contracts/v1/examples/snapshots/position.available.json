@@ -1,0 +1,33 @@
+{
+  "schema_version": "1.0",
+  "snapshot_id": "position_20260904_151000_001",
+  "request_id": "req_bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb",
+  "node_id": "node-shanghai-001",
+  "account_id": "acct_primary_001",
+  "trade_date": "2026-09-04",
+  "as_of": "2026-09-04T15:10:01+08:00",
+  "query_status": "AVAILABLE",
+  "broker_account_status": "OK",
+  "positions": [
+    {
+      "symbol": "600000.SH",
+      "volume": 10000,
+      "can_use_volume": 10000,
+      "frozen_volume": 0,
+      "on_road_volume": 0,
+      "yesterday_volume": 10000,
+      "average_price": "12.3456",
+      "market_value": "123000.00"
+    },
+    {
+      "symbol": "000001.SZ",
+      "volume": 5000,
+      "can_use_volume": 0,
+      "frozen_volume": 0,
+      "on_road_volume": 5000,
+      "yesterday_volume": 0,
+      "average_price": "11.4000",
+      "market_value": "57000.00"
+    }
+  ]
+}

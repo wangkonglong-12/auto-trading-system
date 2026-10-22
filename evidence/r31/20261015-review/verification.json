@@ -1,0 +1,125 @@
+{
+  "date": "2026-10-15",
+  "purpose": "代码复核、已有功能错误修复、页面及非页面功能盘点",
+  "releaseChanged": false,
+  "currentRelease": "0.1.0.dev53",
+  "results": {
+    "windowsPython": {
+      "passed": 2381,
+      "failed": 0,
+      "errors": 0,
+      "skipped": 0,
+      "coveragePercent": 91.19,
+      "sourceOverride": "E:/workspace/auto-trading-system/src"
+    },
+    "quantModule": {
+      "passed": 173,
+      "failed": 0,
+      "errors": 0,
+      "skipped": 0,
+      "isolatedMySQL": true
+    },
+    "operatorConsole": {
+      "passed": 43,
+      "coverage": {
+        "statements": 90.23,
+        "branches": 88.37,
+        "functions": 88.81,
+        "lines": 93.55
+      }
+    },
+    "statementScope": {
+      "passed": 9
+    },
+    "dailyHistoryComponent": {
+      "passed": 4
+    },
+    "windowsLintTypeBuild": "PASS",
+    "quantModuleTypecheck": "PASS",
+    "quantModuleEnabledBuild": "PASS",
+    "quantModuleDisabledBuild": "PASS",
+    "pythonRuffMypyCredentialBoundary": "PASS",
+    "v2ContractArtifacts": "UNCHANGED_VERIFIED",
+    "quantFullTypecheck": "FAIL_6_PREEXISTING_ERRORS_IN_5_UNRELATED_FILES"
+  },
+  "scope": {
+    "windows": {
+      "baselineFiles": 469,
+      "currentFiles": 470,
+      "deleted": [],
+      "modified": [
+        {
+          "path": "E:\\workspace\\auto-trading-system\\docs\\design\\v3.1\\开发修订计划与推进记录.md",
+          "hash": "D02692E6DDE7339ADD9EF9BBB346D81288A21B2A708B2FA09F02CF37168E3C2A"
+        },
+        {
+          "path": "E:\\workspace\\auto-trading-system\\docs\\design\\v3.1\\详细设计方案.md",
+          "hash": "BF547096378F298450765EF63C54B51B36135F42878048C954601012EAF31E4C"
+        },
+        {
+          "path": "E:\\workspace\\auto-trading-system\\frontend\\operator-console\\src\\node\\NodeConsole.vue",
+          "hash": "23884F0161C28E98CA83BCE6F430F7952AA249FE2BF8374FA700FBC6F07D7064"
+        },
+        {
+          "path": "E:\\workspace\\auto-trading-system\\frontend\\operator-console\\src\\test\\nodeConsole.test.ts",
+          "hash": "49096900D89D7C3AE28E6768A6E817A8BF54C3285F9E2BD8127820CF502E331C"
+        }
+      ],
+      "added": [
+        {
+          "path": "E:\\workspace\\auto-trading-system\\docs\\design\\v3.1\\代码复核与完整功能清单_20261015.md",
+          "hash": "49A5B513A03CBE9F81B7AA6034A5DB760FCB48198C97FD0AF5AFB2C9E4D87551"
+        }
+      ]
+    },
+    "quant": {
+      "baselineFiles": 106,
+      "currentFiles": 109,
+      "deleted": [],
+      "modified": [
+        {
+          "hash": "9E9CCC26061CBBADAA8974BA01AE05B478E4E3B6E237508E0EBE5700245892F5",
+          "path": "E:\\workspace\\ai-stock-assistant\\backend\\app\\services\\auto_trading\\statement_reconcile.py"
+        },
+        {
+          "hash": "685C18220758486D52273105970FA96E49288A5492DA72C3785B87E4EE166A19",
+          "path": "E:\\workspace\\ai-stock-assistant\\backend\\tests\\auto_trading\\test_daily_business_v2.py"
+        },
+        {
+          "hash": "F36BFC2866834F9E48ABD0CB00657BD7E0F28FE588E42B3C4D36811F42C03FF6",
+          "path": "E:\\workspace\\ai-stock-assistant\\frontend\\src\\views\\auto_trading\\DailyHistory.vue"
+        }
+      ],
+      "added": [
+        {
+          "hash": "A9FFCE776F479CC3B8FB9555DA77B033B6119886A36F2EFD52E13E0C650B7B88",
+          "path": "E:\\workspace\\ai-stock-assistant\\frontend\\src\\api\\auto_trading\\statementScope.ts"
+        },
+        {
+          "hash": "BFA0B89EA2899872ECED48AE8781AA94FC51FBA087E7EF1C23536F20230983CC",
+          "path": "E:\\workspace\\ai-stock-assistant\\frontend\\tests\\auto_trading\\daily-history.behavior.test.ts"
+        },
+        {
+          "hash": "BD9AB28497BA9ABB0F12D38ACF3BD4E7E58DED553846172C83000EA9EE900E5A",
+          "path": "E:\\workspace\\ai-stock-assistant\\frontend\\tests\\auto_trading\\statement-scope.test.cjs"
+        }
+      ]
+    },
+    "additionalWindowsDocumentation": [
+      "README.md",
+      "开发计划与推进记录.md"
+    ],
+    "sqlSchemaChanged": false,
+    "productionDeployment": false,
+    "scheduledTaskRegistration": false,
+    "realBrokerOperation": false,
+    "reviewMySQLStopped": true
+  },
+  "limitations": [
+    "D1退出汇总契约仍缺项",
+    "正式策略和底仓日内回转规则未冻结",
+    "真实QMT生产适配及现场验收待完成",
+    "正式账单结算与部分设计页面尚未实现"
+  ],
+  "report": "docs/design/v3.1/代码复核与完整功能清单_20261015.md"
+}

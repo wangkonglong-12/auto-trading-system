@@ -1,0 +1,70 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://contracts.auto-trading.local/v1/event-batch-result.schema.json",
+  "title": "EventBatchResult v1.0",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schema_version",
+    "request_id",
+    "received_at",
+    "accepted",
+    "duplicates",
+    "rejected",
+    "high_watermark",
+    "results"
+  ],
+  "properties": {
+    "schema_version": {"const": "1.0"},
+    "request_id": {"type": "string", "pattern": "^req_[0-9a-f]{32}$"},
+    "received_at": {
+      "type": "string",
+      "format": "date-time",
+      "pattern": "^[0-9]{4}-[0-9]{2}-[0-9]{2}T[0-9]{2}:[0-9]{2}:[0-9]{2}(\\.[0-9]{1,6})?\\+08:00$"
+    },
+    "accepted": {"type": "integer", "minimum": 0, "maximum": 50},
+    "duplicates": {"type": "integer", "minimum": 0, "maximum": 50},
+    "rejected": {"type": "integer", "minimum": 0, "maximum": 50},
+    "high_watermark": {
+      "type": "integer",
+      "minimum": 0,
+      "maximum": 9223372036854775807
+    },
+    "results": {
+      "type": "array",
+      "minItems": 1,
+      "maxItems": 50,
+      "items": {"$ref": "#/$defs/receipt"}
+    }
+  },
+  "$defs": {
+    "receipt": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["event_id", "event_hash", "status", "retryable"],
+      "properties": {
+        "event_id": {"type": "string", "pattern": "^evt_[0-9a-f]{32}$"},
+        "event_hash": {"type": "string", "pattern": "^sha256:[0-9a-f]{64}$"},
+        "status": {"enum": ["ACCEPTED", "DUPLICATE", "REJECTED"]},
+        "retryable": {"type": "boolean"},
+        "error_code": {"type": "string", "pattern": "^[A-Z][A-Z0-9_]{2,63}$"},
+        "error_message": {"type": "string", "minLength": 1, "maxLength": 256}
+      },
+      "allOf": [
+        {
+          "if": {"properties": {"status": {"const": "REJECTED"}}, "required": ["status"]},
+          "then": {"required": ["error_code", "error_message"]},
+          "else": {
+            "properties": {"retryable": {"const": false}},
+            "not": {
+              "anyOf": [
+                {"required": ["error_code"]},
+                {"required": ["error_message"]}
+              ]
+            }
+          }
+        }
+      ]
+    }
+  }
+}

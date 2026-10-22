@@ -1,0 +1,34 @@
+{
+  "root": "E:\\workspace\\auto-trading-system",
+  "added": [
+    "docs/design/v3.1/ADR-R31-006_独立进程人工授权.md",
+    "docs/design/v3.1/本地人工授权实施报告_20260923.md",
+    "evidence/r31/20260923-authorization/artifact-verification.json",
+    "evidence/r31/20260923-authorization/cli-entry-verification.json",
+    "evidence/r31/20260923-authorization/coverage-all.json",
+    "evidence/r31/20260923-authorization/installed-tests.xml",
+    "evidence/r31/20260923-authorization/python-tests.xml",
+    "evidence/r31/20260923-authorization/quant-boundary-final.json",
+    "evidence/r31/20260923-authorization/quant-boundary.json",
+    "evidence/r31/20260923-authorization/windows-boundary-review.json",
+    "src/auto_trading_system/apps/node_process/authorization_cli.py",
+    "src/auto_trading_system/control/node_authorization.py",
+    "tests/v31/test_node_authorization.py"
+  ],
+  "deleted": [],
+  "modified": [
+    "README.md",
+    "config/v2/node-config.schema.json",
+    "config/v2/node.mock.example.json",
+    "docs/design/v3.1/开发修订计划与推进记录.md",
+    "docs/design/v3.1/详细设计方案.md",
+    "pyproject.toml",
+    "src/auto_trading_system/apps/node_process/__main__.py",
+    "src/auto_trading_system/config/node_v2.py",
+    "src/auto_trading_system/control/approval_v2.py",
+    "src/auto_trading_system/runtime/engine_v2.py",
+    "src/auto_trading_system/runtime/node_engine.py",
+    "src/auto_trading_system/version.py",
+    "开发计划与推进记录.md"
+  ]
+}

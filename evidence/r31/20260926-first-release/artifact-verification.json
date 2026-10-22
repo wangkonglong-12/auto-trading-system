@@ -1,0 +1,31 @@
+{
+  "version": "0.1.0.dev53",
+  "tests": {
+    "windows-tests.xml": 2381,
+    "installed-tests.xml": 877,
+    "quant-tests.xml": 169,
+    "artifact-e2e-tests.xml": 1
+  },
+  "coverage_percent": 91.1888910024729,
+  "wheel_python_sources_equal": 204,
+  "wheel_static_assets_equal": 11,
+  "installed_source_location_verified": true,
+  "artifacts": {
+    "auto_trading_system-0.1.0.dev53-py3-none-any.whl": "126fb5d742ef9c5eb1870c2bbc7ebd40d967fec491be1377d997135a472a8984",
+    "quant-auto-trading-dev53-increment.zip": "98e400d3fe948a6161a8acd77270a564f5bfc339808f1a9e9e55a009f698780c",
+    "auto-trading-first-offline-dev53.zip": "863e0ddca23637caf07967f1406e69dcf24bfc74056e31f1386e1619d1fff85f"
+  },
+  "frontend_build": {
+    "enabled": "PASS",
+    "disabled": "PASS"
+  },
+  "module_types": "PASS",
+  "whole_frontend_types": "FAIL_6_PRE_EXISTING_ERRORS_IN_5_UNRELATED_FILES",
+  "production_database_touched": false,
+  "registered_tasks_changed": false,
+  "real_qmt_connected": false,
+  "business_files_deleted": 0,
+  "scope": "F1_F4_OFFLINE_ACCEPTANCE",
+  "live_status": "NOT_READY",
+  "d1_business_status": "INCOMPLETE_EXIT_SUMMARY_CONTRACT_PENDING"
+}

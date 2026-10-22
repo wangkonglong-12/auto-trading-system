@@ -1,0 +1,104 @@
+{
+  "additionalProperties": false,
+  "properties": {
+    "account_id": {
+      "pattern": "^[A-Za-z0-9_.:-]{1,96}$",
+      "title": "Account Id",
+      "type": "string"
+    },
+    "confirmed_by": {
+      "pattern": "^[A-Za-z0-9_.:-]{1,96}$",
+      "title": "Confirmed By",
+      "type": "string"
+    },
+    "directions": {
+      "items": {
+        "enum": [
+          "BUY",
+          "SELL"
+        ],
+        "type": "string"
+      },
+      "maxItems": 2,
+      "minItems": 1,
+      "title": "Directions",
+      "type": "array"
+    },
+    "engine_boot_id": {
+      "pattern": "^[A-Za-z0-9_.:-]{1,96}$",
+      "title": "Engine Boot Id",
+      "type": "string"
+    },
+    "grant_id": {
+      "pattern": "^[A-Za-z0-9_.:-]{1,96}$",
+      "title": "Grant Id",
+      "type": "string"
+    },
+    "max_buy_value": {
+      "description": "人民币元，最多2位小数",
+      "pattern": "^(0|[1-9][0-9]{0,11})(\\.[0-9]{1,2})?$",
+      "title": "Max Buy Value",
+      "type": "string"
+    },
+    "max_order_value": {
+      "description": "人民币元，最多2位小数",
+      "pattern": "^(0|[1-9][0-9]{0,11})(\\.[0-9]{1,2})?$",
+      "title": "Max Order Value",
+      "type": "string"
+    },
+    "max_positions": {
+      "maximum": 15,
+      "minimum": 0,
+      "title": "Max Positions",
+      "type": "integer"
+    },
+    "mode": {
+      "enum": [
+        "PAPER",
+        "SHADOW",
+        "ASSISTED",
+        "LIVE_EXIT_ONLY",
+        "LIVE"
+      ],
+      "title": "Mode",
+      "type": "string"
+    },
+    "recovery_report_hash": {
+      "pattern": "^sha256:[a-f0-9]{64}$",
+      "title": "Recovery Report Hash",
+      "type": "string"
+    },
+    "session_generation": {
+      "minimum": 1,
+      "title": "Session Generation",
+      "type": "integer"
+    },
+    "valid_from": {
+      "format": "date-time",
+      "title": "Valid From",
+      "type": "string"
+    },
+    "valid_until": {
+      "format": "date-time",
+      "title": "Valid Until",
+      "type": "string"
+    }
+  },
+  "required": [
+    "grant_id",
+    "account_id",
+    "engine_boot_id",
+    "session_generation",
+    "mode",
+    "directions",
+    "max_buy_value",
+    "max_order_value",
+    "max_positions",
+    "valid_from",
+    "valid_until",
+    "confirmed_by",
+    "recovery_report_hash"
+  ],
+  "title": "SessionGrant",
+  "type": "object"
+}

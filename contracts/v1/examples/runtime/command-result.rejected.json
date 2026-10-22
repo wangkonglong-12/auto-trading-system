@@ -1,0 +1,20 @@
+{
+  "schema_version": "1.0",
+  "result_id": "cmdres_auto_resume_20260904_043",
+  "request_id": "req_f0f0f0f0f0f0f0f0f0f0f0f0f0f0f0f0",
+  "command_id": "cmd_auto_resume_20260904_043",
+  "command_seq": 43,
+  "node_id": "node-shanghai-001",
+  "account_id": "acct_primary_001",
+  "received_at": "2026-09-04T14:45:20+08:00",
+  "completed_at": "2026-09-04T14:45:20.050000+08:00",
+  "status": "REJECTED",
+  "retryable": false,
+  "reason_code": "LOCAL_HALT_HAS_PRIORITY",
+  "previous_state": "HALT",
+  "error": {
+    "code": "LOCAL_HALT_HAS_PRIORITY",
+    "message": "A central command cannot clear the local emergency halt",
+    "retryable": false
+  }
+}

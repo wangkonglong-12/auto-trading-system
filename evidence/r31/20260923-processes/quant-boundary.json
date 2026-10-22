@@ -1,0 +1,12 @@
+{
+  "root": "E:\\workspace\\ai-stock-assistant",
+  "added": [],
+  "deleted": [],
+  "modified": [
+    "backend/app/main.py",
+    "backend/app/services/tail_hot_picks_service.py",
+    "backend/tests/test_scheduler_startup_config.py",
+    "backend/tests/test_tail_hot_multi_clock.py",
+    "frontend/src/views/AiPicksPro.vue"
+  ]
+}

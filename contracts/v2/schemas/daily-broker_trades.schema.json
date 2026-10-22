@@ -1,0 +1,119 @@
+{
+  "additionalProperties": false,
+  "properties": {
+    "account_id": {
+      "description": "内部账户标识，必须与上传清单一致",
+      "pattern": "^[A-Za-z0-9_.:-]{1,96}$",
+      "title": "Account Id",
+      "type": "string"
+    },
+    "broker_order_id": {
+      "pattern": "^[A-Za-z0-9_.:-]{1,96}$",
+      "title": "Broker Order Id",
+      "type": "string"
+    },
+    "broker_trade_id": {
+      "pattern": "^[A-Za-z0-9_.:-]{1,96}$",
+      "title": "Broker Trade Id",
+      "type": "string"
+    },
+    "client_order_id": {
+      "anyOf": [
+        {
+          "pattern": "^[A-Za-z0-9_.:-]{1,96}$",
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Client Order Id"
+    },
+    "gross_amount": {
+      "description": "券商原始成交金额，元；费用单独核对",
+      "pattern": "^(0|[1-9][0-9]{0,11})(\\.[0-9]{1,2})?$",
+      "title": "Gross Amount",
+      "type": "string"
+    },
+    "market": {
+      "enum": [
+        "SH",
+        "SZ",
+        "BJ"
+      ],
+      "title": "Market",
+      "type": "string"
+    },
+    "observed_at": {
+      "description": "该条事实的观测时点",
+      "format": "date-time",
+      "title": "Observed At",
+      "type": "string"
+    },
+    "origin": {
+      "enum": [
+        "STRATEGY",
+        "MANUAL",
+        "UNKNOWN"
+      ],
+      "title": "Origin",
+      "type": "string"
+    },
+    "price": {
+      "description": "每股人民币元，最多8位小数",
+      "pattern": "^(0|[1-9][0-9]{0,9})(\\.[0-9]{1,8})?$",
+      "title": "Price",
+      "type": "string"
+    },
+    "quantity": {
+      "description": "整数股",
+      "maximum": 2147483647,
+      "minimum": 0,
+      "title": "Quantity",
+      "type": "integer"
+    },
+    "side": {
+      "enum": [
+        "BUY",
+        "SELL"
+      ],
+      "title": "Side",
+      "type": "string"
+    },
+    "symbol": {
+      "description": "带市场后缀的证券代码",
+      "pattern": "^[0-9]{6}\\.(SH|SZ|BJ)$",
+      "title": "Symbol",
+      "type": "string"
+    },
+    "trade_date": {
+      "description": "所属交易日",
+      "format": "date",
+      "title": "Trade Date",
+      "type": "string"
+    },
+    "traded_at": {
+      "format": "date-time",
+      "title": "Traded At",
+      "type": "string"
+    }
+  },
+  "required": [
+    "account_id",
+    "trade_date",
+    "observed_at",
+    "broker_trade_id",
+    "broker_order_id",
+    "market",
+    "symbol",
+    "side",
+    "quantity",
+    "price",
+    "gross_amount",
+    "traded_at",
+    "origin"
+  ],
+  "title": "BrokerTradeRecord",
+  "type": "object"
+}

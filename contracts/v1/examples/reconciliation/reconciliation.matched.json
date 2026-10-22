@@ -1,0 +1,25 @@
+{
+  "schema_version": "1.0",
+  "reconciliation_id": "recon_20260904_151000_001",
+  "request_id": "req_cccccccccccccccccccccccccccccccc",
+  "node_id": "node-shanghai-001",
+  "account_id": "acct_primary_001",
+  "trade_date": "2026-09-04",
+  "trigger": "EOD_1510",
+  "started_at": "2026-09-04T15:10:00+08:00",
+  "completed_at": "2026-09-04T15:10:08+08:00",
+  "status": "MATCHED",
+  "inputs": [
+    {"kind": "ASSET", "query_status": "AVAILABLE", "as_of": "2026-09-04T15:10:00+08:00", "reference_id": "asset_20260904_151000_001"},
+    {"kind": "POSITION", "query_status": "AVAILABLE", "as_of": "2026-09-04T15:10:01+08:00", "reference_id": "position_20260904_151000_001"},
+    {"kind": "ORDER", "query_status": "AVAILABLE", "as_of": "2026-09-04T15:10:02+08:00", "reference_id": "orders_20260904_151002_001"},
+    {"kind": "TRADE", "query_status": "AVAILABLE", "as_of": "2026-09-04T15:10:03+08:00", "reference_id": "trades_20260904_151003_001"}
+  ],
+  "discrepancies": [],
+  "summary": {
+    "compared_subjects": 42,
+    "total_discrepancies": 0,
+    "open_discrepancies": 0,
+    "critical_discrepancies": 0
+  }
+}

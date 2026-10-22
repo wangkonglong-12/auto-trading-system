@@ -1,0 +1,26 @@
+{
+  "schema_version": "1.0",
+  "event_id": "evt_00000000000000000000000000000002",
+  "event_hash": "sha256:7a4e2e8851fd2d902ac7937fa1fddebfe075c1c5b499a33d402eea33bbfe81ca",
+  "node_id": "node-demo-001",
+  "account_id": "acct_demo_001",
+  "boot_id": "boot_11111111111111111111111111111111",
+  "local_seq": 2,
+  "correlation_id": "corr_plan_20260904_0001",
+  "causation_id": "plan_01K43TAIL20260904001",
+  "source": "RUNTIME",
+  "severity": "INFO",
+  "event_type": "PLAN_STATUS_CHANGED",
+  "aggregate_type": "PLAN",
+  "aggregate_id": "plan_01K43TAIL20260904001",
+  "trade_date": "2026-09-04",
+  "occurred_at": "2026-09-04T14:34:30+08:00",
+  "recorded_at": "2026-09-04T14:34:30.002+08:00",
+  "payload": {
+    "plan_id": "plan_01K43TAIL20260904001",
+    "plan_hash": "sha256:1111111111111111111111111111111111111111111111111111111111111111",
+    "previous_status": "VALIDATED",
+    "new_status": "ACKED",
+    "reason_code": "PLAN_ACCEPTED"
+  }
+}

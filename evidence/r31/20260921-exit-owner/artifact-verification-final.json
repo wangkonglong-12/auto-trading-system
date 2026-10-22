@@ -1,0 +1,119 @@
+{
+  "version": "0.1.0.dev43",
+  "python": "3.11.16",
+  "installed_target": "E:\\workspace\\auto-trading-system\\.codex_tmp\\r31-exit-owner\\installed-wheel",
+  "package_location_verified": true,
+  "wheel_python_files_equal_current_source": 165,
+  "sdist_document_files_equal_current_source": 15,
+  "artifacts": {
+    "dist\\auto_trading_system-0.1.0.dev43-py3-none-any.whl": "94f0f0a7aa262a9752add27dcf297664da8df211d2cd810bef9e657e3ee3c87a",
+    "dist\\auto_trading_system-0.1.0.dev43.tar.gz": "a7d23a8549b9e621ff10d6e68662c60aa823d1ea7b3eec984cf5e85ac098ed10"
+  },
+  "python_tests": 1914,
+  "new_tests": 59,
+  "frontend_tests": 24,
+  "coverage": {
+    "covered_lines": 15226,
+    "num_statements": 16323,
+    "percent_covered": 90.97559824420635,
+    "percent_covered_display": "90.98",
+    "missing_lines": 1097,
+    "excluded_lines": 315,
+    "percent_statements_covered": 93.27942167493721,
+    "percent_statements_covered_display": "93.28",
+    "num_branches": 4864,
+    "num_partial_branches": 773,
+    "covered_branches": 4049,
+    "missing_branches": 815,
+    "percent_branches_covered": 83.24424342105263,
+    "percent_branches_covered_display": "83.24"
+  },
+  "installed_simulations": {
+    "--simulate-engine": {
+      "cancelled_remaining_quantity": 50,
+      "durable_grant_applied": true,
+      "filled_quantity": 50,
+      "mode": "OFFLINE_ENGINE",
+      "old_grant_not_restored": true,
+      "order_count": 1,
+      "output_directory": "E:\\workspace\\auto-trading-system\\.codex_tmp\\r31-exit-owner\\installed-smoke\\engine-simulation-4c2d62f2006c44cca1ef01badd1bdec3",
+      "real_trading_enabled": false,
+      "recovery_report_hash": "sha256:f9ed352178fb1d1ccfe63060ce5e0a8d848d00aaaf42ebcd4d8e16f7c8a71db3",
+      "recovery_status": "CLEAR",
+      "restart_paused": true,
+      "submission_records": 2
+    },
+    "--simulate-portfolio": {
+      "d0_sellable_policy_shares": 0,
+      "lot_count": 2,
+      "lot_ids_rebuilt": true,
+      "lots": [
+        {
+          "bought_quantity": 50,
+          "calendar_version": "offline-calendar-v1",
+          "eligible_sell_date": "2026-09-08",
+          "lot_id": "lot-432218a42e61ea1c82994acb3f6903f3890ce7f0450b1cc0ea1b5275a1b3c524",
+          "reserved_quantity": 0,
+          "sold_quantity": 0,
+          "strategy_id": "tail-entry",
+          "symbol": "000001.SZ",
+          "trade_date_acquired": "2026-09-07"
+        },
+        {
+          "bought_quantity": 50,
+          "calendar_version": "offline-calendar-v1",
+          "eligible_sell_date": "2026-09-08",
+          "lot_id": "lot-a7712c521ff0b8e10a381fdc3b3853839d082f2591159295fc1110927e0d7ab6",
+          "reserved_quantity": 0,
+          "sold_quantity": 0,
+          "strategy_id": "tail-entry",
+          "symbol": "000001.SZ",
+          "trade_date_acquired": "2026-09-07"
+        }
+      ],
+      "mode": "OFFLINE_PORTFOLIO",
+      "next_session_sellable_policy_shares": 100,
+      "order_count": 2,
+      "output_directory": "E:\\workspace\\auto-trading-system\\.codex_tmp\\r31-exit-owner\\installed-smoke\\portfolio-simulation-ef5998c013294ba99d4b6ba6178d415d",
+      "query_repaired_missing_callbacks": true,
+      "real_trading_enabled": false,
+      "remaining_shares": 100,
+      "restart_paused": true,
+      "same_grant_across_rounds": true,
+      "sellable_policy_note": "Offline projection with hypothetical broker sellable=100; no SELL dispatched",
+      "submission_records": 4
+    },
+    "--simulate-exit": {
+      "d1_broker_orders": 2,
+      "final_remaining": 50,
+      "first_fill": 20,
+      "initial_exit_quantity": 50,
+      "mode": "OFFLINE_EXIT",
+      "opening_checkpoint_hash": "sha256:b4997f950d65631d9d2971381ff4099619d7cc1e259a9c0450cddb4a54b572d4",
+      "opening_quantity": 100,
+      "output_directory": "E:\\workspace\\auto-trading-system\\.codex_tmp\\r31-exit-owner\\installed-smoke\\exit-simulation-5be65b5e24244f59b2db6c482f50ee05",
+      "real_trading_enabled": false,
+      "residual_child_quantity": 30,
+      "restart_paused": true,
+      "restored_path_complete": false,
+      "target_remaining": 50
+    },
+    "--simulate-exit-owner": {
+      "active_state_revisions": 2,
+      "afternoon_plan_loaded": false,
+      "d1_broker_orders": 2,
+      "final_remaining": 0,
+      "first_child_quantity": 50,
+      "first_fill": 20,
+      "mode": "OFFLINE_EXIT_OWNER",
+      "no_order_state_restored": true,
+      "output_directory": "E:\\workspace\\auto-trading-system\\.codex_tmp\\r31-exit-owner\\installed-smoke\\exit-owner-0d8021a8b40046969ed5d0ab4ccc90f1",
+      "real_trading_enabled": false,
+      "residual_child_quantity": 80,
+      "restart_paused": true,
+      "stale_quote_cancelled": true,
+      "target_tightened_while_order_active": true,
+      "time_check_not_repeated": true
+    }
+  }
+}

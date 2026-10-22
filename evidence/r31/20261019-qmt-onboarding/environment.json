@@ -1,0 +1,243 @@
+{
+  "schema": "qmt-environment-inventory/v1",
+  "script_revision": "1.0.0",
+  "collection_mode": "READ_ONLY",
+  "collected_at": "2026-10-19T14:38:43.6539619Z",
+  "host_fingerprint": "b5361e4d01db497a",
+  "os": {
+    "caption": "Microsoft Windows 10 专业版",
+    "version": "10.0.19045",
+    "architecture": "AMD64"
+  },
+  "python": [
+    {
+      "source": "explicit",
+      "path": "E:\\workspace\\auto-trading-system\\.codex_tmp\\qmt-readonly-verified-20261019\\env\\Scripts\\python.exe",
+      "sha256": "1e2031f6e427a86cdef7ba777e58d5a6fa01bc225f3d6e065fbb4f9e58d5685f",
+      "available": true,
+      "version": "3.11.16",
+      "implementation": "CPython",
+      "architecture_bits": 64,
+      "xtquant": {
+        "available": true,
+        "distribution_version": null,
+        "origin": "E:\\workspace\\auto-trading-system\\.codex_tmp\\qmt-readonly-verified-20261019\\sdk\\xtquant\\__init__.py",
+        "package_paths": [
+          "E:\\workspace\\auto-trading-system\\.codex_tmp\\qmt-readonly-verified-20261019\\sdk\\xtquant"
+        ]
+      }
+    },
+    {
+      "source": "py-launcher",
+      "path": "D:\\Users\\%USERNAME%\\AppData\\Local\\Programs\\Python\\Python314\\python.exe",
+      "sha256": "cce21c0e8710e304273e98ac4b2b0f5aceb639acbcd2343cbaa5c4e81619c45b",
+      "available": true,
+      "version": "3.14.3",
+      "implementation": "CPython",
+      "architecture_bits": 64,
+      "xtquant": {
+        "available": true,
+        "distribution_version": null,
+        "origin": "E:\\workspace\\auto-trading-system\\.codex_tmp\\qmt-readonly-verified-20261019\\sdk\\xtquant\\__init__.py",
+        "package_paths": [
+          "E:\\workspace\\auto-trading-system\\.codex_tmp\\qmt-readonly-verified-20261019\\sdk\\xtquant"
+        ]
+      }
+    },
+    {
+      "source": "py-launcher",
+      "path": "%USERPROFILE%\\AppData\\Local\\Programs\\Python\\Python313\\python.exe",
+      "sha256": "dc7ecf75280678175b4f931ce05f1ef9c10d48984399ca7de6beee69d71bcb1b",
+      "available": true,
+      "version": "3.13.13",
+      "implementation": "CPython",
+      "architecture_bits": 64,
+      "xtquant": {
+        "available": true,
+        "distribution_version": null,
+        "origin": "E:\\workspace\\auto-trading-system\\.codex_tmp\\qmt-readonly-verified-20261019\\sdk\\xtquant\\__init__.py",
+        "package_paths": [
+          "E:\\workspace\\auto-trading-system\\.codex_tmp\\qmt-readonly-verified-20261019\\sdk\\xtquant"
+        ]
+      }
+    },
+    {
+      "source": "py-launcher",
+      "path": "D:\\Users\\%USERNAME%\\AppData\\Local\\Programs\\Python\\Python310\\python.exe",
+      "sha256": "94a83686261e9364cf3386b61a01a9f70936e8547da8962d16f1f850226b8954",
+      "available": true,
+      "version": "3.10.0",
+      "implementation": "CPython",
+      "architecture_bits": 64,
+      "xtquant": {
+        "available": true,
+        "distribution_version": null,
+        "origin": "E:\\workspace\\auto-trading-system\\.codex_tmp\\qmt-readonly-verified-20261019\\sdk\\xtquant\\__init__.py",
+        "package_paths": [
+          "E:\\workspace\\auto-trading-system\\.codex_tmp\\qmt-readonly-verified-20261019\\sdk\\xtquant"
+        ]
+      }
+    },
+    {
+      "source": "path",
+      "path": "D:\\Users\\%USERNAME%\\miniconda3\\python.exe",
+      "sha256": "f77193cf0405ab440c39324bdb2f8864596321c1df888adbbe357f3d760f4716",
+      "available": true,
+      "version": "3.13.12",
+      "implementation": "CPython",
+      "architecture_bits": 64,
+      "xtquant": {
+        "available": true,
+        "distribution_version": null,
+        "origin": "E:\\workspace\\auto-trading-system\\.codex_tmp\\qmt-readonly-verified-20261019\\sdk\\xtquant\\__init__.py",
+        "package_paths": [
+          "E:\\workspace\\auto-trading-system\\.codex_tmp\\qmt-readonly-verified-20261019\\sdk\\xtquant"
+        ]
+      }
+    },
+    {
+      "source": "path",
+      "path": "%USERPROFILE%\\AppData\\Local\\Microsoft\\WindowsApps\\python.exe",
+      "sha256": null,
+      "available": true,
+      "version": "3.14.3",
+      "implementation": "CPython",
+      "architecture_bits": 64,
+      "xtquant": {
+        "available": true,
+        "distribution_version": null,
+        "origin": "E:\\workspace\\auto-trading-system\\.codex_tmp\\qmt-readonly-verified-20261019\\sdk\\xtquant\\__init__.py",
+        "package_paths": [
+          "E:\\workspace\\auto-trading-system\\.codex_tmp\\qmt-readonly-verified-20261019\\sdk\\xtquant"
+        ]
+      }
+    },
+    {
+      "source": "path",
+      "path": "%USERPROFILE%\\AppData\\Local\\Microsoft\\WindowsApps\\python3.exe",
+      "sha256": null,
+      "available": true,
+      "version": "3.14.3",
+      "implementation": "CPython",
+      "architecture_bits": 64,
+      "xtquant": {
+        "available": true,
+        "distribution_version": null,
+        "origin": "E:\\workspace\\auto-trading-system\\.codex_tmp\\qmt-readonly-verified-20261019\\sdk\\xtquant\\__init__.py",
+        "package_paths": [
+          "E:\\workspace\\auto-trading-system\\.codex_tmp\\qmt-readonly-verified-20261019\\sdk\\xtquant"
+        ]
+      }
+    }
+  ],
+  "qmt_installations": [
+    {
+      "source": "explicit",
+      "path": "E:\\中金财富QMT个人版交易端",
+      "exists": true,
+      "scan_truncated": false,
+      "visited_directory_count": 238,
+      "artifacts": [
+        {
+          "path": "E:\\中金财富QMT个人版交易端\\bin.x64\\XtMiniQmt.exe",
+          "file_version": "2,1,19,3",
+          "size_bytes": 470392,
+          "sha256": "6fe313e771c8cbb251fcdff52aa336ea9f8dc9aac14b3e1cd43370432db8746b"
+        },
+        {
+          "path": "E:\\中金财富QMT个人版交易端\\bin.x64\\XtQuantServer_qmt.dll",
+          "file_version": null,
+          "size_bytes": 184696,
+          "sha256": "729f713a24f973533ba205c2dabc9501ffd9d62480859bafccec39d396e47b13"
+        },
+        {
+          "path": "E:\\中金财富QMT个人版交易端\\bin.x64\\XtQuantServer.dll",
+          "file_version": null,
+          "size_bytes": 305016,
+          "sha256": "cc4f48dc8d1116eb1166cc73e61cea1a167ae14b155bf78723afc048f93b70f6"
+        }
+      ],
+      "xtquant_directories": []
+    },
+    {
+      "source": "running-process",
+      "path": "E:\\中金财富QMT个人版交易端\\bin.x64",
+      "exists": true,
+      "scan_truncated": false,
+      "visited_directory_count": 9,
+      "artifacts": [
+        {
+          "path": "E:\\中金财富QMT个人版交易端\\bin.x64\\XtMiniQmt.exe",
+          "file_version": "2,1,19,3",
+          "size_bytes": 470392,
+          "sha256": "6fe313e771c8cbb251fcdff52aa336ea9f8dc9aac14b3e1cd43370432db8746b"
+        },
+        {
+          "path": "E:\\中金财富QMT个人版交易端\\bin.x64\\XtQuantServer_qmt.dll",
+          "file_version": null,
+          "size_bytes": 184696,
+          "sha256": "729f713a24f973533ba205c2dabc9501ffd9d62480859bafccec39d396e47b13"
+        },
+        {
+          "path": "E:\\中金财富QMT个人版交易端\\bin.x64\\XtQuantServer.dll",
+          "file_version": null,
+          "size_bytes": 305016,
+          "sha256": "cc4f48dc8d1116eb1166cc73e61cea1a167ae14b155bf78723afc048f93b70f6"
+        }
+      ],
+      "xtquant_directories": []
+    },
+    {
+      "source": "drive-root",
+      "path": "%USERPROFILE%\\AppData\\Local\\Temp\\.tmpKTqmT1",
+      "exists": true,
+      "scan_truncated": false,
+      "visited_directory_count": 1,
+      "artifacts": [],
+      "xtquant_directories": []
+    }
+  ],
+  "userdata_mini": [
+    {
+      "source": "explicit",
+      "path": "E:\\中金财富QMT个人版交易端\\userdata_mini",
+      "exists": true,
+      "function_trading_queue_exists": true
+    },
+    {
+      "source": "qmt-root",
+      "path": "E:\\中金财富QMT个人版交易端\\bin.x64\\userdata_mini",
+      "exists": false,
+      "function_trading_queue_exists": false
+    },
+    {
+      "source": "qmt-root",
+      "path": "%USERPROFILE%\\AppData\\Local\\Temp\\.tmpKTqmT1\\userdata_mini",
+      "exists": false,
+      "function_trading_queue_exists": false
+    }
+  ],
+  "checks": {
+    "python_3_11_x64_found": true,
+    "qmt_installation_found": true,
+    "xtquant_found": true,
+    "userdata_mini_found": true,
+    "function_trading_queue_found": true
+  },
+  "technical_ready": true,
+  "blockers": [],
+  "manual_evidence_required": [
+    "QMT client version, installer SHA-256 and rollback package",
+    "XtQuant release source and package SHA-256",
+    "masked broker account and account type",
+    "function trading permission approval",
+    "market subscription permission approval",
+    "program trading compliance approval"
+  ],
+  "privacy": {
+    "raw_computer_name_omitted": true,
+    "broker_account_not_read": true,
+    "userdata_contents_not_enumerated": true,
+    "user_profile_paths_tokenized": true
+  }
+}

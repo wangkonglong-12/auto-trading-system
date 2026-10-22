@@ -1,0 +1,54 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://contracts.auto-trading.local/v1/signature-test-vector.schema.json",
+  "title": "HMAC Signature Test Vector v1",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["vector_version", "test_only", "secret_utf8", "request", "response"],
+  "properties": {
+    "vector_version": {"const": "1.0"},
+    "test_only": {"const": true},
+    "secret_utf8": {"type": "string", "minLength": 32},
+    "request": {"$ref": "#/$defs/request"},
+    "response": {"$ref": "#/$defs/response"}
+  },
+  "$defs": {
+    "headers": {
+      "type": "object",
+      "minProperties": 6,
+      "additionalProperties": {"type": "string"}
+    },
+    "request": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "key_id", "timestamp", "nonce", "request_id", "method", "request_target",
+        "body_utf8", "canonical", "headers"
+      ],
+      "properties": {
+        "key_id": {"type": "string"},
+        "timestamp": {"type": "integer"},
+        "nonce": {"type": "string"},
+        "request_id": {"type": "string"},
+        "method": {"type": "string"},
+        "request_target": {"type": "string"},
+        "body_utf8": {"type": "string"},
+        "canonical": {"type": "string"},
+        "headers": {"$ref": "#/$defs/headers"}
+      }
+    },
+    "response": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["key_id", "timestamp", "status_code", "body_utf8", "canonical", "headers"],
+      "properties": {
+        "key_id": {"type": "string"},
+        "timestamp": {"type": "integer"},
+        "status_code": {"type": "integer", "minimum": 100, "maximum": 599},
+        "body_utf8": {"type": "string"},
+        "canonical": {"type": "string"},
+        "headers": {"$ref": "#/$defs/headers"}
+      }
+    }
+  }
+}

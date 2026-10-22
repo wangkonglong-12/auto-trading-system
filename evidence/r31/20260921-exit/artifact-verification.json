@@ -1,0 +1,101 @@
+{
+  "version": "0.1.0.dev42",
+  "python": "3.11.16",
+  "installed_target": "E:\\workspace\\auto-trading-system\\.codex_tmp\\r31-exit\\installed-wheel-final",
+  "package_location_verified": true,
+  "wheel_python_files_equal_current_source": 160,
+  "artifacts": {
+    "dist\\auto_trading_system-0.1.0.dev42-py3-none-any.whl": "72d7d67997d11560d2fe8a367620676c07316ab93abe0bf63467927b9703ae55",
+    "dist\\auto_trading_system-0.1.0.dev42.tar.gz": "0ec7854fd51f029a7a1850debc328e5860341cb40a937278dd6f5d55d457c244"
+  },
+  "python_tests": 1855,
+  "new_tests": 66,
+  "frontend_tests": 24,
+  "coverage": {
+    "covered_lines": 14696,
+    "num_statements": 15778,
+    "percent_covered": 90.80128830763225,
+    "percent_covered_display": "90.80",
+    "missing_lines": 1082,
+    "excluded_lines": 315,
+    "percent_statements_covered": 93.14235010774496,
+    "percent_statements_covered_display": "93.14",
+    "num_branches": 4714,
+    "num_partial_branches": 761,
+    "covered_branches": 3911,
+    "missing_branches": 803,
+    "percent_branches_covered": 82.9656342808655,
+    "percent_branches_covered_display": "82.97"
+  },
+  "installed_simulations": {
+    "--simulate-engine": {
+      "cancelled_remaining_quantity": 50,
+      "durable_grant_applied": true,
+      "filled_quantity": 50,
+      "mode": "OFFLINE_ENGINE",
+      "old_grant_not_restored": true,
+      "order_count": 1,
+      "output_directory": "E:\\workspace\\auto-trading-system\\.codex_tmp\\r31-exit\\installed-smoke\\engine-simulation-e2fe76a1af3c45afabd12f509685abbd",
+      "real_trading_enabled": false,
+      "recovery_report_hash": "sha256:fbd061339ac16a3d8af5a673df3296d6073abf3c90d9f1066b56d79790abe38d",
+      "recovery_status": "CLEAR",
+      "restart_paused": true,
+      "submission_records": 2
+    },
+    "--simulate-portfolio": {
+      "d0_sellable_policy_shares": 0,
+      "lot_count": 2,
+      "lot_ids_rebuilt": true,
+      "lots": [
+        {
+          "bought_quantity": 50,
+          "calendar_version": "offline-calendar-v1",
+          "eligible_sell_date": "2026-09-08",
+          "lot_id": "lot-3ca0b50df57bb159ef2b819cfd8693af4c6d0bd36ee1e91e03c3381d9ef90109",
+          "reserved_quantity": 0,
+          "sold_quantity": 0,
+          "strategy_id": "tail-entry",
+          "symbol": "000001.SZ",
+          "trade_date_acquired": "2026-09-07"
+        },
+        {
+          "bought_quantity": 50,
+          "calendar_version": "offline-calendar-v1",
+          "eligible_sell_date": "2026-09-08",
+          "lot_id": "lot-646124657456494512ff1c58b1e1002f7c3ac8c7c581e2fd6659350c410e1bcc",
+          "reserved_quantity": 0,
+          "sold_quantity": 0,
+          "strategy_id": "tail-entry",
+          "symbol": "000001.SZ",
+          "trade_date_acquired": "2026-09-07"
+        }
+      ],
+      "mode": "OFFLINE_PORTFOLIO",
+      "next_session_sellable_policy_shares": 100,
+      "order_count": 2,
+      "output_directory": "E:\\workspace\\auto-trading-system\\.codex_tmp\\r31-exit\\installed-smoke\\portfolio-simulation-0914d56df7a043cd8a13d8ce9c7b8bbf",
+      "query_repaired_missing_callbacks": true,
+      "real_trading_enabled": false,
+      "remaining_shares": 100,
+      "restart_paused": true,
+      "same_grant_across_rounds": true,
+      "sellable_policy_note": "Offline projection with hypothetical broker sellable=100; no SELL dispatched",
+      "submission_records": 4
+    },
+    "--simulate-exit": {
+      "d1_broker_orders": 2,
+      "final_remaining": 50,
+      "first_fill": 20,
+      "initial_exit_quantity": 50,
+      "mode": "OFFLINE_EXIT",
+      "opening_checkpoint_hash": "sha256:bb45b7f355ca777b2428c094798938921df00e85ca3dd88226d68ca03ebbc70d",
+      "opening_quantity": 100,
+      "output_directory": "E:\\workspace\\auto-trading-system\\.codex_tmp\\r31-exit\\installed-smoke\\exit-simulation-cf09c3bed3cb48f7af287e520d79f12e",
+      "real_trading_enabled": false,
+      "residual_child_quantity": 30,
+      "restart_paused": true,
+      "restored_path_complete": false,
+      "target_remaining": 50
+    }
+  }
+}

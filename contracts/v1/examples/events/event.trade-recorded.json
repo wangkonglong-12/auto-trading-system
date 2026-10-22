@@ -1,0 +1,30 @@
+{
+  "schema_version": "1.0",
+  "event_id": "evt_00000000000000000000000000000005",
+  "event_hash": "sha256:5b187cf60c42fa95f4e5fd1ed3af487b56f2cd7bbb34c4b7bc0814dcdbb985f3",
+  "node_id": "node-demo-001",
+  "account_id": "acct_demo_001",
+  "boot_id": "boot_11111111111111111111111111111111",
+  "local_seq": 5,
+  "correlation_id": "corr_plan_20260904_0001",
+  "causation_id": "ord_01K43TAIL000000001",
+  "source": "BROKER_CALLBACK",
+  "severity": "INFO",
+  "event_type": "TRADE_RECORDED",
+  "aggregate_type": "TRADE",
+  "aggregate_id": "trade_QMT202609040001",
+  "trade_date": "2026-09-04",
+  "occurred_at": "2026-09-04T14:35:02.200+08:00",
+  "recorded_at": "2026-09-04T14:35:02.204+08:00",
+  "payload": {
+    "trade_id": "trade_QMT202609040001",
+    "client_order_id": "ord_01K43TAIL000000001",
+    "broker_order_id": "QMT20260904000001",
+    "symbol": "000001.SZ",
+    "side": "BUY",
+    "price": "12.35",
+    "quantity": 100,
+    "notional": "1235.00",
+    "traded_at": "2026-09-04T14:35:02.200+08:00"
+  }
+}

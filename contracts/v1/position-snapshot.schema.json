@@ -1,0 +1,55 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://contracts.auto-trading.local/v1/position-snapshot.schema.json",
+  "title": "PositionSnapshot v1.0",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schema_version", "snapshot_id", "request_id", "node_id", "account_id",
+    "trade_date", "as_of", "query_status", "broker_account_status"
+  ],
+  "properties": {
+    "schema_version": {"$ref": "common.schema.json#/$defs/schemaVersion"},
+    "snapshot_id": {"type": "string", "pattern": "^position_[A-Za-z0-9_-]{8,64}$"},
+    "request_id": {"$ref": "common.schema.json#/$defs/requestId"},
+    "node_id": {"$ref": "common.schema.json#/$defs/nodeId"},
+    "account_id": {"$ref": "common.schema.json#/$defs/accountId"},
+    "trade_date": {"$ref": "common.schema.json#/$defs/tradeDate"},
+    "as_of": {"$ref": "common.schema.json#/$defs/shanghaiDateTime"},
+    "query_status": {"$ref": "common.schema.json#/$defs/queryStatus"},
+    "broker_account_status": {"$ref": "common.schema.json#/$defs/brokerAccountStatus"},
+    "positions": {
+      "type": "array",
+      "maxItems": 5000,
+      "items": {"$ref": "#/$defs/position"}
+    },
+    "error": {"$ref": "common.schema.json#/$defs/error"}
+  },
+  "allOf": [
+    {
+      "if": {"properties": {"query_status": {"const": "AVAILABLE"}}, "required": ["query_status"]},
+      "then": {"required": ["positions"], "not": {"required": ["error"]}},
+      "else": {"required": ["error"], "not": {"required": ["positions"]}}
+    }
+  ],
+  "$defs": {
+    "position": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "symbol", "volume", "can_use_volume", "frozen_volume", "on_road_volume",
+        "yesterday_volume", "average_price", "market_value"
+      ],
+      "properties": {
+        "symbol": {"$ref": "common.schema.json#/$defs/securityCode"},
+        "volume": {"$ref": "common.schema.json#/$defs/positiveQuantity"},
+        "can_use_volume": {"$ref": "common.schema.json#/$defs/quantity"},
+        "frozen_volume": {"$ref": "common.schema.json#/$defs/quantity"},
+        "on_road_volume": {"$ref": "common.schema.json#/$defs/quantity"},
+        "yesterday_volume": {"$ref": "common.schema.json#/$defs/quantity"},
+        "average_price": {"$ref": "common.schema.json#/$defs/price"},
+        "market_value": {"$ref": "common.schema.json#/$defs/money"}
+      }
+    }
+  }
+}

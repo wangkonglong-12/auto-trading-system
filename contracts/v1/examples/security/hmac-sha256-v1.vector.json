@@ -1,0 +1,38 @@
+{
+  "vector_version": "1.0",
+  "test_only": true,
+  "secret_utf8": "test-only-secret-32-bytes-minimum!!",
+  "request": {
+    "key_id": "node-key-2026-09",
+    "timestamp": 1788504300,
+    "nonce": "0123456789abcdeffedcba9876543210",
+    "request_id": "req_0123456789abcdeffedcba9876543210",
+    "method": "POST",
+    "request_target": "/api/v1/trading/runtime/heartbeat?trace=full",
+    "body_utf8": "{\"message\":\"上海\",\"schema_version\":\"1.0\"}",
+    "canonical": "ATS-HMAC-SHA256\nrequest\nv1\nnode-key-2026-09\n1788504300\n0123456789abcdeffedcba9876543210\nreq_0123456789abcdeffedcba9876543210\nPOST\n/api/v1/trading/runtime/heartbeat?trace=full\nsha256:5ebf85597e6113bd79912bd59abfc8e011ff024032649f139ee0d161bdad876e",
+    "headers": {
+      "X-ATS-Key-Id": "node-key-2026-09",
+      "X-ATS-Timestamp": "1788504300",
+      "X-ATS-Nonce": "0123456789abcdeffedcba9876543210",
+      "X-ATS-Request-Id": "req_0123456789abcdeffedcba9876543210",
+      "X-ATS-Content-SHA256": "sha256:5ebf85597e6113bd79912bd59abfc8e011ff024032649f139ee0d161bdad876e",
+      "X-ATS-Signature": "v1=5d51650346f6a994d196a7f070600ced555fb1b52dfa1634f8becd0a9bf85f63"
+    }
+  },
+  "response": {
+    "key_id": "node-key-2026-09",
+    "timestamp": 1788504301,
+    "status_code": 202,
+    "body_utf8": "{\"accepted\":true,\"request_id\":\"req_0123456789abcdeffedcba9876543210\"}",
+    "canonical": "ATS-HMAC-SHA256\nresponse\nv1\nnode-key-2026-09\n1788504301\n0123456789abcdeffedcba9876543210\nreq_0123456789abcdeffedcba9876543210\n202\nsha256:84b24acc9b0ec237fe9b697044780f94710ea48e564d77be09ffc83123f3a248",
+    "headers": {
+      "X-ATS-Key-Id": "node-key-2026-09",
+      "X-ATS-Timestamp": "1788504301",
+      "X-ATS-Request-Nonce": "0123456789abcdeffedcba9876543210",
+      "X-ATS-Request-Id": "req_0123456789abcdeffedcba9876543210",
+      "X-ATS-Content-SHA256": "sha256:84b24acc9b0ec237fe9b697044780f94710ea48e564d77be09ffc83123f3a248",
+      "X-ATS-Signature": "v1=94dfacf9fa702f5e15ba6774d9b121e181a06c667dc138da774db48be277519e"
+    }
+  }
+}

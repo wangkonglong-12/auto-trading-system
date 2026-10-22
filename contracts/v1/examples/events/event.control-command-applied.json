@@ -1,0 +1,28 @@
+{
+  "schema_version": "1.0",
+  "event_id": "evt_00000000000000000000000000000007",
+  "event_hash": "sha256:5a6cc26070fb6e6872bbbab56dedf9d3d91be69160c0e220c124dbfd6fa0ee01",
+  "node_id": "node-demo-001",
+  "account_id": "acct_demo_001",
+  "boot_id": "boot_11111111111111111111111111111111",
+  "local_seq": 7,
+  "correlation_id": "corr_control_20260904_0001",
+  "causation_id": "cmd_01K43CTRL000000001",
+  "source": "OPERATOR",
+  "severity": "WARNING",
+  "event_type": "CONTROL_COMMAND_APPLIED",
+  "aggregate_type": "CONTROL",
+  "aggregate_id": "cmd_01K43CTRL000000001",
+  "trade_date": "2026-09-04",
+  "occurred_at": "2026-09-04T14:40:00+08:00",
+  "recorded_at": "2026-09-04T14:40:00.001+08:00",
+  "payload": {
+    "command_id": "cmd_01K43CTRL000000001",
+    "command_type": "PAUSE_BUY",
+    "actor_id": "operator_demo",
+    "result": "APPLIED",
+    "reason_code": "OPERATOR_REQUEST",
+    "previous_state": "AUTO",
+    "new_state": "PAUSE_BUY"
+  }
+}

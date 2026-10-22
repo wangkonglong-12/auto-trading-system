@@ -1,0 +1,17 @@
+{
+  "schema_version": "1.0",
+  "node_id": "node_sh_01",
+  "account_id": "acct_001",
+  "boot_id": "boot_01K43TAIL20260904",
+  "plan_id": "plan_01K43TAIL20260903001",
+  "plan_hash": "sha256:051fbebaf24664e3037e73c3926b6b3867c78fad018b3566855f12e877daf466",
+  "ack_status": "REJECTED",
+  "runtime_mode": "HALT",
+  "reject_reasons": [
+    {
+      "code": "PERSISTENCE_UNAVAILABLE",
+      "message": "LocalJournal is not writable"
+    }
+  ],
+  "occurred_at": "2026-09-04T14:45:00.000+08:00"
+}

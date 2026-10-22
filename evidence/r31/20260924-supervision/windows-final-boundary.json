@@ -1,0 +1,20 @@
+{
+  "root": "E:\\workspace\\auto-trading-system",
+  "added": [
+    "docs/design/v3.1/进程监护与异常恢复实施报告_20260924.md",
+    "evidence/r31/20260924-supervision/README.md",
+    "evidence/r31/20260924-supervision/artifact-verification.json",
+    "evidence/r31/20260924-supervision/coverage.json",
+    "evidence/r31/20260924-supervision/installed-tests.xml",
+    "evidence/r31/20260924-supervision/post-reboot-baseline.json",
+    "evidence/r31/20260924-supervision/python-tests.xml",
+    "evidence/r31/20260924-supervision/windows-retained-files.json"
+  ],
+  "deleted": [],
+  "modified": [
+    "README.md",
+    "docs/design/v3.1/开发修订计划与推进记录.md",
+    "docs/design/v3.1/详细设计方案.md",
+    "开发计划与推进记录.md"
+  ]
+}

@@ -1,0 +1,78 @@
+{
+  "additionalProperties": false,
+  "properties": {
+    "artifact_hash": {
+      "anyOf": [
+        {
+          "pattern": "^sha256:[a-f0-9]{64}$",
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Artifact Hash"
+    },
+    "engine_boot_id": {
+      "pattern": "^[A-Za-z0-9_.:-]{1,96}$",
+      "title": "Engine Boot Id",
+      "type": "string"
+    },
+    "in_flight_order_ids": {
+      "default": [],
+      "items": {
+        "pattern": "^[A-Za-z0-9_.:-]{1,96}$",
+        "type": "string"
+      },
+      "maxItems": 32,
+      "title": "In Flight Order Ids",
+      "type": "array"
+    },
+    "observed_at": {
+      "format": "date-time",
+      "title": "Observed At",
+      "type": "string"
+    },
+    "permission_epoch": {
+      "minimum": 0,
+      "title": "Permission Epoch",
+      "type": "integer"
+    },
+    "reason_code": {
+      "pattern": "^[A-Za-z0-9_.:-]{1,96}$",
+      "title": "Reason Code",
+      "type": "string"
+    },
+    "request_id": {
+      "pattern": "^[A-Za-z0-9_.:-]{1,96}$",
+      "title": "Request Id",
+      "type": "string"
+    },
+    "state_version": {
+      "minimum": 0,
+      "title": "State Version",
+      "type": "integer"
+    },
+    "status": {
+      "enum": [
+        "APPLIED",
+        "REJECTED",
+        "PENDING"
+      ],
+      "title": "Status",
+      "type": "string"
+    }
+  },
+  "required": [
+    "request_id",
+    "engine_boot_id",
+    "status",
+    "state_version",
+    "permission_epoch",
+    "reason_code",
+    "observed_at"
+  ],
+  "title": "LocalControlResult",
+  "type": "object"
+}

@@ -1,0 +1,182 @@
+{
+  "$defs": {
+    "EntryInstrument": {
+      "additionalProperties": false,
+      "properties": {
+        "lower_price": {
+          "description": "当日合法申报价下界，元",
+          "pattern": "^(0|[1-9][0-9]{0,9})(\\.[0-9]{1,8})?$",
+          "title": "Lower Price",
+          "type": "string"
+        },
+        "max_order_quantity": {
+          "description": "规则包单笔股数上限",
+          "maximum": 2147483647,
+          "minimum": 1,
+          "title": "Max Order Quantity",
+          "type": "integer"
+        },
+        "min_quantity": {
+          "description": "合法最小买入数量，股",
+          "maximum": 10000,
+          "minimum": 1,
+          "title": "Min Quantity",
+          "type": "integer"
+        },
+        "price_tick": {
+          "description": "已验证价格档位，元",
+          "pattern": "^(0|[1-9][0-9]{0,9})(\\.[0-9]{1,8})?$",
+          "title": "Price Tick",
+          "type": "string"
+        },
+        "quantity_step": {
+          "description": "超过最低数量后的申报步长，股",
+          "maximum": 10000,
+          "minimum": 1,
+          "title": "Quantity Step",
+          "type": "integer"
+        },
+        "reference_price": {
+          "description": "计划追价保护参考价，元",
+          "pattern": "^(0|[1-9][0-9]{0,9})(\\.[0-9]{1,8})?$",
+          "title": "Reference Price",
+          "type": "string"
+        },
+        "source_hash": {
+          "description": "参考价和证券规则来源证据摘要",
+          "pattern": "^sha256:[a-f0-9]{64}$",
+          "title": "Source Hash",
+          "type": "string"
+        },
+        "symbol": {
+          "description": "证券代码及交易所",
+          "pattern": "^[0-9]{6}\\.(SH|SZ|BJ)$",
+          "title": "Symbol",
+          "type": "string"
+        },
+        "upper_price": {
+          "description": "当日合法申报价上界，元",
+          "pattern": "^(0|[1-9][0-9]{0,9})(\\.[0-9]{1,8})?$",
+          "title": "Upper Price",
+          "type": "string"
+        }
+      },
+      "required": [
+        "symbol",
+        "reference_price",
+        "lower_price",
+        "upper_price",
+        "price_tick",
+        "min_quantity",
+        "quantity_step",
+        "max_order_quantity",
+        "source_hash"
+      ],
+      "title": "EntryInstrument",
+      "type": "object"
+    }
+  },
+  "additionalProperties": false,
+  "properties": {
+    "cancel_after_seconds": {
+      "description": "普通阶段子单最小调整间隔，秒",
+      "maximum": 300,
+      "minimum": 1,
+      "title": "Cancel After Seconds",
+      "type": "integer"
+    },
+    "depth_bps": {
+      "description": "可见卖一数量使用比例，基点",
+      "maximum": 10000,
+      "minimum": 1,
+      "title": "Depth Bps",
+      "type": "integer"
+    },
+    "fee_reserve": {
+      "description": "每个买入子单保守费用预留，元",
+      "pattern": "^(0|[1-9][0-9]{0,11})(\\.[0-9]{1,2})?$",
+      "title": "Fee Reserve",
+      "type": "string"
+    },
+    "instruments": {
+      "description": "本次已核验证券规则，最多15个唯一标的",
+      "items": {
+        "$ref": "#/$defs/EntryInstrument"
+      },
+      "maxItems": 15,
+      "minItems": 1,
+      "title": "Instruments",
+      "type": "array"
+    },
+    "max_active_orders": {
+      "description": "账户同时活动或不明委托数上限",
+      "maximum": 3,
+      "minimum": 1,
+      "title": "Max Active Orders",
+      "type": "integer"
+    },
+    "max_chase_bps": {
+      "description": "相对参考价的最大追价，基点",
+      "maximum": 1000,
+      "minimum": 0,
+      "title": "Max Chase Bps",
+      "type": "integer"
+    },
+    "max_children": {
+      "description": "每个分配最多子单数，含首次及至多三次补单",
+      "maximum": 4,
+      "minimum": 1,
+      "title": "Max Children",
+      "type": "integer"
+    },
+    "max_spread_bps": {
+      "description": "买卖一价差相对买一的上限，基点",
+      "maximum": 1000,
+      "minimum": 0,
+      "title": "Max Spread Bps",
+      "type": "integer"
+    },
+    "participation_bps": {
+      "description": "60秒成交量参与上限，基点",
+      "maximum": 10000,
+      "minimum": 1,
+      "title": "Participation Bps",
+      "type": "integer"
+    },
+    "quote_max_age_ms": {
+      "description": "源时间与单调时钟双重新鲜度上限",
+      "maximum": 5000,
+      "minimum": 100,
+      "title": "Quote Max Age Ms",
+      "type": "integer"
+    },
+    "rulebook_version": {
+      "description": "已安装证券规则包版本",
+      "pattern": "^[A-Za-z0-9_.:-]{1,96}$",
+      "title": "Rulebook Version",
+      "type": "string"
+    },
+    "version": {
+      "description": "已安装买入策略版本，由签名计划引用",
+      "pattern": "^[A-Za-z0-9_.:-]{1,96}$",
+      "title": "Version",
+      "type": "string"
+    }
+  },
+  "required": [
+    "version",
+    "rulebook_version",
+    "fee_reserve",
+    "max_chase_bps",
+    "max_spread_bps",
+    "participation_bps",
+    "depth_bps",
+    "quote_max_age_ms",
+    "cancel_after_seconds",
+    "max_children",
+    "max_active_orders",
+    "instruments"
+  ],
+  "title": "EntryPolicy",
+  "type": "object"
+}

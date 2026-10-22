@@ -1,0 +1,33 @@
+{
+  "schema_version": "1.0",
+  "plan_id": "plan_01K43TAIL20260903002",
+  "plan_type": "TAIL_1431_D0_ENTRY_D1_EXIT",
+  "account_id": "acct_demo_001",
+  "strategy_id": "TAIL_CLOSE",
+  "trade_date": "2026-09-03",
+  "timezone": "Asia/Shanghai",
+  "status": "NO_TRADE",
+  "execution_mode": "READ_ONLY",
+  "live_eligible": false,
+  "no_trade_reason": "ZERO_ELIGIBLE",
+  "source": {
+    "run_id": "tail_run_20260903_1431",
+    "run_status": "succeeded",
+    "data_completeness": "full",
+    "algorithm_version": "tail_1431_v5_6_selection_eligibility_guard"
+  },
+  "generated_at": "2026-09-03T14:34:20.218+08:00",
+  "valid_from": "2026-09-03T14:34:30+08:00",
+  "entry_start": "2026-09-03T14:35:00+08:00",
+  "stop_new_orders_at": "2026-09-03T14:56:30+08:00",
+  "expire_at": "2026-09-03T15:00:00+08:00",
+  "portfolio": {
+    "target_exposure": "0.00",
+    "hard_max_exposure": "0.60",
+    "cash_reserve": "0.05",
+    "max_positions": 15,
+    "max_active_orders": 3
+  },
+  "items": [],
+  "plan_hash": "sha256:87ef9a0e4e281df5d8e8b0d95844daebbebe538a36b07255d7f77845c9c72cf3"
+}

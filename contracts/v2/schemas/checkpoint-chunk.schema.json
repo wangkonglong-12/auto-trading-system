@@ -1,0 +1,16 @@
+{
+  "additionalProperties": false,
+  "properties": {
+    "content_base64": {
+      "description": "原始正文分片Base64，最大32768字节",
+      "maxLength": 43692,
+      "title": "Content Base64",
+      "type": "string"
+    }
+  },
+  "required": [
+    "content_base64"
+  ],
+  "title": "CheckpointChunk",
+  "type": "object"
+}

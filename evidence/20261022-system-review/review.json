@@ -1,0 +1,61 @@
+{
+  "checked_at": "2026-10-22T00:31:20.153458+08:00",
+  "python_tests": {
+    "name": "pytest",
+    "errors": "0",
+    "failures": "0",
+    "skipped": "0",
+    "tests": "2544",
+    "time": "222.691",
+    "timestamp": "2026-10-22T00:25:51.401803+08:00",
+    "hostname": "DESKTOP-OVIR8KO"
+  },
+  "python_coverage_percent": 90.10985396658334,
+  "frontend_tests": 61,
+  "frontend_test_files": 9,
+  "frontend_checks": [
+    "eslint",
+    "prettier",
+    "vue-tsc",
+    "vitest coverage thresholds",
+    "vite build"
+  ],
+  "python_checks": [
+    "ruff",
+    "ruff format",
+    "mypy"
+  ],
+  "post_change_targeted_tests": 114,
+  "real_order_testing": "NOT_PERFORMED",
+  "production_quant_backend_integration": "NOT_ACCEPTED_IN_THIS_REVIEW",
+  "current_broker_profile": "QMT_READ_ONLY",
+  "fixes": [
+    "monetary fields preserve decimal text",
+    "field-specific validation",
+    "advanced parameter explanations",
+    "empty required numeric inputs rejected",
+    "midnight restarts paused with fresh recovery",
+    "unique QMT client sessions per boot",
+    "live supervisor mode verification",
+    "market and signal status projection",
+    "fresh authenticated account reads",
+    "dedicated query channel independent of emergency halt",
+    "Windows CMD CRLF policy"
+  ],
+  "reviewed_files": {
+    "src\\auto_trading_system\\apps\\desktop\\__main__.py": "963aa31d10199b3f74ea3a2ffaeb913199f46ea377b9c0ad618d7921296c661b",
+    "src\\auto_trading_system\\apps\\desktop\\session.py": "b6f9b5584d34475d2e2b970f84b0d4ad020a27786c54daac6f9fc88723bb43d7",
+    "src\\auto_trading_system\\apps\\local_console\\node_app.py": "e89590701d0b44f88cda6373f065ad4cc8dde36e7cf80e0963ee69b525b3e40d",
+    "src\\auto_trading_system\\apps\\local_console\\node_bridge.py": "858fb28220b40d72f2c8dbae91140e378637aedf6ac03a3ef827cb7ce88de8f7",
+    "src\\auto_trading_system\\apps\\local_console\\node_status.py": "d64ac395b52ba5e1234a0bb4ba81d44151cedb18d578f5131fae2376f582d45e",
+    "src\\auto_trading_system\\apps\\node_process\\__main__.py": "16815a22db7100ab9cda29f787032bed9b39f14af7288805e1961bd54316c890",
+    "src\\auto_trading_system\\runtime\\engine_v2.py": "069496e436dbff128d164b2c0ece0029907cb0e84a3f55e480600ef057dac9fb",
+    "src\\auto_trading_system\\runtime\\node_engine.py": "15517facc24b0e39a1423c32dcc6ac740be911dd6de8c9b164bb585e2ee1b5de",
+    "src\\auto_trading_system\\runtime\\node_supervisor.py": "8178a95169956eb4dcb072d6eadd2df85213a176f4f36cfb83d002e2b127941b",
+    "src\\auto_trading_system\\strategies\\trading_settings.py": "f769dbd0dec0fef39fc19878070479320159fa7e7070839181951e8749e7e487",
+    "frontend\\operator-console\\src\\node\\NodeConsole.vue": "209c1264ff654a557e61a126ce859be9803a6838426f36dbe02fdd872f1a3c31",
+    "frontend\\operator-console\\src\\node\\api.ts": "17dd96190cf6a2011324eac8d4d7dc23d872ccf165f97ce69256a8e537adc962",
+    "frontend\\operator-console\\src\\node\\settingsValidation.ts": "a65edd3ed2be395569a2f0d23b9918864434fa1d82069f40a42b024ab2da1ad7",
+    "src\\auto_trading_system\\apps\\local_console\\static\\node.html": "6b7ef61530a671951c6550c44fa0f223c01b495dc00190fea7123b3a1b8c35f7"
+  }
+}

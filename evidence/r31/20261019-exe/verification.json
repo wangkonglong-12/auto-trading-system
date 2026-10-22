@@ -1,0 +1,216 @@
+{
+  "date": "2026-10-19",
+  "version": "0.1.0.dev54",
+  "kind": "Windows x64 one-file portable MOCK preview",
+  "artifact": {
+    "path": "dist/AutoTradingSystem-0.1.0-dev54.exe",
+    "bytes": 27744355,
+    "sha256": "B445E7761B5E5E15D12A3CD33161E1E0F9339D90A90AF1F18B12EADD748EDEB5",
+    "signed": false
+  },
+  "review": {
+    "result": "PASS",
+    "notes": [
+      "Frozen sys.executable routes worker modules to node entry, not GUI recursion.",
+      "Windowed None streams handled and multiprocessing freeze_support applied before imports.",
+      "Existing OwnedProcess creates suspended workers and assigns private kill-on-close Jobs before execution.",
+      "Default fresh preview configuration is MOCK, zero limits, no operator access, no paper authorization or production quant endpoint.",
+      "Existing data, previous builds and quant backend not edited or deleted.",
+      "Read-only state and worker/API/assets exercised using actual frozen EXE; interactive GUI button clicks not separately automated."
+    ]
+  },
+  "checks": {
+    "python": {
+      "tests": 2387,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "coveragePercent": 90.63,
+      "seconds": 234.25,
+      "environment": ".codex_tmp/exe-20261019/validation-env",
+      "installation": "editable current dev54 with requirements/dev.lock"
+    },
+    "ruff": "PASS",
+    "format": "PASS, 341 files",
+    "mypy": "PASS, 340 files",
+    "secretBoundary": "PASS",
+    "frontend": {
+      "tests": 43,
+      "testFiles": 8,
+      "typecheck": "PASS",
+      "build": "PASS, 11 current-source assets"
+    },
+    "pipCheck": {
+      "build": "PASS",
+      "validation": "PASS"
+    },
+    "initialFailure": {
+      "file": "initial-tests-old-metadata.xml",
+      "tests": 2387,
+      "passed": 2386,
+      "failed": 1,
+      "cause": "Source/project dev54 compared with old installed dev53 package metadata; old environment kept intact. Fresh dev54 validation environment passes without weakening the test."
+    },
+    "frozenAcceptance": {
+      "candidate": "PASS",
+      "finalDistributedExe": "PASS",
+      "externalPythonRequired": false,
+      "path": "Chinese and spaces; working directory TEMP",
+      "environment": "PATH Windows system directories only, no PYTHONPATH/PYTHONHOME",
+      "tk": "8.6.12",
+      "components": "engine/agent/supervisor CURRENT",
+      "httpAssets": 4,
+      "realTrading": false,
+      "orderCount": 0,
+      "ownedJobsClosed": 3
+    }
+  },
+  "build": {
+    "python": "3.11.16 x64",
+    "pyinstaller": "6.22.3",
+    "windows": "Windows 10 x64 19045",
+    "workDirectory": ".codex_tmp/exe-build-0dc5eb726b7f48d689eb618054c3477d",
+    "candidate": ".codex_tmp/exe-20261019/candidate-1/AutoTradingSystem-0.1.0-dev54.exe",
+    "warnings": "pyinstaller-warnings.txt; optional Unix/HTTP2/ASGI/scheduler dependencies not used by validated default preview"
+  },
+  "scope": {
+    "originalCount": 470,
+    "deleted": [],
+    "modified": [
+      "E:\\workspace\\auto-trading-system\\src\\auto_trading_system\\version.py",
+      "E:\\workspace\\auto-trading-system\\docs\\design\\v3.1\\开发修订计划与推进记录.md"
+    ],
+    "added": [
+      "E:\\workspace\\auto-trading-system\\src\\auto_trading_system\\apps\\desktop\\__init__.py",
+      "E:\\workspace\\auto-trading-system\\src\\auto_trading_system\\apps\\desktop\\__main__.py",
+      "E:\\workspace\\auto-trading-system\\src\\auto_trading_system\\apps\\desktop\\session.py",
+      "E:\\workspace\\auto-trading-system\\tests\\v31\\test_desktop_launcher.py",
+      "E:\\workspace\\auto-trading-system\\scripts\\build-windows-exe.ps1",
+      "E:\\workspace\\auto-trading-system\\scripts\\windows\\desktop-entry.py",
+      "E:\\workspace\\auto-trading-system\\docs\\Windows_EXE使用说明_20261019.md"
+    ],
+    "additionalRootChanges": [
+      "README.md",
+      "开发计划与推进记录.md",
+      "pyproject.toml"
+    ],
+    "additionalNewBuildFiles": [
+      "packaging/auto-trading-desktop.spec",
+      "packaging/windows-version.txt",
+      "requirements/windows-exe.in",
+      "requirements/windows-exe.lock"
+    ],
+    "quantBackendWrites": false,
+    "databaseSchemaChanges": false,
+    "registeredTasksChanged": false,
+    "oldReleasesPreserved": true
+  },
+  "fingerprints": {
+    "inputs": [
+      {
+        "path": "pyproject.toml",
+        "sha256": "B6BDA6B5F7C324AE1DACC9771E5E2F8FD0F31CD3545C6AED207D7C27356F1F2F"
+      },
+      {
+        "path": "src/auto_trading_system/version.py",
+        "sha256": "4FFB3A084C7A97881812F2C94F65EDD1C57B5ED9ECF277385D8B22D826B3B89F"
+      },
+      {
+        "path": "src/auto_trading_system/apps/desktop/__init__.py",
+        "sha256": "C86A629F6D899F1B36FDAFB806839FB8A659462643C875DBDA550B94E3BCF098"
+      },
+      {
+        "path": "src/auto_trading_system/apps/desktop/__main__.py",
+        "sha256": "B23ACE4654ACC31A8BED13A5B442389542976B54378EE9D17E96A79D5F4497D8"
+      },
+      {
+        "path": "src/auto_trading_system/apps/desktop/session.py",
+        "sha256": "FE204D4DB864936EAEB4A38C7D646B3CD95795985A8D48DE06F18AE1AA3D62B6"
+      },
+      {
+        "path": "scripts/windows/desktop-entry.py",
+        "sha256": "78F205D3F4B71458CA7392415D5E7A180BA486B4EC917B2B68DD83732B8F0681"
+      },
+      {
+        "path": "scripts/build-windows-exe.ps1",
+        "sha256": "852DF35E59CD04CDAF60A1D7871EBEC96DA5ECF27624A4BA45CD28C2C2BC73ED"
+      },
+      {
+        "path": "packaging/auto-trading-desktop.spec",
+        "sha256": "820513969EB937D2C9E65EC129B89715E7211960573C9FEDDF2664FC6D9BC12B"
+      },
+      {
+        "path": "packaging/windows-version.txt",
+        "sha256": "3FFC2710E82B4B648D75B86EB164C5C21F3BFE825B8514A4BBE24BC6C21929FD"
+      },
+      {
+        "path": "requirements/runtime.lock",
+        "sha256": "4E869B79652B30D68F63A26A0E3D9E55191B776E082B269C99237EB37E4C31B8"
+      },
+      {
+        "path": "requirements/windows-exe.in",
+        "sha256": "D7B00774329FE732864B9CB6B54E78E6D74C7B69B7813F4466D34D0ED17A4D6C"
+      },
+      {
+        "path": "requirements/windows-exe.lock",
+        "sha256": "F2C9C11D1F851984BF560FF3B3DAFB39CFEFC4D1893232135BE0F8E5B5236B52"
+      },
+      {
+        "path": "tests/v31/test_desktop_launcher.py",
+        "sha256": "7AC894277402004F4C0E5BB7DC474093C7D84C2748634643468866801DD93AD7"
+      }
+    ],
+    "frontend": [
+      {
+        "name": "index.html",
+        "sha256": "B968269FC43869C13A49914E3FE668432616424C25A0CA838BDB8FC373662E49"
+      },
+      {
+        "name": "node.html",
+        "sha256": "72B23DC166502BDA926F783FC05809D5E6FCD5E4218C0CBA6A6F5DA1D2DD847D"
+      },
+      {
+        "name": "legacy-BsA1BXnQ.js",
+        "sha256": "6881F44312177AF8CC493F650E6A326ECF803B5C26B392E21776435D26D2A7E7"
+      },
+      {
+        "name": "legacy-CCU6ErJe.css",
+        "sha256": "1F55E67C6B9354826EEFDFFEEC918AB01892F936417E69E88B4E0A7D724692C8"
+      },
+      {
+        "name": "ModulePlaceholderView-Qe07V4Pf.js",
+        "sha256": "ABC34D1E537C139A0501CC0F551A65B894D5C5090D5E37CDB7B1906932F67D41"
+      },
+      {
+        "name": "modulepreload-polyfill-B5Qt9EMX.js",
+        "sha256": "D2A32840421496E872ADE591618D2FA5C33797605D1AEC04301717E5A90757D0"
+      },
+      {
+        "name": "node-Ca0dcs_c.js",
+        "sha256": "B4A29680A108F52F62D1AE7DBDF2323243173B58F99B7DD62F192162ECB8E322"
+      },
+      {
+        "name": "node-DH3A6DeV.css",
+        "sha256": "8EFB095A95E3B626E48E5D6C4830F0285F572B228284600F8FD95FACB99B8054"
+      },
+      {
+        "name": "vendor-charts-Cxryhlfn.js",
+        "sha256": "BFF34575C0FF02F806FAE5548B5C79F9045A7EE9195A7A0A51F53AAEAAAD1A1A"
+      },
+      {
+        "name": "vendor-ui-IXJI97Z6.js",
+        "sha256": "82E3B50D441F72217355329EF2BE892E5DC1DBAF7A8FB8F36E83F9A655E34BE3"
+      },
+      {
+        "name": "vendor-vue-Bqt8vJsE.js",
+        "sha256": "95965F46E6A7A5CE43141E0FAED31FECB15EBE568BCD2010AEF2C0B8501121ED"
+      }
+    ]
+  },
+  "limitations": [
+    "Default double click starts isolated read-only MOCK session; new private directory each run, old directories retained.",
+    "QMT/client/SDK, production quant service, actual account and live trading readiness not included.",
+    "D1 exit-result contract, finalized strategy/T, actual statements and other unfinished features remain separate work items.",
+    "Unsigned private build; no antivirus exclusions or bypass applied."
+  ]
+}

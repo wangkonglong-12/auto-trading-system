@@ -1,0 +1,81 @@
+{
+  "cleanup_failure_codes": [],
+  "collection_mode": "READ_ONLY",
+  "completed_at": "2026-10-19T22:40:35.865624+08:00",
+  "config_hash": "8239dc378e6ee22da1d4829e295e2d4b19ee36a84e7f3577dcbbd87f05d84ed2",
+  "duration_milliseconds": 79,
+  "evidence_truncated": false,
+  "failure_code": null,
+  "outcome": "PASS",
+  "phases": [
+    {
+      "elapsed_milliseconds": 0,
+      "phase": "CALLBACK_REGISTERED"
+    },
+    {
+      "elapsed_milliseconds": 63,
+      "phase": "TRADER_STARTED"
+    },
+    {
+      "elapsed_milliseconds": 63,
+      "phase": "CONNECT_RETURNED",
+      "result_code": 0
+    },
+    {
+      "elapsed_milliseconds": 63,
+      "phase": "SUBSCRIBE_RETURNED",
+      "result_code": 0
+    },
+    {
+      "elapsed_milliseconds": 63,
+      "phase": "ACCOUNT_STATUS_QUERY_RETURNED",
+      "result_code": 1
+    },
+    {
+      "elapsed_milliseconds": 63,
+      "phase": "UNSUBSCRIBE_RETURNED",
+      "result_code": 0
+    },
+    {
+      "elapsed_milliseconds": 79,
+      "phase": "TRADER_STOPPED"
+    }
+  ],
+  "primary_failure_code": null,
+  "privacy": {
+    "exception_messages_omitted": true,
+    "full_broker_account_omitted": true,
+    "sdk_objects_omitted": true,
+    "userdata_path_omitted": true
+  },
+  "qmt": {
+    "connect_result": 0,
+    "sdk_version": null,
+    "session_id": 6101902,
+    "subscribe_result": 0,
+    "unsubscribe_result": 0,
+    "userdata_mini_fingerprint": "1a707d2e5df5b9d4"
+  },
+  "schema": "qmt-readonly-probe/v1",
+  "started_at": "2026-10-19T22:40:35.790678+08:00",
+  "status": {
+    "disconnect_callback_count": 0,
+    "invalid_callback_count": 0,
+    "maximum_reported_account_count": 1,
+    "observations": [
+      {
+        "account_type": 2,
+        "elapsed_milliseconds": 63,
+        "source": "QUERY",
+        "status": 0,
+        "status_name": "OK"
+      }
+    ],
+    "query_count": 1
+  },
+  "target_account": {
+    "fingerprint": "16d151a5410d41d0",
+    "masked": "****2868",
+    "type": "STOCK"
+  }
+}

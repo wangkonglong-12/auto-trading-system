@@ -1,0 +1,23 @@
+{
+  "additionalProperties": false,
+  "properties": {
+    "payload_hash": {
+      "description": "同账户Journal内封存正文的完整摘要",
+      "pattern": "^sha256:[a-f0-9]{64}$",
+      "title": "Payload Hash",
+      "type": "string"
+    },
+    "trade_date": {
+      "description": "已封存持仓的上一交易日",
+      "format": "date",
+      "title": "Trade Date",
+      "type": "string"
+    }
+  },
+  "required": [
+    "trade_date",
+    "payload_hash"
+  ],
+  "title": "OpeningReference",
+  "type": "object"
+}

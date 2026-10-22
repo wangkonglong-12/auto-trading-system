@@ -1,0 +1,43 @@
+{
+  "version": "0.1.0.dev40",
+  "python": "3.11.16",
+  "installed_target": "E:\\workspace\\auto-trading-system\\.codex_tmp\\r31-engine\\installed-wheel",
+  "installed_package_path_verified": true,
+  "artifacts": {
+    "dist\\auto_trading_system-0.1.0.dev40-py3-none-any.whl": "21eb39066323432c2a9b4607feb58015349347e1c53d4737e86253e9888a10d8",
+    "dist\\auto_trading_system-0.1.0.dev40.tar.gz": "90b5fa4cf09680352017eb7b3d44142ece3f047826a589fcf097942e099f3c8a"
+  },
+  "python_test_count": 1731,
+  "new_engine_recovery_test_count": 77,
+  "frontend_test_count": 24,
+  "coverage_summary": {
+    "covered_lines": 13900,
+    "num_statements": 14954,
+    "percent_covered": 90.56662194240891,
+    "percent_covered_display": "90.57",
+    "missing_lines": 1054,
+    "excluded_lines": 315,
+    "percent_statements_covered": 92.95171860371806,
+    "percent_statements_covered_display": "92.95",
+    "num_branches": 4424,
+    "num_partial_branches": 732,
+    "covered_branches": 3650,
+    "missing_branches": 774,
+    "percent_branches_covered": 82.50452079566004,
+    "percent_branches_covered_display": "82.50"
+  },
+  "installed_wheel_simulation": {
+    "cancelled_remaining_quantity": 50,
+    "durable_grant_applied": true,
+    "filled_quantity": 50,
+    "mode": "OFFLINE_ENGINE",
+    "old_grant_not_restored": true,
+    "order_count": 1,
+    "output_directory": "E:\\workspace\\auto-trading-system\\.codex_tmp\\r31-engine\\installed-smoke\\engine-simulation-d51e885b0679496bbf786c70f57d196e",
+    "real_trading_enabled": false,
+    "recovery_report_hash": "sha256:b10c7e1b99ab883b98be328112f1dffdc2bcbac9ad3bf0f962d30f9c92ae4e77",
+    "recovery_status": "CLEAR",
+    "restart_paused": true,
+    "submission_records": 2
+  }
+}

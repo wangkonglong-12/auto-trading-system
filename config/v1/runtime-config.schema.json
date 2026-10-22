@@ -1,0 +1,722 @@
+{
+  "$defs": {
+    "CentralApiSettings": {
+      "additionalProperties": false,
+      "description": "Signed HTTPS control-plane endpoint and transport limits.",
+      "properties": {
+        "base_url": {
+          "format": "uri",
+          "minLength": 1,
+          "title": "Base Url",
+          "type": "string"
+        },
+        "connect_timeout_seconds": {
+          "default": "3",
+          "pattern": "^(?!0(?:\\.0{1,3})?$)(?:(?:[0-9]{1,2}|[12][0-9]{2})(?:\\.[0-9]{1,3})?|300(?:\\.0{1,3})?)$",
+          "title": "Connect Timeout Seconds",
+          "type": "string"
+        },
+        "max_connections": {
+          "default": 4,
+          "maximum": 16,
+          "minimum": 1,
+          "title": "Max Connections",
+          "type": "integer"
+        },
+        "read_timeout_seconds": {
+          "default": "10",
+          "pattern": "^(?!0(?:\\.0{1,3})?$)(?:(?:[0-9]{1,2}|[12][0-9]{2})(?:\\.[0-9]{1,3})?|300(?:\\.0{1,3})?)$",
+          "title": "Read Timeout Seconds",
+          "type": "string"
+        },
+        "verify_tls": {
+          "const": true,
+          "default": true,
+          "title": "Verify Tls",
+          "type": "boolean"
+        }
+      },
+      "required": [
+        "base_url"
+      ],
+      "title": "CentralApiSettings",
+      "type": "object"
+    },
+    "EnvironmentProfile": {
+      "description": "Deployment profile; the Runtime state machine remains a separate concern.",
+      "enum": [
+        "READ_ONLY",
+        "PAPER",
+        "SHADOW",
+        "ASSISTED",
+        "LIVE_EXIT_ONLY",
+        "LIVE"
+      ],
+      "title": "EnvironmentProfile",
+      "type": "string"
+    },
+    "EnvironmentSecretReference": {
+      "additionalProperties": false,
+      "description": "Development-only reference to a process environment variable.",
+      "properties": {
+        "source": {
+          "const": "ENVIRONMENT",
+          "title": "Source",
+          "type": "string"
+        },
+        "variable": {
+          "pattern": "^ATS_SECRET_[A-Z0-9_]{3,64}$",
+          "title": "Variable",
+          "type": "string"
+        }
+      },
+      "required": [
+        "source",
+        "variable"
+      ],
+      "title": "EnvironmentSecretReference",
+      "type": "object"
+    },
+    "HardSafetySettings": {
+      "additionalProperties": false,
+      "description": "Machine-local limits that a central plan cannot exceed.",
+      "properties": {
+        "active_order_per_symbol_side": {
+          "const": 1,
+          "default": 1,
+          "title": "Active Order Per Symbol Side",
+          "type": "integer"
+        },
+        "hard_max_exposure": {
+          "default": "0.60",
+          "pattern": "^(?!0(?:\\.0{1,8})?$)(?:0(?:\\.[0-9]{1,8})?|1(?:\\.0{1,8})?)$",
+          "title": "Hard Max Exposure",
+          "type": "string"
+        },
+        "max_active_orders": {
+          "default": 3,
+          "maximum": 3,
+          "minimum": 1,
+          "title": "Max Active Orders",
+          "type": "integer"
+        },
+        "max_clock_skew_seconds": {
+          "default": 30,
+          "maximum": 30,
+          "minimum": 1,
+          "title": "Max Clock Skew Seconds",
+          "type": "integer"
+        },
+        "max_daily_buy_notional": {
+          "pattern": "^(?!0(?:\\.0{1,2})?$)(?:0|[1-9][0-9]{0,11})(?:\\.[0-9]{1,2})?$",
+          "title": "Max Daily Buy Notional",
+          "type": "string"
+        },
+        "max_positions": {
+          "default": 15,
+          "maximum": 15,
+          "minimum": 1,
+          "title": "Max Positions",
+          "type": "integer"
+        },
+        "max_single_order_notional": {
+          "pattern": "^(?!0(?:\\.0{1,2})?$)(?:0|[1-9][0-9]{0,11})(?:\\.[0-9]{1,2})?$",
+          "title": "Max Single Order Notional",
+          "type": "string"
+        },
+        "max_single_position_exposure": {
+          "default": "0.05",
+          "pattern": "^(?!0(?:\\.0{1,8})?$)(?:0(?:\\.[0-9]{1,8})?|1(?:\\.0{1,8})?)$",
+          "title": "Max Single Position Exposure",
+          "type": "string"
+        },
+        "max_tick_age_seconds": {
+          "default": "1.5",
+          "pattern": "^(?!0(?:\\.0{1,3})?$)(?:(?:[0-9]{1,2}|[12][0-9]{2})(?:\\.[0-9]{1,3})?|300(?:\\.0{1,3})?)$",
+          "title": "Max Tick Age Seconds",
+          "type": "string"
+        }
+      },
+      "required": [
+        "max_single_order_notional",
+        "max_daily_buy_notional"
+      ],
+      "title": "HardSafetySettings",
+      "type": "object"
+    },
+    "LocalApiSettings": {
+      "additionalProperties": false,
+      "description": "Loopback-only operator console endpoint.",
+      "properties": {
+        "control_preview_ttl_seconds": {
+          "default": 90,
+          "maximum": 120,
+          "minimum": 30,
+          "title": "Control Preview Ttl Seconds",
+          "type": "integer"
+        },
+        "host": {
+          "const": "127.0.0.1",
+          "default": "127.0.0.1",
+          "title": "Host",
+          "type": "string"
+        },
+        "login_failure_window_seconds": {
+          "default": 300,
+          "maximum": 3600,
+          "minimum": 60,
+          "title": "Login Failure Window Seconds",
+          "type": "integer"
+        },
+        "login_max_failures": {
+          "default": 5,
+          "maximum": 10,
+          "minimum": 3,
+          "title": "Login Max Failures",
+          "type": "integer"
+        },
+        "operator_id": {
+          "pattern": "^[A-Za-z][A-Za-z0-9_.:-]{2,95}$",
+          "title": "Operator Id",
+          "type": "string"
+        },
+        "port": {
+          "default": 8765,
+          "maximum": 65535,
+          "minimum": 1024,
+          "title": "Port",
+          "type": "integer"
+        },
+        "session_absolute_seconds": {
+          "default": 3600,
+          "maximum": 14400,
+          "minimum": 900,
+          "title": "Session Absolute Seconds",
+          "type": "integer"
+        },
+        "session_idle_seconds": {
+          "default": 900,
+          "maximum": 3600,
+          "minimum": 300,
+          "title": "Session Idle Seconds",
+          "type": "integer"
+        }
+      },
+      "required": [
+        "operator_id"
+      ],
+      "title": "LocalApiSettings",
+      "type": "object"
+    },
+    "NodeSettings": {
+      "additionalProperties": false,
+      "description": "Logical node identity; the full broker account is loaded as a secret.",
+      "properties": {
+        "account_alias": {
+          "maxLength": 32,
+          "minLength": 2,
+          "pattern": "^[A-Za-z0-9_-]+$",
+          "title": "Account Alias",
+          "type": "string"
+        },
+        "account_id": {
+          "pattern": "^acct_[A-Za-z0-9_-]{3,48}$",
+          "title": "Account Id",
+          "type": "string"
+        },
+        "node_id": {
+          "pattern": "^node-[a-z0-9][a-z0-9-]{2,47}$",
+          "title": "Node Id",
+          "type": "string"
+        }
+      },
+      "required": [
+        "node_id",
+        "account_id",
+        "account_alias"
+      ],
+      "title": "NodeSettings",
+      "type": "object"
+    },
+    "QmtSettings": {
+      "additionalProperties": false,
+      "description": "Machine-bound QMT connection settings.",
+      "properties": {
+        "account_type": {
+          "const": "STOCK",
+          "default": "STOCK",
+          "title": "Account Type",
+          "type": "string"
+        },
+        "session_id": {
+          "maximum": 2147483647,
+          "minimum": 1,
+          "title": "Session Id",
+          "type": "integer"
+        },
+        "userdata_mini": {
+          "format": "path",
+          "title": "Userdata Mini",
+          "type": "string"
+        }
+      },
+      "required": [
+        "userdata_mini",
+        "session_id"
+      ],
+      "title": "QmtSettings",
+      "type": "object"
+    },
+    "ReconciliationSettings": {
+      "additionalProperties": false,
+      "description": "Periodic broker-fact query cadence.",
+      "properties": {
+        "active_orders_interval_seconds": {
+          "default": 2,
+          "maximum": 30,
+          "minimum": 1,
+          "title": "Active Orders Interval Seconds",
+          "type": "integer"
+        },
+        "asset_interval_seconds": {
+          "default": 30,
+          "maximum": 300,
+          "minimum": 5,
+          "title": "Asset Interval Seconds",
+          "type": "integer"
+        },
+        "position_interval_seconds": {
+          "default": 15,
+          "maximum": 300,
+          "minimum": 5,
+          "title": "Position Interval Seconds",
+          "type": "integer"
+        }
+      },
+      "title": "ReconciliationSettings",
+      "type": "object"
+    },
+    "RecorderSettings": {
+      "additionalProperties": false,
+      "description": "Tick recorder resource limits and retention policy.",
+      "properties": {
+        "compression": {
+          "const": "zstd",
+          "default": "zstd",
+          "title": "Compression",
+          "type": "string"
+        },
+        "enabled": {
+          "default": true,
+          "title": "Enabled",
+          "type": "boolean"
+        },
+        "queue_capacity": {
+          "default": 100000,
+          "maximum": 2000000,
+          "minimum": 1000,
+          "title": "Queue Capacity",
+          "type": "integer"
+        },
+        "retention_trading_days": {
+          "default": 20,
+          "maximum": 120,
+          "minimum": 1,
+          "title": "Retention Trading Days",
+          "type": "integer"
+        }
+      },
+      "title": "RecorderSettings",
+      "type": "object"
+    },
+    "RuntimeQueueSettings": {
+      "additionalProperties": false,
+      "description": "Bounded decision-ingress lanes with reserved capacity for critical events.",
+      "properties": {
+        "critical_capacity": {
+          "default": 256,
+          "maximum": 10000,
+          "minimum": 16,
+          "title": "Critical Capacity",
+          "type": "integer"
+        },
+        "normal_capacity": {
+          "default": 10000,
+          "maximum": 1000000,
+          "minimum": 100,
+          "title": "Normal Capacity",
+          "type": "integer"
+        }
+      },
+      "title": "RuntimeQueueSettings",
+      "type": "object"
+    },
+    "SecuritySettings": {
+      "additionalProperties": false,
+      "description": "Non-secret identifiers plus opaque references to sensitive values.",
+      "properties": {
+        "broker_account_id": {
+          "discriminator": {
+            "mapping": {
+              "ENVIRONMENT": "#/$defs/EnvironmentSecretReference",
+              "WINDOWS_CREDENTIAL_MANAGER": "#/$defs/WindowsCredentialReference"
+            },
+            "propertyName": "source"
+          },
+          "oneOf": [
+            {
+              "$ref": "#/$defs/EnvironmentSecretReference"
+            },
+            {
+              "$ref": "#/$defs/WindowsCredentialReference"
+            }
+          ],
+          "title": "Broker Account Id"
+        },
+        "node_hmac_secret": {
+          "discriminator": {
+            "mapping": {
+              "ENVIRONMENT": "#/$defs/EnvironmentSecretReference",
+              "WINDOWS_CREDENTIAL_MANAGER": "#/$defs/WindowsCredentialReference"
+            },
+            "propertyName": "source"
+          },
+          "oneOf": [
+            {
+              "$ref": "#/$defs/EnvironmentSecretReference"
+            },
+            {
+              "$ref": "#/$defs/WindowsCredentialReference"
+            }
+          ],
+          "title": "Node Hmac Secret"
+        },
+        "node_key_id": {
+          "pattern": "^key_[A-Za-z0-9_-]{4,48}$",
+          "title": "Node Key Id",
+          "type": "string"
+        },
+        "operator_password_verifier": {
+          "discriminator": {
+            "mapping": {
+              "ENVIRONMENT": "#/$defs/EnvironmentSecretReference",
+              "WINDOWS_CREDENTIAL_MANAGER": "#/$defs/WindowsCredentialReference"
+            },
+            "propertyName": "source"
+          },
+          "oneOf": [
+            {
+              "$ref": "#/$defs/EnvironmentSecretReference"
+            },
+            {
+              "$ref": "#/$defs/WindowsCredentialReference"
+            }
+          ],
+          "title": "Operator Password Verifier"
+        }
+      },
+      "required": [
+        "node_key_id",
+        "node_hmac_secret",
+        "broker_account_id",
+        "operator_password_verifier"
+      ],
+      "title": "SecuritySettings",
+      "type": "object"
+    },
+    "StorageSettings": {
+      "additionalProperties": false,
+      "description": "Local state and evidence storage root.",
+      "properties": {
+        "minimum_free_space_mb": {
+          "default": 2048,
+          "maximum": 1048576,
+          "minimum": 1024,
+          "title": "Minimum Free Space Mb",
+          "type": "integer"
+        },
+        "root": {
+          "format": "path",
+          "title": "Root",
+          "type": "string"
+        }
+      },
+      "required": [
+        "root"
+      ],
+      "title": "StorageSettings",
+      "type": "object"
+    },
+    "SyncSettings": {
+      "additionalProperties": false,
+      "description": "Control-plane polling and batching cadence.",
+      "properties": {
+        "command_active_interval_seconds": {
+          "default": "2",
+          "pattern": "^(?!0(?:\\.0{1,3})?$)(?:(?:[0-9]{1,2}|[12][0-9]{2})(?:\\.[0-9]{1,3})?|300(?:\\.0{1,3})?)$",
+          "title": "Command Active Interval Seconds",
+          "type": "string"
+        },
+        "command_long_poll_seconds": {
+          "default": "20",
+          "pattern": "^(?!0(?:\\.0{1,3})?$)(?:(?:[0-9]{1,2}|[12][0-9]{2})(?:\\.[0-9]{1,3})?|300(?:\\.0{1,3})?)$",
+          "title": "Command Long Poll Seconds",
+          "type": "string"
+        },
+        "event_batch_size": {
+          "default": 50,
+          "maximum": 50,
+          "minimum": 1,
+          "title": "Event Batch Size",
+          "type": "integer"
+        },
+        "event_upload_interval_seconds": {
+          "default": "1",
+          "pattern": "^(?!0(?:\\.0{1,3})?$)(?:(?:[0-9]{1,2}|[12][0-9]{2})(?:\\.[0-9]{1,3})?|300(?:\\.0{1,3})?)$",
+          "title": "Event Upload Interval Seconds",
+          "type": "string"
+        },
+        "heartbeat_active_interval_seconds": {
+          "default": "5",
+          "pattern": "^(?!0(?:\\.0{1,3})?$)(?:(?:[0-9]{1,2}|[12][0-9]{2})(?:\\.[0-9]{1,3})?|300(?:\\.0{1,3})?)$",
+          "title": "Heartbeat Active Interval Seconds",
+          "type": "string"
+        },
+        "heartbeat_idle_interval_seconds": {
+          "default": "30",
+          "pattern": "^(?!0(?:\\.0{1,3})?$)(?:(?:[0-9]{1,2}|[12][0-9]{2})(?:\\.[0-9]{1,3})?|300(?:\\.0{1,3})?)$",
+          "title": "Heartbeat Idle Interval Seconds",
+          "type": "string"
+        },
+        "outbox_critical_watermark": {
+          "default": 100000,
+          "maximum": 1000000,
+          "minimum": 101,
+          "title": "Outbox Critical Watermark",
+          "type": "integer"
+        },
+        "outbox_high_watermark": {
+          "default": 50000,
+          "maximum": 999999,
+          "minimum": 100,
+          "title": "Outbox High Watermark",
+          "type": "integer"
+        },
+        "outbox_retry_base_seconds": {
+          "default": 2,
+          "maximum": 300,
+          "minimum": 1,
+          "title": "Outbox Retry Base Seconds",
+          "type": "integer"
+        },
+        "outbox_retry_max_seconds": {
+          "default": 300,
+          "maximum": 86400,
+          "minimum": 1,
+          "title": "Outbox Retry Max Seconds",
+          "type": "integer"
+        },
+        "plan_active_interval_seconds": {
+          "default": "2",
+          "pattern": "^(?!0(?:\\.0{1,3})?$)(?:(?:[0-9]{1,2}|[12][0-9]{2})(?:\\.[0-9]{1,3})?|300(?:\\.0{1,3})?)$",
+          "title": "Plan Active Interval Seconds",
+          "type": "string"
+        },
+        "plan_idle_interval_seconds": {
+          "default": "30",
+          "pattern": "^(?!0(?:\\.0{1,3})?$)(?:(?:[0-9]{1,2}|[12][0-9]{2})(?:\\.[0-9]{1,3})?|300(?:\\.0{1,3})?)$",
+          "title": "Plan Idle Interval Seconds",
+          "type": "string"
+        }
+      },
+      "title": "SyncSettings",
+      "type": "object"
+    },
+    "WatchdogSettings": {
+      "additionalProperties": false,
+      "description": "Independent supervisor timing and crash-loop limits.",
+      "properties": {
+        "circuit_open_seconds": {
+          "default": 300,
+          "maximum": 3600,
+          "minimum": 30,
+          "title": "Circuit Open Seconds",
+          "type": "integer"
+        },
+        "crash_limit": {
+          "default": 3,
+          "maximum": 10,
+          "minimum": 2,
+          "title": "Crash Limit",
+          "type": "integer"
+        },
+        "crash_window_seconds": {
+          "default": 600,
+          "maximum": 3600,
+          "minimum": 60,
+          "title": "Crash Window Seconds",
+          "type": "integer"
+        },
+        "heartbeat_interval_seconds": {
+          "default": 2,
+          "maximum": 10,
+          "minimum": 1,
+          "title": "Heartbeat Interval Seconds",
+          "type": "integer"
+        },
+        "heartbeat_stale_timeout_seconds": {
+          "default": 10,
+          "maximum": 120,
+          "minimum": 3,
+          "title": "Heartbeat Stale Timeout Seconds",
+          "type": "integer"
+        },
+        "heartbeat_startup_timeout_seconds": {
+          "default": 45,
+          "maximum": 300,
+          "minimum": 10,
+          "title": "Heartbeat Startup Timeout Seconds",
+          "type": "integer"
+        },
+        "poll_interval_seconds": {
+          "default": 2,
+          "maximum": 10,
+          "minimum": 1,
+          "title": "Poll Interval Seconds",
+          "type": "integer"
+        },
+        "restart_initial_delay_seconds": {
+          "default": 2,
+          "maximum": 60,
+          "minimum": 1,
+          "title": "Restart Initial Delay Seconds",
+          "type": "integer"
+        },
+        "restart_max_delay_seconds": {
+          "default": 60,
+          "maximum": 600,
+          "minimum": 2,
+          "title": "Restart Max Delay Seconds",
+          "type": "integer"
+        },
+        "terminate_grace_seconds": {
+          "default": 5,
+          "maximum": 30,
+          "minimum": 1,
+          "title": "Terminate Grace Seconds",
+          "type": "integer"
+        }
+      },
+      "title": "WatchdogSettings",
+      "type": "object"
+    },
+    "WindowsCredentialReference": {
+      "additionalProperties": false,
+      "description": "Reference to a generic credential stored by the installation process.",
+      "properties": {
+        "encoding": {
+          "default": "utf-16-le",
+          "enum": [
+            "utf-16-le",
+            "utf-8"
+          ],
+          "title": "Encoding",
+          "type": "string"
+        },
+        "source": {
+          "const": "WINDOWS_CREDENTIAL_MANAGER",
+          "title": "Source",
+          "type": "string"
+        },
+        "target": {
+          "maxLength": 160,
+          "minLength": 8,
+          "pattern": "^AutoTrading/[A-Za-z0-9._-]+(?:/[A-Za-z0-9._-]+)+$",
+          "title": "Target",
+          "type": "string"
+        }
+      },
+      "required": [
+        "source",
+        "target"
+      ],
+      "title": "WindowsCredentialReference",
+      "type": "object"
+    }
+  },
+  "$id": "https://contracts.auto-trading.local/config/v1/runtime-config.schema.json",
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "additionalProperties": false,
+  "description": "Complete version 1.0 machine configuration.",
+  "properties": {
+    "central_api": {
+      "$ref": "#/$defs/CentralApiSettings"
+    },
+    "config_version": {
+      "const": "1.0",
+      "title": "Config Version",
+      "type": "string"
+    },
+    "hard_safety": {
+      "$ref": "#/$defs/HardSafetySettings"
+    },
+    "local_api": {
+      "$ref": "#/$defs/LocalApiSettings"
+    },
+    "node": {
+      "$ref": "#/$defs/NodeSettings"
+    },
+    "profile": {
+      "$ref": "#/$defs/EnvironmentProfile"
+    },
+    "qmt": {
+      "$ref": "#/$defs/QmtSettings"
+    },
+    "reconciliation": {
+      "$ref": "#/$defs/ReconciliationSettings"
+    },
+    "recorder": {
+      "$ref": "#/$defs/RecorderSettings"
+    },
+    "restart_mode": {
+      "const": "READY_PAUSED",
+      "default": "READY_PAUSED",
+      "title": "Restart Mode",
+      "type": "string"
+    },
+    "runtime_queues": {
+      "$ref": "#/$defs/RuntimeQueueSettings"
+    },
+    "security": {
+      "$ref": "#/$defs/SecuritySettings"
+    },
+    "storage": {
+      "$ref": "#/$defs/StorageSettings"
+    },
+    "sync": {
+      "$ref": "#/$defs/SyncSettings"
+    },
+    "timezone": {
+      "const": "Asia/Shanghai",
+      "default": "Asia/Shanghai",
+      "title": "Timezone",
+      "type": "string"
+    },
+    "watchdog": {
+      "$ref": "#/$defs/WatchdogSettings"
+    }
+  },
+  "required": [
+    "config_version",
+    "profile",
+    "node",
+    "qmt",
+    "central_api",
+    "local_api",
+    "storage",
+    "hard_safety",
+    "security"
+  ],
+  "title": "Auto Trading Windows Runtime Configuration v1.0",
+  "type": "object"
+}

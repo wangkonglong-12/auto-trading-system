@@ -1,0 +1,36 @@
+name: quality
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+permissions:
+  contents: read
+
+jobs:
+  test:
+    runs-on: windows-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+      - uses: pnpm/action-setup@v4
+        with:
+          version: 11.19.0
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+          cache: pnpm
+          cache-dependency-path: frontend/operator-console/pnpm-lock.yaml
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+          cache: pip
+          cache-dependency-path: requirements/dev.lock
+      - name: Install locked dependencies
+        run: |
+          python -m pip install --require-hashes -r requirements/dev.lock
+          python -m pip install --no-deps -e .
+      - name: Run quality gate
+        shell: pwsh
+        run: .\scripts\check.ps1 -Python python

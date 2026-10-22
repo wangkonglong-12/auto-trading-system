@@ -1,0 +1,50 @@
+{
+  "additionalProperties": false,
+  "properties": {
+    "byte_count": {
+      "description": "完整正文UTF-8字节数",
+      "exclusiveMinimum": 65536,
+      "maximum": 8388608,
+      "title": "Byte Count",
+      "type": "integer"
+    },
+    "chunk_bytes": {
+      "const": 32768,
+      "default": 32768,
+      "description": "除末片外的原始分片字节数",
+      "title": "Chunk Bytes",
+      "type": "integer"
+    },
+    "chunks": {
+      "description": "按正文顺序排列的原始分片摘要",
+      "items": {
+        "pattern": "^sha256:[a-f0-9]{64}$",
+        "type": "string"
+      },
+      "maxItems": 256,
+      "minItems": 3,
+      "title": "Chunks",
+      "type": "array"
+    },
+    "payload_hash": {
+      "description": "完整规范JSON正文的SHA256",
+      "pattern": "^sha256:[a-f0-9]{64}$",
+      "title": "Payload Hash",
+      "type": "string"
+    },
+    "storage_format": {
+      "const": "critical-blob-v1",
+      "default": "critical-blob-v1",
+      "description": "本地分片检查点格式标记，保留字段",
+      "title": "Storage Format",
+      "type": "string"
+    }
+  },
+  "required": [
+    "payload_hash",
+    "byte_count",
+    "chunks"
+  ],
+  "title": "CheckpointManifest",
+  "type": "object"
+}

@@ -1,0 +1,30 @@
+{
+  "schema_major": 2,
+  "broker": "MOCK",
+  "node_id": "example-paper-node",
+  "account_id": "example-paper-account",
+  "node_generation": 1,
+  "journal_generation": "example-journal-1",
+  "strategy_id": "tail-entry",
+  "service_sid": "S-1-5-21-1000-1000-1000-1001",
+  "data_root": "C:/AutoTrading/paper-node-data",
+  "ipc_secrets": {
+    "agent": {"source": "WINDOWS_CREDENTIAL_MANAGER", "target": "AutoTrading/example-paper-node/ipc-agent"},
+    "jobrunner": {"source": "WINDOWS_CREDENTIAL_MANAGER", "target": "AutoTrading/example-paper-node/ipc-jobrunner"},
+    "operator": {"source": "WINDOWS_CREDENTIAL_MANAGER", "target": "AutoTrading/example-paper-node/ipc-operator"}
+  },
+  "operator_access": null,
+  "quant_origin": "https://quant.example.invalid",
+  "quant_key_id": "example-http-key",
+  "quant_secret": {"source": "WINDOWS_CREDENTIAL_MANAGER", "target": "AutoTrading/example-paper-node/http"},
+  "trusted_plan_keys": {"example-public-test-key": "d75a980182b10ab7d54bfed3c964073a0ee172f3daa62325af021a68f707511a"},
+  "policies": [
+    {"component": "entry", "version": "simulation-v1", "payload_hash": "sha256:bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb"},
+    {"component": "exit", "version": "simulation-v1", "payload_hash": "sha256:bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb"},
+    {"component": "execution", "version": "simulation-v1", "payload_hash": "sha256:bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb"},
+    {"component": "risk", "version": "simulation-v1", "payload_hash": "sha256:bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb"}
+  ],
+  "rulebook": "simulation-v1",
+  "calendar": {"version": "example-two-day-fixture", "sessions": ["2026-09-07", "2026-09-08"]},
+  "mock_cash": "10000.00"
+}

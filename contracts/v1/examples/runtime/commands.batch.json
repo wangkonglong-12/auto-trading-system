@@ -1,0 +1,41 @@
+{
+  "schema_version": "1.0",
+  "request_id": "req_eeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee",
+  "node_id": "node-shanghai-001",
+  "account_id": "acct_primary_001",
+  "generated_at": "2026-09-04T14:45:10+08:00",
+  "after_command_seq": 40,
+  "high_watermark": 42,
+  "next_poll_after_ms": 2000,
+  "commands": [
+    {
+      "schema_version": "1.0",
+      "command_id": "cmd_pause_buy_20260904_041",
+      "command_seq": 41,
+      "node_id": "node-shanghai-001",
+      "account_id": "acct_primary_001",
+      "command_type": "PAUSE_BUY",
+      "scope": {"type": "ACCOUNT", "id": "acct_primary_001"},
+      "issued_at": "2026-09-04T14:45:08+08:00",
+      "expires_at": "2026-09-04T14:50:08+08:00",
+      "actor": {"type": "OPERATOR", "id": "risk-operator-01"},
+      "reason_code": "CENTRAL_RISK_PAUSE",
+      "reason": "Pause new buy orders while the upstream risk signal is reviewed"
+    },
+    {
+      "schema_version": "1.0",
+      "command_id": "cmd_reconcile_20260904_042",
+      "command_seq": 42,
+      "node_id": "node-shanghai-001",
+      "account_id": "acct_primary_001",
+      "command_type": "REQUEST_RECONCILIATION",
+      "scope": {"type": "ACCOUNT", "id": "acct_primary_001"},
+      "issued_at": "2026-09-04T14:45:09+08:00",
+      "expires_at": "2026-09-04T14:50:09+08:00",
+      "actor": {"type": "SYSTEM", "id": "central-reconciliation"},
+      "reason_code": "PERIODIC_RECONCILIATION",
+      "reason": "Run a full broker reconciliation",
+      "parameters": {"reconciliation_scope": "FULL"}
+    }
+  ]
+}

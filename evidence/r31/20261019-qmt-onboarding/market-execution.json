@@ -1,0 +1,12 @@
+{
+  "account_checks": "NOT_REQUESTED",
+  "failure_code": null,
+  "mode": "READ_ONLY",
+  "real_trading_enabled": false,
+  "schema": "qmt-onboarding/v1",
+  "stages": {
+    "tick": "PASS"
+  },
+  "status": "PASS",
+  "worker_exit_code": 0
+}

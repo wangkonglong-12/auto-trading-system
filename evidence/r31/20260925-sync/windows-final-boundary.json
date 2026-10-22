@@ -1,0 +1,29 @@
+{
+  "root": "E:\\workspace\\auto-trading-system",
+  "added": [
+    "docs/design/v3.1/ADR-R31-010_每日更正版与有界续传.md",
+    "docs/design/v3.1/每日同步更正与恢复实施报告_20260925.md",
+    "evidence/r31/20260925-sync/README.md",
+    "evidence/r31/20260925-sync/artifact-verification.json",
+    "evidence/r31/20260925-sync/coverage.json",
+    "evidence/r31/20260925-sync/installed-tests.xml",
+    "evidence/r31/20260925-sync/python-tests.xml",
+    "tests/v31/test_daily_revisions.py"
+  ],
+  "deleted": [],
+  "modified": [
+    "README.md",
+    "docs/design/v3.1/开发修订计划与推进记录.md",
+    "docs/design/v3.1/详细设计方案.md",
+    "pyproject.toml",
+    "src/auto_trading_system/runtime/node_engine.py",
+    "src/auto_trading_system/sync/agent_jobs.py",
+    "src/auto_trading_system/sync/daily_catalog.py",
+    "src/auto_trading_system/sync/daily_files.py",
+    "src/auto_trading_system/sync/job_store.py",
+    "src/auto_trading_system/sync/node_agent.py",
+    "src/auto_trading_system/version.py",
+    "tests/v31/test_node_processes.py",
+    "开发计划与推进记录.md"
+  ]
+}

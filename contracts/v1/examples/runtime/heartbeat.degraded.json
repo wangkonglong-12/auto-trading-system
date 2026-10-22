@@ -1,0 +1,42 @@
+{
+  "schema_version": "1.0",
+  "heartbeat_id": "heartbeat_20260904_144505_001",
+  "request_id": "req_dededededededededededededededede",
+  "node_id": "node-shanghai-001",
+  "account_id": "acct_primary_001",
+  "boot_id": "boot_11111111111111111111111111111111",
+  "heartbeat_seq": 173,
+  "trade_date": "2026-09-04",
+  "sent_at": "2026-09-04T14:45:05+08:00",
+  "execution_mode": "SHADOW",
+  "runtime_state": "READY_PAUSED",
+  "connectivity": {
+    "qmt": "RECONNECTING",
+    "broker_account": "UNKNOWN",
+    "central_api": "DEGRADED",
+    "market_data": "STALE"
+  },
+  "health": {
+    "journal": "HEALTHY",
+    "event_queue_depth": 8,
+    "event_queue_capacity": 10000,
+    "writer_queue_depth": 2,
+    "writer_queue_capacity": 2000,
+    "outbox_pending": 24,
+    "oldest_outbox_at": "2026-09-04T14:44:57+08:00",
+    "active_orders": 2,
+    "subscribed_symbols": 15,
+    "wal_bytes": 1179648,
+    "disk_free_bytes": 53686042624,
+    "clock_offset_ms": 18
+  },
+  "versions": {
+    "runtime": "0.1.0.dev4",
+    "config_hash": "sha256:aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+    "python": "3.11.9",
+    "qmt": "broker-build-pending-poc",
+    "xtquant": "bundled-version-pending-poc"
+  },
+  "last_reconciliation_id": "recon_20260904_143000_001",
+  "degraded_reasons": ["QMT_RECONNECTING", "MARKET_DATA_STALE"]
+}

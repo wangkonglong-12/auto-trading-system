@@ -1,0 +1,146 @@
+{
+  "additionalProperties": false,
+  "properties": {
+    "account_id": {
+      "description": "内部账户标识，必须与上传清单一致",
+      "pattern": "^[A-Za-z0-9_.:-]{1,96}$",
+      "title": "Account Id",
+      "type": "string"
+    },
+    "action_id": {
+      "pattern": "^[A-Za-z0-9_.:-]{1,96}$",
+      "title": "Action Id",
+      "type": "string"
+    },
+    "action_type": {
+      "enum": [
+        "NEW",
+        "CANCEL"
+      ],
+      "title": "Action Type",
+      "type": "string"
+    },
+    "client_order_id": {
+      "pattern": "^[A-Za-z0-9_.:-]{1,96}$",
+      "title": "Client Order Id",
+      "type": "string"
+    },
+    "engine_boot_id": {
+      "pattern": "^[A-Za-z0-9_.:-]{1,96}$",
+      "title": "Engine Boot Id",
+      "type": "string"
+    },
+    "limit_price": {
+      "description": "每股人民币元，最多8位小数",
+      "pattern": "^(0|[1-9][0-9]{0,9})(\\.[0-9]{1,8})?$",
+      "title": "Limit Price",
+      "type": "string"
+    },
+    "maximum_amount": {
+      "description": "人民币元，最多2位小数",
+      "pattern": "^(0|[1-9][0-9]{0,11})(\\.[0-9]{1,2})?$",
+      "title": "Maximum Amount",
+      "type": "string"
+    },
+    "observed_at": {
+      "description": "该条事实的观测时点",
+      "format": "date-time",
+      "title": "Observed At",
+      "type": "string"
+    },
+    "payload_hash": {
+      "pattern": "^sha256:[a-f0-9]{64}$",
+      "title": "Payload Hash",
+      "type": "string"
+    },
+    "permission_epoch": {
+      "minimum": 1,
+      "title": "Permission Epoch",
+      "type": "integer"
+    },
+    "plan_hash": {
+      "pattern": "^sha256:[a-f0-9]{64}$",
+      "title": "Plan Hash",
+      "type": "string"
+    },
+    "quantity": {
+      "description": "整数股",
+      "maximum": 2147483647,
+      "minimum": 0,
+      "title": "Quantity",
+      "type": "integer"
+    },
+    "record_seq": {
+      "description": "关键Journal提交序号",
+      "minimum": 1,
+      "title": "Record Seq",
+      "type": "integer"
+    },
+    "side": {
+      "enum": [
+        "BUY",
+        "SELL"
+      ],
+      "title": "Side",
+      "type": "string"
+    },
+    "status": {
+      "enum": [
+        "SEND_REQUESTED",
+        "NOT_DISPATCHED",
+        "SDK_ACCEPTED",
+        "REJECTED",
+        "UNCERTAIN",
+        "RESOLVED"
+      ],
+      "title": "Status",
+      "type": "string"
+    },
+    "symbol": {
+      "description": "带市场后缀的证券代码",
+      "pattern": "^[0-9]{6}\\.(SH|SZ|BJ)$",
+      "title": "Symbol",
+      "type": "string"
+    },
+    "target_order_id": {
+      "anyOf": [
+        {
+          "pattern": "^[A-Za-z0-9_.:-]{1,96}$",
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Target Order Id"
+    },
+    "trade_date": {
+      "description": "所属交易日",
+      "format": "date",
+      "title": "Trade Date",
+      "type": "string"
+    }
+  },
+  "required": [
+    "account_id",
+    "trade_date",
+    "observed_at",
+    "client_order_id",
+    "action_type",
+    "action_id",
+    "plan_hash",
+    "symbol",
+    "side",
+    "quantity",
+    "limit_price",
+    "maximum_amount",
+    "payload_hash",
+    "record_seq",
+    "engine_boot_id",
+    "permission_epoch",
+    "status"
+  ],
+  "title": "SubmissionRecord",
+  "type": "object"
+}
