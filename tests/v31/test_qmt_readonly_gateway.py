@@ -17,6 +17,7 @@ from auto_trading_system.apps.qmt_debug import __main__ as debug_app
 from auto_trading_system.config.node_v2 import NodeProcessConfig
 from auto_trading_system.gateways.broker.cicc_qmt import XtquantBindings
 from auto_trading_system.gateways.broker.cicc_qmt_readonly_gateway import CiccQmtReadOnlyGateway
+from auto_trading_system.gateways.broker.qmt_command_transport import QmtConstants
 from auto_trading_system.monitoring.qmt_readonly import QmtProbeConfig, QmtReadOnlyAdapterError
 from auto_trading_system.protocol.v2.canonical import canonical_bytes
 from auto_trading_system.reconcile.portfolio_checkpoint import PortfolioCheckpoint, prefix_hash
@@ -125,6 +126,137 @@ def test_nonready_account_callback_halts_once_with_specific_reason(tmp_path: Pat
     with pytest.raises(QmtReadOnlyAdapterError, match="QMT_GATEWAY_UNAVAILABLE"):
         broker.read_account()
     broker.stop()
+
+
+@pytest.fixture
+def display_sdk(monkeypatch: pytest.MonkeyPatch) -> None:
+    monkeypatch.setattr(QmtConstants, "from_sdk", lambda: QmtConstants(23, 24, 11))
+    monkeypatch.setattr(
+        "auto_trading_system.gateways.market.qmt.read_instrument_names", lambda _: {}
+    )
+
+
+@pytest.mark.parametrize("recovered_callback", [False, True])
+def test_display_recovers_after_account_recheck_without_clearing_halt_or_cached_account(
+    tmp_path: Path, display_sdk: None, recovered_callback: bool
+) -> None:
+    unavailable: list[str] = []
+    broker, trader = gateway(tmp_path, unavailable)
+    broker.start(lambda _: None)
+    assert broker.query_orders() == ()
+    original = broker.read_account()
+    callback = cast(Any, trader.callback)
+    callback.on_account_status(SimpleNamespace(account_id=ACCOUNT, account_type=2, status=1))
+    if recovered_callback:
+        callback.on_account_status(SimpleNamespace(account_id=ACCOUNT, account_type=2, status=0))
+    cast(Any, trader.asset).cash = 150.0
+    cast(Any, trader.asset).total_asset = 350.0
+    details = broker.read_operator_details()
+    assert details["available"] is True and details["cash"] == "150.00"
+    assert details["coherent"] is False
+    assert original.cash == "123.46" and broker._last_account is original
+    assert unavailable == ["QMT_ACCOUNT_STATUS_NOT_READY"]
+    for operation in (broker.read_account, broker.query_orders, broker.query_trades):
+        with pytest.raises(QmtReadOnlyAdapterError, match="QMT_GATEWAY_UNAVAILABLE"):
+            operation()
+    with pytest.raises(QmtReadOnlyAdapterError, match="QMT_GATEWAY_READ_ONLY"):
+        broker.submit_order(None)  # type: ignore[arg-type]
+    with pytest.raises(QmtReadOnlyAdapterError, match="QMT_GATEWAY_READ_ONLY"):
+        broker.cancel_order(None)  # type: ignore[arg-type]
+    broker.stop()
+
+
+@pytest.mark.parametrize(
+    "status",
+    [
+        None,
+        [],
+        [SimpleNamespace(account_id=ACCOUNT, account_type=2, status=1)],
+        [SimpleNamespace(account_id="OTHER123", account_type=2, status=0)],
+        [SimpleNamespace(account_id=ACCOUNT, account_type=3, status=0)],
+        [SimpleNamespace(account_id=ACCOUNT, account_type=2, status="0")],
+    ],
+)
+def test_display_requires_current_valid_target_account(
+    tmp_path: Path, display_sdk: None, status: object
+) -> None:
+    broker, trader = gateway(tmp_path)
+    broker.start(lambda _: None)
+    cast(Any, trader).status = status
+    with pytest.raises(QmtReadOnlyAdapterError):
+        broker.read_operator_details()
+    broker.stop()
+
+
+@pytest.mark.parametrize("signal", ["disconnect", "invalid_status"])
+def test_display_remains_blocked_after_transport_or_malformed_status_failure(
+    tmp_path: Path, display_sdk: None, signal: str
+) -> None:
+    broker, trader = gateway(tmp_path)
+    broker.start(lambda _: None)
+    callback = cast(Any, trader.callback)
+    if signal == "disconnect":
+        callback.on_disconnected()
+    else:
+        callback.on_account_status(object())
+    callback.on_account_status(SimpleNamespace(account_id=ACCOUNT, account_type=2, status=0))
+    with pytest.raises(QmtReadOnlyAdapterError, match="QMT_GATEWAY_UNAVAILABLE"):
+        broker.read_operator_details()
+    broker.stop()
+
+
+@pytest.mark.parametrize(
+    "phase", ["initial_status", "asset", "final_status", "final_query_not_ready"]
+)
+def test_display_rejects_account_change_during_query(
+    tmp_path: Path, display_sdk: None, monkeypatch: pytest.MonkeyPatch, phase: str
+) -> None:
+    broker, trader = gateway(tmp_path)
+    broker.start(lambda _: None)
+    callback = cast(Any, trader.callback)
+    status_calls = 0
+
+    def change_status() -> None:
+        callback.on_account_status(SimpleNamespace(account_id=ACCOUNT, account_type=2, status=1))
+        callback.on_account_status(SimpleNamespace(account_id=ACCOUNT, account_type=2, status=0))
+
+    def query_status() -> object:
+        nonlocal status_calls
+        status_calls += 1
+        if phase == "final_query_not_ready" and status_calls == 2:
+            return [SimpleNamespace(account_id=ACCOUNT, account_type=2, status=1)]
+        if (phase == "initial_status" and status_calls == 1) or (
+            phase == "final_status" and status_calls == 2
+        ):
+            change_status()
+        return trader.status
+
+    def query_asset(_: object) -> object:
+        if phase == "asset":
+            change_status()
+        return trader.asset
+
+    monkeypatch.setattr(trader, "query_account_status", query_status)
+    monkeypatch.setattr(trader, "query_stock_asset", query_asset)
+    with pytest.raises(QmtReadOnlyAdapterError, match="QMT_GATEWAY_ACCOUNT_NOT_OK"):
+        broker.read_operator_details()
+    broker.stop()
+
+
+def test_display_rejects_stopped_session_and_failed_fresh_query(
+    tmp_path: Path, display_sdk: None
+) -> None:
+    broker, trader = gateway(tmp_path)
+    with pytest.raises(QmtReadOnlyAdapterError, match="QMT_GATEWAY_UNAVAILABLE"):
+        broker.read_operator_details()
+    broker.start(lambda _: None)
+    assert broker.read_operator_details()["available"] is True
+    trader.asset = None
+    with pytest.raises(QmtReadOnlyAdapterError, match="QMT_FACT_ASSET_NONE"):
+        broker.read_operator_details()
+    broker.stop()
+    with pytest.raises(QmtReadOnlyAdapterError, match="QMT_GATEWAY_UNAVAILABLE"):
+        broker.read_operator_details()
 
 
 def test_qmt_configuration_binds_fingerprint_and_keeps_mock_scope(
@@ -281,12 +413,26 @@ def test_qmt_live_opening_context_uses_only_owned_filled_lots(
     loaded, context = _live_opening_context(config, cast(Any, Journal()), morning, settings)
 
     assert loaded == reference and context is not None
+    assert context.cancel_after_seconds == 5
+    changed = settings.model_copy(
+        update={
+            "sell_execution": settings.sell_execution.model_copy(update={"cancel_after_seconds": 7})
+        }
+    )
+    _, changed_context = _live_opening_context(config, cast(Any, Journal()), morning, changed)
+    assert changed_context is not None and changed_context.cancel_after_seconds == 7
+    assert settings.buy.cancel_after_seconds == 10
     assert [(lot.lot_id, lot.symbol, lot.cost) for lot in context.lots] == [
         ("owned-lot", "000001.SZ", "10.00")
     ]
     assert context.sell_rules is not None
     assert str(context.sell_rules.take_profit_pct) == "5"
     assert context.max_order_value == "5000"
+    buy_only = settings.model_copy(update={"sell": None})
+    assert _live_opening_context(config, cast(Any, Journal()), morning, buy_only) == (
+        reference,
+        None,
+    )
 
     _, late = _live_opening_context(
         config,
@@ -296,6 +442,27 @@ def test_qmt_live_opening_context_uses_only_owned_filled_lots(
     )
     assert late is None
     assert _live_opening_context(original, cast(Any, Journal()), morning, settings) == (None, None)
+
+    # A missed closing day must remain a recovery issue, not a fatal boot error.
+    def stale_day() -> datetime:
+        return datetime(2026, 9, 9, 2, 0, tzinfo=UTC)
+
+    assert _live_opening_context(config, cast(Any, Journal()), stale_day, settings) == (
+        reference,
+        None,
+    )
+    assert _live_opening_context(config, cast(Any, Journal()), stale_day, buy_only) == (
+        reference,
+        None,
+    )
+    # Do not discard a bad hash: pass its original pointer to guarded recovery.
+    bad_reference = reference.model_copy(update={"payload_hash": "sha256:" + "f" * 64})
+    path = config.data_root / "critical/opening-reference.json"
+    path.write_bytes(canonical_bytes(bad_reference.model_dump(mode="json")))
+    assert _live_opening_context(config, cast(Any, Journal()), morning, settings) == (
+        bad_reference,
+        None,
+    )
 
 
 def test_debug_session_builds_real_profile_from_prepared_sdk(

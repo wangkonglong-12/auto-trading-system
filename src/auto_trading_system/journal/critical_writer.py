@@ -41,10 +41,14 @@ class CriticalStorePort(Protocol):
         table: Literal["broker_facts", "control_records", "recovery_checkpoints"],
         key: str,
     ) -> bytes | None: ...
+    def read_broker_facts(self, client_ids: tuple[str, ...]) -> tuple[bytes, ...]: ...
     def close(self) -> None: ...
 
 
 class _Work(Protocol):
+    @property
+    def deadline(self) -> float: ...
+
     def execute(self, store: CriticalStorePort) -> None: ...
     def reject(self) -> None: ...
 
@@ -85,6 +89,7 @@ class CriticalJournalOwner:
         self._ready: Future[None] = Future()
         self._lock = Lock()
         self._started = False
+        self._active_deadline: float | None = None
         self._thread = Thread(target=self._run, name="critical-journal-owner", daemon=True)
 
     def start(self, timeout: float = 5) -> None:
@@ -93,10 +98,22 @@ class CriticalJournalOwner:
                 raise CriticalStoreError("JOURNAL_ALREADY_STARTED")
             self._started = True
             self._thread.start()
-        self._ready.result(timeout=timeout)  # Startup only, before the decision loop.
+        try:
+            self._ready.result(timeout=timeout)  # Startup only, before the decision loop.
+        except TimeoutError:
+            self._failed.set()
+            self._closing.set()
+            raise
 
     @property
     def healthy(self) -> bool:
+        with self._lock:
+            return self._healthy_locked()
+
+    def _healthy_locked(self) -> bool:
+        # Detect stuck I/O from the caller thread; never wait for storage here.
+        if self._active_deadline is not None and monotonic() >= self._active_deadline:
+            self._failed.set()
         return self._ready.done() and not self._failed.is_set() and not self._closing.is_set()
 
     def commit(self, submission: Submission, *, deadline: float) -> Future[CommitEvidence]:
@@ -110,7 +127,7 @@ class CriticalJournalOwner:
     def request(self, operation: Callable[[CriticalStorePort], T], *, deadline: float) -> Future[T]:
         future: Future[T] = Future()
         with self._lock:
-            if not self.healthy:
+            if not self._healthy_locked():
                 future.set_exception(CriticalStoreError("JOURNAL_UNAVAILABLE"))
                 return future
             try:
@@ -139,13 +156,23 @@ class CriticalJournalOwner:
                     request = self._queue.get(timeout=0.02)
                 except Empty:
                     continue
-                if self._failed.is_set():
+                with self._lock:
+                    unavailable = self._failed.is_set() or self._closing.is_set()
+                    if not unavailable and monotonic() < request.deadline:
+                        self._active_deadline = request.deadline
+                if unavailable:
                     request.reject()
                     continue
                 try:
                     request.execute(store)
                 except Exception:
                     self._failed.set()
+                finally:
+                    with self._lock:
+                        # Late success is still durable evidence, but must not
+                        # restore health or permit queued writes to continue.
+                        self._healthy_locked()
+                        self._active_deadline = None
         except Exception as exc:
             self._failed.set()
             if not self._ready.done():

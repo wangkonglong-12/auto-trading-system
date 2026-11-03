@@ -77,10 +77,15 @@ class SubmitOrder:
 class CancelOrder:
     client_order_id: str
     broker_order_id: str
+    cancel_request_id: str | None = None
 
     def __post_init__(self) -> None:
         _require_pattern(self.client_order_id, _CLIENT_ORDER_PATTERN, field="client_order_id")
         _require_pattern(self.broker_order_id, _BROKER_REFERENCE_PATTERN, field="broker_order_id")
+        if self.cancel_request_id is not None:
+            _require_pattern(
+                self.cancel_request_id, _CLIENT_ORDER_PATTERN, field="cancel_request_id"
+            )
 
 
 @dataclass(frozen=True, slots=True)
@@ -121,8 +126,13 @@ class BrokerOrder:
     broker_status_code: int | None
     status_reason: str
     updated_at: ShanghaiTimestamp
+    broker_contract_id: str | None = None
 
     def __post_init__(self) -> None:
+        if self.broker_contract_id is not None:
+            _require_pattern(
+                self.broker_contract_id, _BROKER_REFERENCE_PATTERN, field="broker_contract_id"
+            )
         _require_pattern(self.client_order_id, _CLIENT_ORDER_PATTERN, field="client_order_id")
         if self.broker_order_id is not None:
             _require_pattern(
@@ -155,6 +165,13 @@ class BrokerOrder:
 
 @dataclass(frozen=True, slots=True)
 class BrokerOrderUpdate:
+    order: BrokerOrder
+
+
+@dataclass(frozen=True, slots=True)
+class BrokerOrderIdentity:
+    """Identity-only callback evidence; it does not prove a fill or release shares."""
+
     order: BrokerOrder
 
 
@@ -198,4 +215,20 @@ class BrokerCancelError:
             )
 
 
-BrokerEvent: TypeAlias = BrokerOrderUpdate | BrokerTrade | BrokerCancelError
+@dataclass(frozen=True, slots=True)
+class BrokerRequestError:
+    client_order_id: str
+    action_type: str
+    reason_code: str
+    occurred_at: ShanghaiTimestamp
+
+    def __post_init__(self) -> None:
+        _require_pattern(self.client_order_id, _CLIENT_ORDER_PATTERN, field="client_order_id")
+        _require_pattern(self.reason_code, _REASON_PATTERN, field="reason_code")
+        if self.action_type not in {"NEW", "CANCEL"}:
+            raise DomainValueError("INVALID_REQUEST_ACTION", "action_type", "unknown action")
+
+
+BrokerEvent: TypeAlias = (
+    BrokerOrderUpdate | BrokerTrade | BrokerCancelError | BrokerRequestError | BrokerOrderIdentity
+)

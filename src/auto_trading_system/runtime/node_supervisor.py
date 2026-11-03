@@ -31,6 +31,30 @@ from auto_trading_system.runtime.single_instance import (
 )
 from auto_trading_system.runtime.supervision_state import SupervisionState, SupervisionStore
 
+READONLY_RETRY_REASONS = frozenset(
+    {
+        "LAUNCHING",
+        "CHILD_STOPPED",
+        "CHILD_EXITED",
+        "CHILD_LAUNCH_FAILED",
+        "CHILD_START_TIMEOUT",
+        "OWNER_STALE",
+        "SUPERVISOR_INTERRUPTED",
+    }
+)
+
+
+def _desktop_supervision_store(config: NodeProcessConfig) -> SupervisionStore:
+    """Called with both ownership guards held, once per explicit desktop launch."""
+    store = SupervisionStore(config)
+    if config.broker == "QMT_READ_ONLY" and os.environ.get("ATS_DESKTOP_LOG_DIRECTORY"):
+        state = store.read()
+        if (state.failures or state.active_run) and state.reason in READONLY_RETRY_REASONS:
+            # Archive the previous attempt; retain identity, journal and disk faults.
+            # Retries within this launch still consume the normal finite budget.
+            store.reset()
+    return store
+
 
 def supervisor_guard(config: NodeProcessConfig, *, engine: bool = False) -> AccountInstanceGuard:
     key = ("" if engine else "supervisor:") + config.account_id.upper()
@@ -259,7 +283,7 @@ def run_supervisor(
     with supervisor_guard(config):
         # Never adopt or signal an existing standalone engine, even with a valid PID.
         with supervisor_guard(config, engine=True):
-            pass
+            store = _desktop_supervision_store(config)
         key = role_keys(config, ("operator",))["operator"]
         client = RPCClient(
             lambda body: exchange(config.pipe_name("control"), body, timeout_seconds=0.5),
@@ -289,7 +313,7 @@ def run_supervisor(
 
         supervisor = NodeSupervisor(
             config,
-            SupervisionStore(config),
+            store,
             launch,
             lambda: client.invoke("STATUS"),
             request_stop=lambda run_id: _request_child_stop(client, run_id),

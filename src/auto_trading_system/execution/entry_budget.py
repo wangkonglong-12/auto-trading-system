@@ -42,9 +42,14 @@ def buy_exposures(
         quantity, amount = item.quantity, Decimal(item.maximum_amount)
         order = by_id.get(item.client_order_id)
         if (
-            state_guard_installed
-            and item.entry_binding is not None
-            and item.entry_binding.state_hash is not None
+            (
+                item.manual_binding is not None
+                or (
+                    state_guard_installed
+                    and item.entry_binding is not None
+                    and item.entry_binding.state_hash is not None
+                )
+            )
             and item.client_order_id not in held_ids
             and order is not None
             and order.is_terminal

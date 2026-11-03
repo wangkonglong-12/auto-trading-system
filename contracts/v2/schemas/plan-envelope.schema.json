@@ -308,6 +308,23 @@
           "title": "Data Completeness",
           "type": "string"
         },
+        "decision_phase": {
+          "anyOf": [
+            {
+              "enum": [
+                "1440",
+                "1445",
+                "1450"
+              ],
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Decision Phase"
+        },
         "finalized": {
           "const": true,
           "title": "Finalized",
@@ -347,6 +364,19 @@
           "format": "date-time",
           "title": "Scheduled At",
           "type": "string"
+        },
+        "selection_rule": {
+          "anyOf": [
+            {
+              "const": "TAIL_EXCELLENT_V1",
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Selection Rule"
         },
         "source_hash": {
           "description": "同版本来源头和明细摘要",

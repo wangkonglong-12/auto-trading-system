@@ -24,6 +24,12 @@ _SIGNATURE_DOMAIN = b"AUTO-TRADING/PLAN/V2\n"
 
 
 class SourceRevision(WireModel):
+    decision_phase: Literal["1440", "1445", "1450"] | None = Field(
+        default=None, exclude_if=lambda v: v is None
+    )
+    selection_rule: Literal["TAIL_EXCELLENT_V1"] | None = Field(
+        default=None, exclude_if=lambda v: v is None
+    )
     source_run_id: WireId = Field(description="正式选股运行编号")
     source_revision: int = Field(ge=1, description="不可变来源版本")
     source_hash: Sha256 = Field(description="同版本来源头和明细摘要")
@@ -40,6 +46,13 @@ class SourceRevision(WireModel):
 
     @model_validator(mode="after")
     def time_order(self) -> SourceRevision:
+        if (self.decision_phase is None) != (self.selection_rule is None):
+            raise ValueError("tail phase requires its selection rule")
+        if (
+            self.decision_phase is not None
+            and self.scheduled_at.strftime("%H%M") != self.decision_phase
+        ):
+            raise ValueError("tail phase differs from scheduled time")
         if not self.market_data_cutoff <= self.completed_at <= self.published_at:
             raise ValueError("source cutoff, completion and publication must be ordered")
         if self.completed_at < self.scheduled_at:
@@ -127,9 +140,9 @@ class PlanPayload(WireModel):
             raise ValueError("allocation ids must be unique")
         if len({item.rank for item in self.allocations}) != len(self.allocations):
             raise ValueError("allocation ranks must be unique")
-        if sum(Decimal(item.target_value) for item in self.allocations) > Decimal(
-            self.risk_budget.max_buy_value
-        ):
+        if self.source.decision_phase is None and sum(
+            Decimal(item.target_value) for item in self.allocations
+        ) > Decimal(self.risk_budget.max_buy_value):
             raise ValueError("allocated targets exceed approved total budget")
         for instant in (
             self.execution_window.entry_not_before,

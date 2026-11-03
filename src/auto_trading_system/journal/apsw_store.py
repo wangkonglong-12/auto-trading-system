@@ -84,7 +84,9 @@ class APSWCriticalStore:
                 raise CriticalStoreError("JOURNAL_WAL_UNAVAILABLE")
             db.pragma("synchronous", "full")
             db.pragma("foreign_keys", True)
-            db.pragma("wal_autocheckpoint", 0)
+            # No runtime maintenance caller exists for this adapter. SQLite's
+            # PASSIVE auto-checkpoint recycles WAL without waiting for readers.
+            db.pragma("wal_autocheckpoint", 1000)
             if not exists:
                 with _transaction(db):
                     db.execute(SCHEMA_SQL)
@@ -224,8 +226,30 @@ class APSWCriticalStore:
             )
         return tuple(records)
 
+    def read_broker_facts(self, client_ids: tuple[str, ...]) -> tuple[bytes, ...]:
+        """Bounded immutable archive read for explicit historical recovery only."""
+        if not client_ids or len(client_ids) > 2048 or len(set(client_ids)) != len(client_ids):
+            raise ValueError("invalid historical fact selection")
+        marks = ",".join("?" for _ in client_ids)
+        rows = self._db().execute(
+            "SELECT payload_hash,payload_json FROM broker_facts WHERE fact_key LIKE 'fact-%' "
+            f"AND json_extract(payload_json,'$.data.client_order_id') IN ({marks}) LIMIT 10001",
+            client_ids,
+        )
+        result: list[bytes] = []
+        size = 0
+        for stored_hash, raw in rows:
+            body = str(raw).encode()
+            size += len(body)
+            if len(result) >= 10000 or size > 8 * 1024 * 1024:
+                raise ValueError("historical fact capacity exceeded")
+            if digest(body) != stored_hash:
+                raise CriticalStoreError("JOURNAL_PAYLOAD_CORRUPT")
+            result.append(body)
+        return tuple(result)
+
     def checkpoint(self) -> tuple[int, int]:
-        """Caller schedules maintenance only after pending trading work is drained."""
+        """Optional explicit PASSIVE maintenance in addition to auto-checkpoints."""
         return self._db().wal_checkpoint(mode=apsw.SQLITE_CHECKPOINT_PASSIVE)
 
     def backup(self, destination: Path) -> str:

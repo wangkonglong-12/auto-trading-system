@@ -81,7 +81,7 @@ class SubmissionCoordinator:
         permission = self._permission.snapshot()
         if (
             not self._journal.healthy
-            or permission.halted
+            or not self._permission.allows(submission.client_order_id, permission.epoch)
             or submission.permission_epoch != permission.epoch
             or valid_until <= monotonic()
             or not 0 < wait_seconds <= 0.25

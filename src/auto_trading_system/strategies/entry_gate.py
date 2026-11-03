@@ -96,6 +96,21 @@ class EntryStateGate:
             raise ValueError("entry targets require settled durable state")
         return tuple(self.targets[k] for k in sorted(self.targets))
 
+    @property
+    def execution_policy(self) -> EntryPolicy:
+        settings = self.engine.buy_settings if self.engine else None
+        if settings is None:
+            return self.policy
+        return self.policy.model_copy(
+            update={
+                "max_chase_bps": settings.advanced.max_chase_bps,
+                "max_spread_bps": settings.advanced.max_spread_bps,
+                "quote_max_age_ms": settings.advanced.quote_max_age_ms,
+                "cancel_after_seconds": settings.buy.cancel_after_seconds,
+                "max_children": settings.buy.max_retries + 1,
+            }
+        )
+
     def price(self, quote: EntryQuote) -> Decimal | None:
         now, rule = self.clock(), self.rules[quote.symbol]
         age_ms = (now - quote.observed_at).total_seconds() * 1000
@@ -106,18 +121,18 @@ class EntryStateGate:
         ceiling = min(
             Decimal(rule.upper_price),
             Decimal(quote.cage_upper),
-            Decimal(rule.reference_price) * (10000 + self.policy.max_chase_bps) / 10000,
+            Decimal(rule.reference_price) * (10000 + self.execution_policy.max_chase_bps) / 10000,
         )
         if (
             now.date() != self.plan.trade_date
             or not market_open(now)
             or not quote.tradable
             or not quote.path_complete
-            or not 0 <= age_ms <= self.policy.quote_max_age_ms
-            or not 0 <= ns_age <= self.policy.quote_max_age_ms * 1_000_000
+            or not 0 <= age_ms <= self.execution_policy.quote_max_age_ms
+            or not 0 <= ns_age <= self.execution_policy.quote_max_age_ms * 1_000_000
             or not Decimal(rule.lower_price) <= price <= ceiling
             or (Decimal(quote.ask_price) - Decimal(quote.bid_price)) * 10000
-            > Decimal(quote.bid_price) * self.policy.max_spread_bps
+            > Decimal(quote.bid_price) * self.execution_policy.max_spread_bps
         ):
             return None
         return price
@@ -129,6 +144,11 @@ class EntryStateGate:
             return False
         target, quote = self.targets.get(item.symbol), self.quotes.get(item.symbol)
         if target is None or quote is None or target.target_quantity == 0:
+            return False
+        if (
+            engine.buy_settings is not None
+            and target.configuration_version != engine.buy_settings_version
+        ):
             return False
         price = self.price(quote)
         rule = self.rules[item.symbol]
@@ -144,15 +164,18 @@ class EntryStateGate:
         # Day-to-window conservative participation budget: attempted shares are
         # never credited back, even after cancellation or restart. Rolling
         # timestamped liquidity attribution can later relax this explicit bound.
-        volume_limit = quote.recent_volume * self.policy.participation_bps // 10000
+        volume_limit = quote.recent_volume * self.execution_policy.participation_bps // 10000
         used = self.used_quotes.get(item.symbol)
         allowed = bool(
             price is not None
             and Decimal(item.limit_price) == price
             and item.plan_hash == self.plan_hash
             and item.side == "BUY"
+            and binding is not None
+            and binding.strategy_id in {None, self.plan.strategy_id}
             and binding
             == EntryBinding(
+                strategy_id=binding.strategy_id,
                 plan_id=self.plan.plan_id,
                 allocation_id=target.allocation_id,
                 target_quantity=target.target_quantity,
@@ -165,12 +188,17 @@ class EntryStateGate:
                 rule_id=self.policy.version,
             )
             and item.quantity == legal_quantity(item.quantity, rule)
-            and item.quantity <= rule.max_order_quantity
+            and item.quantity
+            <= (
+                engine.buy_limits.max_order_quantity
+                if engine.buy_settings
+                else rule.max_order_quantity
+            )
             and item.quantity + sum(s.quantity for s in children) <= volume_limit
-            and item.quantity <= quote.ask_quantity * self.policy.depth_bps // 10000
+            and item.quantity <= quote.ask_quantity * self.execution_policy.depth_bps // 10000
             and Decimal(item.maximum_amount)
             == price * item.quantity + Decimal(self.policy.fee_reserve)
-            and len(children) < self.policy.max_children
+            and len(children) < self.execution_policy.max_children
             and (used is None or used[0] != quote.sequence or used[1] == item.client_order_id)
             and sum(
                 v.phase != "TERMINAL_CONFIRMED" and v.client_order_id != item.client_order_id

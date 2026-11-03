@@ -14,7 +14,7 @@ from contextlib import suppress
 from datetime import datetime, time, timedelta
 from pathlib import Path
 from secrets import token_hex
-from threading import Event
+from threading import Event, Lock
 from time import monotonic
 from typing import Any
 from uuid import uuid4
@@ -33,10 +33,11 @@ from auto_trading_system.runtime.node_layout import (
     initialize_layout,
     validate_layout,
 )
+from auto_trading_system.runtime.node_supervisor import READONLY_RETRY_REASONS
 from auto_trading_system.runtime.owned_process import OwnedProcess
 from auto_trading_system.security.operator_password import OperatorPasswordHasher
 
-DESKTOP_OPERATOR_PASSWORD = "paper-demo-2026"
+DESKTOP_OPERATOR_PASSWORD = "Desktop-570612-Local"
 
 
 def node_command(arguments: list[str]) -> list[str]:
@@ -105,7 +106,7 @@ def preview_config(
 
 
 class PreviewSession:
-    """单个生命周期工作线程拥有所有子进程，GUI 仅发出停止信号。"""
+    """生命周期和退出清理使用独立工作线程，GUI 仅发出停止信号。"""
 
     def __init__(self, directory: Path, *, now: datetime | None = None) -> None:
         self.directory = directory.absolute()
@@ -123,6 +124,8 @@ class PreviewSession:
         )
         self.environment["ATS_DESKTOP_LOG_DIRECTORY"] = str(self.config.data_root / "logs")
         self.children: dict[str, OwnedProcess] = {}
+        self._process_lock = Lock()
+        self._stop_done = Event()
         self.stop_requested = Event()
         self.started = False
         self.closed = False
@@ -149,17 +152,23 @@ class PreviewSession:
     def _launch(self, component: str, *arguments: str) -> None:
         if self.stop_requested.is_set():
             raise RuntimeError("DESKTOP_STOP_REQUESTED")
-        self.children[component] = OwnedProcess(
+        child = OwnedProcess(
             node_command(["--config", str(self.path), component, *arguments]),
             environment=self.environment,
         )
+        with self._process_lock:
+            if not self.closed and not self.stop_requested.is_set():
+                self.children[component] = child
+                return
+        child.close()
+        raise RuntimeError("DESKTOP_STOP_REQUESTED")
 
     def _wait(self, probe: Callable[[], bool], *, seconds: float = 60) -> None:
         until = monotonic() + seconds
         while monotonic() < until:
             if self.stop_requested.is_set():
                 raise RuntimeError("DESKTOP_STOP_REQUESTED")
-            if any(child.poll() is not None for child in self.children.values()):
+            if any(child.poll() is not None for child in tuple(self.children.values())):
                 raise RuntimeError("DESKTOP_CHILD_EXITED")
             try:
                 if probe():
@@ -184,6 +193,12 @@ class PreviewSession:
     def _supervisor_ready(self) -> bool:
         status = self.client("supervisor").invoke("STATUS")
         if status.get("blocked") is True or status.get("action") in {"BLOCKED", "FAULT"}:
+            if (
+                self.config.broker == "QMT_READ_ONLY"
+                and isinstance(status.get("reason"), str)
+                and status.get("reason") in READONLY_RETRY_REASONS
+            ):
+                raise RuntimeError("QMT_READ_ONLY_START_FAILED")
             raise RuntimeError("SUPERVISOR_BLOCKED")
         return status.get("action") == "HEALTHY"
 
@@ -227,36 +242,46 @@ class PreviewSession:
 
     def stop(self) -> None:
         """先请求暂停/正常退出，再以自有 Job 句柄回收；不按名称查杀进程。"""
-        if self.closed:
+        with self._process_lock:
+            stopping = self.closed
+            self.closed = True
+            children = dict(self.children)
+        if stopping:
+            self._stop_done.wait(12)
             return
-        self.closed = True
         self.stop_requested.set()
-        if self.children:
-            with suppress(IPCError, OSError, ValueError):
-                self.client("control").invoke("HALT")
-        for component, channel in (("agent", "agent"), ("supervise", "supervisor")):
-            child = self.children.get(component)
-            if child is not None:
+        deadline = monotonic() + 10
+        clean = True
+        try:
+            if children:
+                with suppress(IPCError, OSError, ValueError, RuntimeError):
+                    self.client("control").invoke("HALT")
+            for component, channel in (("agent", "agent"), ("supervise", "supervisor")):
+                child = children.get(component)
+                if child is None or monotonic() >= deadline:
+                    continue
                 try:
                     self.client(channel).invoke("STOP")
-                    child.wait(8)
-                except (IPCError, OSError, ValueError, TimeoutError):
+                    child.wait(max(0, min(3, deadline - monotonic())))
+                except (IPCError, OSError, ValueError, RuntimeError, TimeoutError):
                     pass
-        clean = True
-        for child in reversed(tuple(self.children.values())):
-            try:
-                if child.poll() is None:
-                    child.terminate()
-                    child.wait(5)
-            except (OSError, RuntimeError, TimeoutError):
-                clean = False
-            finally:
+            for child in reversed(tuple(children.values())):
                 try:
-                    child.close()
-                except Exception:
-                    clean = False  # 继续关闭其他自有 Job，不能提前中断清理。
-        self.children.clear()
-        self.stopped_cleanly = clean
+                    if child.poll() is None:
+                        child.terminate()
+                        child.wait(max(0, min(1, deadline - monotonic())))
+                except (OSError, RuntimeError, TimeoutError):
+                    clean = False
+                finally:
+                    try:
+                        child.close()
+                    except Exception:
+                        clean = False
+        finally:
+            with self._process_lock:
+                self.children.clear()
+            self.stopped_cleanly = clean
+            self._stop_done.set()
 
     def worker_status(self) -> dict[str, JsonValue]:
         return self.client("control").invoke("STATUS")
@@ -314,6 +339,8 @@ class ConfiguredSession(PreviewSession):
         self.environment["ATS_QMT_SDK_ROOT"] = str(sdk_root)
         self.environment["ATS_DESKTOP_LOG_DIRECTORY"] = str(config.data_root / "logs")
         self.children = {}
+        self._process_lock = Lock()
+        self._stop_done = Event()
         self.stop_requested = Event()
         self.started = False
         self.closed = False
@@ -323,6 +350,23 @@ class ConfiguredSession(PreviewSession):
 
     def _prepare_files(self) -> None:
         validate_layout(self.config)
+        if self.config.broker == "QMT_TRADING" and self.config.tail_picks is not None:
+            from auto_trading_system.config.execution_calendar import refresh_execution_calendar
+            from auto_trading_system.gateways.market.qmt import load_xtdata_bindings
+
+            sdk_path = self.environment["ATS_QMT_SDK_ROOT"]
+            inserted = sdk_path not in sys.path
+            if inserted:
+                sys.path.insert(0, sdk_path)
+            try:
+                with suppress(OSError, ValueError, RuntimeError):
+                    reader = load_xtdata_bindings().get_trading_calendar
+                    if reader is not None:
+                        refresh_execution_calendar(self.config, datetime.now(CN).date(), reader)
+            finally:
+                if inserted:
+                    sys.path.remove(sdk_path)
+            self.config = load_node_config(self.path)
 
     def _validate_ready_snapshot(self, snapshot: dict[str, Any]) -> None:
         expected = self.config.broker == "QMT_TRADING"
@@ -337,7 +381,7 @@ class ConfiguredSession(PreviewSession):
         local_time = current.timetz().replace(tzinfo=None)
         key: tuple[str, str] | None = None
         if current.date() in self.config.calendar.sessions:
-            if time(14, 30) <= local_time <= time(14, 55, 59):
+            if self.config.tail_picks is None and time(14, 30) <= local_time <= time(14, 55, 59):
                 key = ("pull-plan", current.strftime("%Y-%m-%dT%H:%M"))
             elif time(15, 30) <= local_time < time(18, 1) and current.minute % 15 == 0:
                 key = ("daily-export", current.strftime("%Y-%m-%dT%H:%M"))

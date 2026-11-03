@@ -19,6 +19,18 @@ def load_opening_reference(path: Path) -> OpeningReference | None:
 
 
 def save_opening_reference(path: Path, reference: OpeningReference) -> None:
+    previous = load_opening_reference(path)
+    if previous is not None:
+        if previous.trade_date > reference.trade_date or (
+            previous.trade_date == reference.trade_date and previous != reference
+        ):
+            raise ValueError("opening reference cannot replace a sealed day")
+        if previous.trade_date < reference.trade_date:
+            _save_reference(path.with_name("opening-reference.previous.json"), previous)
+    _save_reference(path, reference)
+
+
+def _save_reference(path: Path, reference: OpeningReference) -> None:
     temporary = path.with_name(path.name + "." + uuid4().hex + ".tmp")
     try:
         path.parent.mkdir(parents=True, exist_ok=True)

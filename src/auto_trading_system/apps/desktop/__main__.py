@@ -8,7 +8,7 @@ import json
 import os
 import sys
 import webbrowser
-from collections.abc import Iterator, Sequence
+from collections.abc import Callable, Iterator, Sequence
 from contextlib import ExitStack, contextmanager, redirect_stderr, redirect_stdout
 from datetime import date, datetime
 from pathlib import Path
@@ -17,6 +17,10 @@ from threading import Thread
 from typing import Any
 from uuid import uuid4
 
+from auto_trading_system.apps.desktop.recovery import (
+    interrupted_start_available,
+    recover_interrupted_start,
+)
 from auto_trading_system.apps.desktop.session import (
     DESKTOP_OPERATOR_PASSWORD,
     ConfiguredSession,
@@ -28,6 +32,7 @@ from auto_trading_system.apps.desktop.setup import (
     LauncherSetupServer,
     configured_from_environment,
     default_settings_path,
+    inspect_launcher_settings,
     read_launcher_settings,
 )
 from auto_trading_system.control.windows_pipe import current_sid
@@ -43,6 +48,11 @@ def trading_day_changed(started_on: date, *, now: datetime | None = None) -> boo
     return (now or datetime.now(CN)).astimezone(CN).date() != started_on
 
 
+def confirm_desktop_close(_data_root: Path, confirm: Callable[[], bool]) -> bool:
+    """Desktop shutdown always needs confirmation, independent of web preferences."""
+    return confirm()
+
+
 def failure_message(exc: Exception) -> str:
     messages = {
         "DESKTOP_CHILD_EXITED": "本机后台进程已退出，请重新启动系统。",
@@ -52,7 +62,23 @@ def failure_message(exc: Exception) -> str:
         "CHILD_IDENTITY_MISMATCH": "后台进程身份核验失败，系统已停止自动交易。",
         "CHILD_JOURNAL_UNHEALTHY": "本机交易记录存储异常，系统已停止自动交易。",
         "DISK_SPACE_LOW": "数据盘可用空间不足，系统已停止。",
-        "SUPERVISOR_BLOCKED": "后台连续异常后已锁定，需要检查运行记录。",
+        "DESKTOP_RECOVERY_STORAGE_FAILED": (
+            "恢复记录无法保存，未继续启动；请检查磁盘空间和数据目录权限。"
+        ),
+        "DESKTOP_RECOVERY_NODE_RUNNING": "后台仍有实例运行，未重置；请先正常关闭原有实例。",
+        "DESKTOP_RECOVERY_RECORD_INVALID": "恢复记录校验失败，未继续启动；请保留数据目录和日志。",
+        "DESKTOP_RECOVERY_NOT_INTERRUPTED": "锁定原因已变化，未重置；请重新检查。",
+        "DESKTOP_RECOVERY_KEY_UNAVAILABLE": "本机签名记录缺失或异常，未解锁。",
+        "DESKTOP_RECOVERY_CONSENT_CHANGED": "持续买入记录已变化，未解锁，请重新核对。",
+        "DESKTOP_RECOVERY_CONSENT_NOT_DISABLED": "未能确认持续自动买入已关闭，保持启动锁定。",
+        "SUPERVISOR_BLOCKED": (
+            "后台监护累计异常后已锁定，交易未启动。请保留运行记录，"
+            "若提示为异常退出，可点击下方“恢复启动并核验”；其他故障请查看运行记录。"
+        ),
+        "QMT_READ_ONLY_START_FAILED": (
+            "QMT只读后台启动失败，本次重试已停止。请确认MiniQMT已启动并登录，"
+            "关闭本窗口后重新打开自动交易系统即可重试，无需解锁或修改密码。"
+        ),
     }
     return messages.get(str(exc), "本机后台运行异常，系统已停止。请查看运行记录中的原因码。")
 
@@ -212,6 +238,9 @@ def launch_window(
         base = Path(os.environ["LOCALAPPDATA"]) / "AutoTradingSystem" / "Unconfigured"
         base.mkdir(parents=True, exist_ok=True)
         session = UnconfiguredSession(base / ("session-" + uuid4().hex))
+        _, setup_issue = inspect_launcher_settings(default_settings_path())
+        if setup_issue is not None:
+            session.environment["ATS_DESKTOP_SETUP_ISSUE"] = setup_issue
     else:
         base = Path(os.environ["LOCALAPPDATA"]) / "AutoTradingSystem" / "DesktopPreview"
         base.mkdir(parents=True, exist_ok=True)
@@ -233,8 +262,8 @@ def launch_window(
         if unconfigured
         else "自动交易系统 · 离线模拟版"
     )
-    window.geometry("660x340")
-    window.minsize(600, 320)
+    window.geometry("700x440")
+    window.minsize(700, 440)
     frame = ttk.Frame(window, padding=24)
     frame.pack(fill="both", expand=True)
     ttk.Label(frame, text="自动交易系统", font=("Microsoft YaHei UI", 18, "bold")).pack(anchor="w")
@@ -266,41 +295,146 @@ def launch_window(
         justify="left",
     ).pack(anchor="w")
     state = tk.StringVar(value="正在启动引擎、监护及同步代理…")
-    ttk.Label(frame, textvariable=state).pack(anchor="w", pady=(16, 8))
+    ttk.Label(frame, textvariable=state, wraplength=520, justify="left").pack(
+        anchor="w", pady=(16, 8)
+    )
     address = tk.StringVar(value="启动后显示本机访问地址")
     ttk.Entry(frame, textvariable=address, state="readonly").pack(fill="x")
     buttons = ttk.Frame(frame)
     buttons.pack(fill="x", pady=(18, 0))
-    open_button = ttk.Button(
-        buttons, text="打开操作台", state="disabled", command=lambda: webbrowser.open(session.url)
-    )
+
+    def open_console() -> None:
+        Thread(
+            target=lambda: webbrowser.open(session.url), name="desktop-open", daemon=True
+        ).start()
+
+    open_button = ttk.Button(buttons, text="打开操作台", state="disabled", command=open_console)
     open_button.pack(side="left")
     data_button = ttk.Button(
         buttons,
         text="打开本次数据目录",
         state="disabled",
-        command=lambda: os.startfile(session.directory),
+        command=lambda: Thread(
+            target=lambda: os.startfile(session.directory), name="desktop-folder", daemon=True
+        ).start(),
     )
     data_button.pack(side="left", padx=8)
     if setup_server is not None:
-        setup_button = ttk.Button(buttons, text="连接QMT", command=setup_server.open)
+        setup_button = ttk.Button(
+            buttons,
+            text="连接QMT",
+            command=lambda: Thread(
+                target=setup_server.open, name="desktop-setup-open", daemon=True
+            ).start(),
+        )
         setup_button.pack(side="left", padx=8)
     events: Queue[tuple[str, str]] = Queue(maxsize=4)
     rolled_over = False
+    closing = False
+    confirming = False
+    startup_failed = False
+    stopped_after_failure = False
+    recovery_available = False
+    recovering = False
+    retry_requested = False
+
+    def stop_work() -> None:
+        try:
+            session.stop()
+        finally:
+            events.put(("closed", ""))
 
     def close() -> None:
+        nonlocal closing, confirming
+        if closing or confirming or recovering:
+            return
+        if stopped_after_failure:
+            window.destroy()
+            return
+        confirming = True
+        try:
+            confirmed = confirm_desktop_close(
+                session.directory,
+                lambda: messagebox.askyesno(
+                    "确认关闭", "后台运行中，是否确认关闭", parent=window, default="no"
+                ),
+            )
+        finally:
+            confirming = False
+        if not confirmed:
+            return
+        closing = True
         state.set("正在暂停并停止交易节点…")
         session.stop_requested.set()
         open_button.configure(state="disabled")
         exit_button.configure(state="disabled")
+        Thread(target=stop_work, name="desktop-shutdown", daemon=True).start()
 
+    def recover() -> None:
+        nonlocal recovering, confirming
+        if not stopped_after_failure or not recovery_available or recovering or confirming:
+            return
+        confirming = True
+        try:
+            approved = messagebox.askyesno(
+                "确认恢复启动",
+                "恢复将备份原有记录，关闭持续自动买入，仅重置后台异常退出的启动限制，"
+                "然后重新启动并核验账户。不会发送买卖或撤单，不改动交易账本。是否继续?",
+                parent=window,
+                default="no",
+            )
+        finally:
+            confirming = False
+        if not approved:
+            return
+        recovering = True
+        recovery_button.configure(state="disabled")
+        exit_button.configure(state="disabled")
+        state.set("正在备份启动记录、关闭持续自动买入并恢复启动…")
+
+        def recovery_work() -> None:
+            try:
+                recover_interrupted_start(session.config)
+            except Exception as exc:
+                code = str(exc)
+                if code not in {
+                    "DESKTOP_RECOVERY_NOT_INTERRUPTED",
+                    "DESKTOP_RECOVERY_KEY_UNAVAILABLE",
+                    "DESKTOP_RECOVERY_CONSENT_CHANGED",
+                    "DESKTOP_RECOVERY_CONSENT_NOT_DISABLED",
+                }:
+                    code = (
+                        "DESKTOP_RECOVERY_STORAGE_FAILED"
+                        if isinstance(exc, OSError)
+                        else "DESKTOP_RECOVERY_NODE_RUNNING"
+                        if isinstance(exc, RuntimeError)
+                        else "DESKTOP_RECOVERY_RECORD_INVALID"
+                    )
+                try:
+                    log = session.directory / "logs/desktop-lifecycle.log"
+                    with log.open("a", encoding="utf-8") as output:
+                        output.write(f"{datetime.now(CN).isoformat()} {code}\n")
+                except OSError:
+                    pass
+                events.put(("recovery-error", failure_message(RuntimeError(code))))
+            else:
+                events.put(("recovered", ""))
+
+        Thread(target=recovery_work, name="desktop-recovery", daemon=True).start()
+        window.after(150, observe)
+
+    recovery_button = ttk.Button(buttons, text="恢复启动并核验", state="disabled", command=recover)
+    # Show this action only after a known process-exit lock and complete cleanup.
     exit_button = ttk.Button(buttons, text="停止并退出", command=close)
     exit_button.pack(side="right")
     window.protocol("WM_DELETE_WINDOW", close)
 
     def work() -> None:
         nonlocal rolled_over
+        nonlocal recovery_available
         started_on = datetime.now(CN).date()
+        blocked_start = False
+        error_detail: str | None = None
         try:
             session.start()
             events.put(("ready", session.url))
@@ -314,16 +448,25 @@ def launch_window(
                     events.put(("rollover", ""))
                     break
                 session.automation_tick()
-                if any(child.poll() is not None for child in session.children.values()):
+                if any(child.poll() is not None for child in tuple(session.children.values())):
                     raise RuntimeError("DESKTOP_CHILD_EXITED")
         except Exception as exc:
-            if str(exc) != "DESKTOP_STOP_REQUESTED":
+            # start() also sets stop_requested while cleaning up a failed launch.
+            # Only a user close/cancel suppresses the error, not that cleanup latch.
+            if str(exc) != "DESKTOP_STOP_REQUESTED" and not closing:
                 # Only fixed codes are persisted; arbitrary exception text may
                 # contain account data or submitted credentials.
                 code = str(exc)
+                blocked_start = code == "SUPERVISOR_BLOCKED"
                 safe_code = (
                     code
-                    if code in {"DESKTOP_CHILD_EXITED", "DESKTOP_START_TIMEOUT"}
+                    if code
+                    in {
+                        "DESKTOP_CHILD_EXITED",
+                        "DESKTOP_START_TIMEOUT",
+                        "SUPERVISOR_BLOCKED",
+                        "QMT_READ_ONLY_START_FAILED",
+                    }
                     else type(exc).__name__
                 )
                 try:
@@ -332,18 +475,49 @@ def launch_window(
                         output.write(f"{datetime.now(CN).isoformat()} {safe_code}\n")
                 except OSError:
                     pass
-                events.put(("error", failure_message(exc)))
+                error_detail = failure_message(exc)
         finally:
             session.stop()
+            if blocked_start and qmt_trading:
+                try:
+                    recovery_available = interrupted_start_available(session.config)
+                except (OSError, ValueError):
+                    recovery_available = False
+            if error_detail is not None:
+                events.put(("recoverable-error" if recovery_available else "error", error_detail))
             events.put(("closed", ""))
 
     def observe() -> None:
+        nonlocal startup_failed, stopped_after_failure, recovering, retry_requested
         try:
             kind, detail = events.get_nowait()
         except Empty:
             window.after(150, observe)
             return
+        if kind == "recovered":
+            recovering = False
+            retry_requested = True
+            window.destroy()
+            return
+        if kind == "recovery-error":
+            recovering = False
+            state.set(detail)
+            recovery_button.configure(state="normal")
+            exit_button.configure(state="normal")
+            messagebox.showerror("恢复未完成", detail, parent=window)
+            return
         if kind == "closed":
+            if startup_failed and not closing:
+                stopped_after_failure = True
+                state.set("启动未完成，后台已停止；请查看错误提示和运行记录。")
+                data_button.configure(state="normal")
+                if recovery_available:
+                    recovery_button.configure(state="normal")
+                    recovery_button.pack(side="left", padx=8)
+                    state.set(
+                        "启动因上次后台异常退出而锁定。点击“恢复启动并核验”可关闭持续买入后重试。"
+                    )
+                return  # Keep the error visible until the user closes this window.
             window.destroy()
             return
         if kind == "configured":
@@ -353,11 +527,16 @@ def launch_window(
             window.after(150, observe)
             return
         if kind == "rollover":
-            state.set("交易日已切换，正在重新连接账户；自动交易保持暂停…")
+            state.set("交易日已切换，正在重新连接并核验账户…")
             open_button.configure(state="disabled")
             window.after(150, observe)
             return
-        if kind == "error":
+        if kind == "recoverable-error" and not closing:
+            startup_failed = True
+            state.set("上次后台异常退出导致启动锁定。请点击下方“恢复启动并核验”。")
+        elif kind == "error" and not closing:
+            startup_failed = True
+            state.set(detail)
             messagebox.showerror(
                 "启动未完成",
                 f"{detail}\n运行记录保留在: {session.directory / 'logs'}",
@@ -365,7 +544,7 @@ def launch_window(
             )
         elif not session.stop_requested.is_set():
             state.set(
-                "QMT实盘节点已启动；请登录后检查设置并手动启动。"
+                "QMT实盘节点已启动；请登录查看设置，持续自动买入按已确认的开关运行。"
                 if qmt_trading
                 else "QMT真实账户已连接；当前为只读核验，不会发送委托。"
                 if qmt_connected
@@ -376,7 +555,7 @@ def launch_window(
             address.set(detail)
             open_button.configure(state="normal")
             data_button.configure(state="normal")
-            webbrowser.open(detail)
+            open_console()
         window.after(150, observe)
 
     try:
@@ -394,10 +573,10 @@ def launch_window(
         window.after(150, observe)
         window.mainloop()
         session.stop_requested.set()
-        thread.join(timeout=20)
+        thread.join(timeout=0)
         if setup_server is not None and setup_server.completed.is_set():
             return 10
-        return 11 if rolled_over else 0
+        return 12 if retry_requested else 11 if rolled_over else 0
     finally:
         if setup_server is not None:
             setup_server.close()
@@ -509,7 +688,7 @@ def main(argv: Sequence[str] | None = None) -> int:
     configured.validate()
     while True:
         result = launch_window(config_path=configured.config_path, sdk_root=configured.sdk_root)
-        if result != 11:
+        if result not in {11, 12}:
             return result
 
 

@@ -146,6 +146,7 @@ def test_real_pipe_recovery_confirmation_arm_resume_and_audit(
         assert proposal["installed_limits"] == {
             "mode": "PAPER",
             "max_buy_value": "0",
+            "max_symbol_buy_value": "0",
             "max_order_value": "0",
             "max_positions": 0,
             "max_order_quantity": 1,

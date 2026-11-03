@@ -214,7 +214,7 @@ class MockBrokerGateway:
         if scenario.outcome is CancelOutcome.REJECT:
             events: list[BrokerEvent] = [
                 BrokerCancelError(
-                    client_order_id=command.client_order_id,
+                    client_order_id=command.cancel_request_id or command.client_order_id,
                     broker_order_id=command.broker_order_id,
                     error_code=scenario.reject_code,
                     message=scenario.reject_message,

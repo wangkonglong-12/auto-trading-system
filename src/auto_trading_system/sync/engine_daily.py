@@ -149,21 +149,35 @@ def freeze_engine_day(
                 ),
             ),
         )
-    plan = snapshot.plan
     results: list[DailyRecord] = []
-    if plan is None:
-        gaps["plan_results"] = "EXIT_RESULTS_CONTRACT_PENDING"
-    elif (plan.payload.account_id, plan.payload.trade_date) != (
-        report.account_id,
-        report.trade_date,
+    plans = snapshot.entry_plans or ((snapshot.plan,) if snapshot.plan else ())
+    if any(
+        t.plan_hash not in {p.envelope.payload_hash for p in plans} for t in snapshot.entry_targets
     ):
-        raise ValueError("daily plan scope mismatch")
-    else:
-        durable_targets = {t.allocation_id: t for t in snapshot.entry_targets}
-        if len(durable_targets) != len(snapshot.entry_targets):
+        raise ValueError("durable entry target scope differs from daily plans")
+    if not plans:
+        gaps["plan_results"] = "EXIT_RESULTS_CONTRACT_PENDING"
+    for plan in plans:
+        if (plan.payload.account_id, plan.payload.trade_date) != (
+            report.account_id,
+            report.trade_date,
+        ):
+            raise ValueError("daily plan scope mismatch")
+        phase_targets = tuple(
+            t for t in snapshot.entry_targets if t.plan_hash == plan.envelope.payload_hash
+        )
+        durable_targets = {t.allocation_id: t for t in phase_targets}
+        if len(durable_targets) != len(phase_targets):
             raise ValueError("duplicate durable entry targets")
         entry_policy = next(p for p in plan.payload.policy_bundle if p.component == "entry")
-        for persisted in snapshot.entry_targets:
+        policies = {
+            p.payload_hash
+            for p in snapshot.entry_policies
+            if p.version == entry_policy.version
+            and p.rulebook_version == plan.payload.rulebook_version
+            and {a.symbol for a in plan.payload.allocations} == {i.symbol for i in p.instruments}
+        }
+        for persisted in phase_targets:
             allocation = next(
                 (a for a in plan.payload.allocations if a.allocation_id == persisted.allocation_id),
                 None,
@@ -174,7 +188,10 @@ def freeze_engine_day(
                 or persisted.trade_date != report.trade_date
                 or persisted.symbol != allocation.symbol
                 or persisted.plan_hash != plan.envelope.payload_hash
-                or persisted.policy_hash != entry_policy.payload_hash
+                or (
+                    persisted.policy_hash != entry_policy.payload_hash
+                    and persisted.policy_hash not in policies
+                )
             ):
                 raise ValueError("durable entry target scope differs from daily plan")
         for allocation in plan.payload.allocations:
@@ -191,6 +208,19 @@ def freeze_engine_day(
                 item.entry_binding.target_quantity for item in children if item.entry_binding
             }
             decision = durable_targets.get(allocation.allocation_id)
+            duplicate = (
+                plan.payload.source.decision_phase is not None
+                and not children
+                and decision is None
+                and any(
+                    t.symbol == allocation.symbol
+                    and t.target_quantity > 0
+                    and t.plan_hash != plan.envelope.payload_hash
+                    for t in snapshot.entry_targets
+                )
+            )
+            if duplicate:
+                targets.add(0)
             if decision is not None:
                 targets.add(decision.target_quantity)
             if (
@@ -229,7 +259,19 @@ def freeze_engine_day(
             )
             results.append(
                 daily_record(
-                    allocation.allocation_id,
+                    (
+                        "phase-result-"
+                        + digest(
+                            canonical_bytes(
+                                {
+                                    "plan": plan.envelope.payload_hash,
+                                    "allocation": allocation.allocation_id,
+                                }
+                            )
+                        )[7:]
+                    )
+                    if plan.payload.source.decision_phase is not None
+                    else allocation.allocation_id,
                     PlanResultRecord(
                         **common,
                         plan_id=plan.payload.plan_id,
@@ -239,7 +281,9 @@ def freeze_engine_day(
                         target_quantity=target,
                         filled_quantity=filled,
                         status=status,
-                        reason_code=decision.reason
+                        reason_code="DUPLICATE_SIGNAL"
+                        if duplicate
+                        else decision.reason
                         if decision and target == 0
                         else "FROZEN_ENTRY_TARGET_RECONCILED",
                     ),

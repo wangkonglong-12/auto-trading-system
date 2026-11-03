@@ -32,6 +32,9 @@ class PlanReceipt(WireModel):
 
 
 class PlanLookup(WireModel):
+    previous_phases: tuple[PlanEnvelope, ...] = Field(
+        default=(), max_length=2, exclude_if=lambda v: not v
+    )
     account_id: WireId
     strategy_id: WireId
     trade_date: date
@@ -43,6 +46,21 @@ class PlanLookup(WireModel):
 
     @model_validator(mode="after")
     def identity(self) -> PlanLookup:
+        if self.previous_phases:
+            if self.plan is None or self.plan.payload.source.decision_phase is None:
+                raise ValueError("phase history requires a published tail phase")
+            phases = [p.payload.source.decision_phase for p in self.previous_phases]
+            if any(p is None for p in phases) or len(set(phases)) != len(phases):
+                raise ValueError("phase history is ambiguous")
+            for prior in self.previous_phases:
+                p = prior.payload
+                if (p.account_id, p.strategy_id, p.trade_date, p.target_node_generation) != (
+                    self.account_id,
+                    self.strategy_id,
+                    self.trade_date,
+                    self.plan.payload.target_node_generation,
+                ) or str(p.source.decision_phase) >= self.plan.payload.source.decision_phase:
+                    raise ValueError("phase history scope differs")
         if (self.state == "PUBLISHED") != (self.plan is not None):
             raise ValueError("published lookup requires a plan; withdrawal has no new plan")
         if self.plan is not None:

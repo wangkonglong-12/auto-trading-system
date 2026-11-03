@@ -14,7 +14,7 @@ from typing import Literal, Protocol, cast
 from cryptography.hazmat.primitives.asymmetric.ed25519 import Ed25519PublicKey
 
 from auto_trading_system.protocol.v2.api import PlanLookup, PlanReceipt
-from auto_trading_system.protocol.v2.canonical import canonical_bytes
+from auto_trading_system.protocol.v2.canonical import canonical_bytes, digest
 from auto_trading_system.protocol.v2.plans import PlanEnvelope, check_plan_binding, verify_plan
 from auto_trading_system.sync.artifact_files import ArtifactFiles
 from auto_trading_system.sync.daily_files import FrozenBatch, check_daily_successor, load_daily
@@ -75,6 +75,23 @@ class AgentJobs:
         lookup = self.remote.current_plan(self.account_id, self.strategy_id, now.date())
         if lookup is None:
             return None
+        for previous in sorted(
+            lookup.previous_phases, key=lambda p: str(p.payload.source.decision_phase)
+        ):
+            prior = PlanLookup(
+                account_id=lookup.account_id,
+                strategy_id=lookup.strategy_id,
+                trade_date=lookup.trade_date,
+                plan_id=previous.payload.plan_id,
+                state="PUBLISHED",
+                state_version=lookup.state_version,
+                etag=digest(canonical_bytes({"phase_hash": previous.envelope.payload_hash})),
+                plan=previous,
+            )
+            self._apply_lookup(prior, now)
+        return self._apply_lookup(lookup, now)
+
+    def _apply_lookup(self, lookup: PlanLookup, now: datetime) -> SyncJob:
         if (lookup.account_id, lookup.strategy_id, lookup.trade_date) != (
             self.account_id,
             self.strategy_id,

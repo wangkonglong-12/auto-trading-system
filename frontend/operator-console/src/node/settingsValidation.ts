@@ -1,17 +1,24 @@
 import type { FieldIssue } from "./api";
 
+export type TradingBoard = "MAIN" | "CHINEXT" | "STAR";
+
 export interface TradingSettingsValues {
   buy: {
+    allowed_boards?: TradingBoard[];
+    signal_mode?: "TAIL_EXCELLENT_3_PHASES" | null;
     order_method: "ASK1_PROTECTED_LIMIT";
     max_daily_buy_value: string;
     max_symbol_buy_value: string;
     max_order_value: string;
     cancel_after_seconds: number;
     max_retries: number;
+    max_daily_symbols?: number | null;
   };
-  sell: { take_profit_pct: string; stop_loss_pct: string; sell_by: string };
+  sell: { take_profit_pct: string; stop_loss_pct: string; sell_by: string } | null;
+  sell_execution?: { cancel_after_seconds: number };
   safety: {
     max_daily_loss: string;
+    max_total_position_pct?: string;
     max_positions: number;
     emergency_liquidation_enabled: boolean;
   };
@@ -27,6 +34,21 @@ export function validateSettings(value: TradingSettingsValues): FieldIssue[] {
   const issues: FieldIssue[] = [];
   const money = /^(0|[1-9]\d{0,11})(\.\d{1,2})?$/;
   const { buy, sell, safety, advanced } = value;
+  const boards = buy.allowed_boards ?? ["MAIN"];
+  if (
+    boards.some((board) => !["MAIN", "CHINEXT", "STAR"].includes(board)) ||
+    new Set(boards).size !== boards.length
+  )
+    issues.push({
+      field: "buy.allowed_boards",
+      message: "可交易的板块：请选择有效板块，不能重复。",
+    });
+  const positionPct = safety.max_total_position_pct ?? "70";
+  if (!money.test(positionPct) || Number(positionPct) <= 0 || Number(positionPct) > 100)
+    issues.push({
+      field: "safety.max_total_position_pct",
+      message: "账户总仓位上限：请填写0.01至100的百分比，最多两位小数。",
+    });
   for (const [field, amount, label] of [
     ["buy.max_daily_buy_value", buy.max_daily_buy_value, "当日最多买入"],
     ["buy.max_symbol_buy_value", buy.max_symbol_buy_value, "单只股票最多买入"],
@@ -51,26 +73,42 @@ export function validateSettings(value: TradingSettingsValues): FieldIssue[] {
         message: "买入金额须满足：单笔委托最多 ≤ 单只股票最多买入 ≤ 当日最多买入。",
       });
   }
-  for (const [field, raw, label, maximum] of [
-    ["sell.take_profit_pct", sell.take_profit_pct, "止盈涨幅", 100],
-    ["sell.stop_loss_pct", sell.stop_loss_pct, "止损跌幅", 99.99],
-  ] as const) {
-    if (!money.test(raw) || Number(raw) <= 0 || Number(raw) > maximum)
-      issues.push({ field, message: `${label}：请填写0.01至${maximum}的百分比，最多两位小数。` });
+  if (sell) {
+    for (const [field, raw, label, maximum] of [
+      ["sell.take_profit_pct", sell.take_profit_pct, "止盈涨幅", 100],
+      ["sell.stop_loss_pct", sell.stop_loss_pct, "止损跌幅", 99.99],
+    ] as const) {
+      if (!money.test(raw) || Number(raw) <= 0 || Number(raw) > maximum)
+        issues.push({ field, message: `${label}：请填写0.01至${maximum}的百分比，最多两位小数。` });
+    }
+    if (
+      !/^\d{2}:\d{2}$/.test(sell.sell_by) ||
+      !(
+        (sell.sell_by >= "09:30" && sell.sell_by <= "11:25") ||
+        (sell.sell_by >= "13:00" && sell.sell_by <= "14:50")
+      )
+    )
+      issues.push({
+        field: "sell.sell_by",
+        message: "最晚卖出时间：请选择09:30–11:25或13:00–14:50，精确到分钟。",
+      });
   }
   if (
-    !/^\d{2}:\d{2}$/.test(sell.sell_by) ||
-    !(
-      (sell.sell_by >= "09:30" && sell.sell_by <= "11:25") ||
-      (sell.sell_by >= "13:00" && sell.sell_by <= "14:50")
-    )
+    buy.max_daily_symbols != null &&
+    (!Number.isInteger(buy.max_daily_symbols) ||
+      buy.max_daily_symbols < 1 ||
+      buy.max_daily_symbols > 15)
   )
-    issues.push({
-      field: "sell.sell_by",
-      message: "最晚卖出时间：请选择09:30–11:25或13:00–14:50，精确到分钟。",
-    });
+    issues.push({ field: "buy.max_daily_symbols", message: "每日最多买入：请填写1至15的整数。" });
   for (const [field, number, label, minimum, maximum] of [
-    ["buy.cancel_after_seconds", buy.cancel_after_seconds, "未成交等待（秒）", 1, 300],
+    ["buy.cancel_after_seconds", buy.cancel_after_seconds, "买入未成交撤单时效（秒）", 1, 300],
+    [
+      "sell_execution.cancel_after_seconds",
+      value.sell_execution?.cancel_after_seconds ?? 5,
+      "卖出未成交撤单时效（秒）",
+      1,
+      300,
+    ],
     ["buy.max_retries", buy.max_retries, "最多重新下单次数", 0, 3],
     ["safety.max_positions", safety.max_positions, "最多持有股票数量", 0, 15],
     ["advanced.max_order_quantity", advanced.max_order_quantity, "单笔最大股数", 100, 1000000],

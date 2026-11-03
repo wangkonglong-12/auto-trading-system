@@ -100,6 +100,55 @@ def test_long_reader_defers_checkpoint_without_blocking_j1(
         store.close()
 
 
+def test_automatic_checkpoint_reuses_wal_during_long_running_session(
+    tmp_path: Path,
+    submission: Submission,
+) -> None:
+    path = tmp_path / "autocheckpoint.db"
+    store = APSWCriticalStore(path, submission.account_id)
+    store.open()
+    try:
+        assert store._db().pragma("wal_autocheckpoint") == 1000
+        body = canonical_bytes({"payload": "x" * 60_000})
+        page_size = int(store._db().pragma("page_size"))
+        for index in range(200):
+            assert store.append_evidence("broker_facts", f"fact-{index}", body)
+        # More than 12 MB was committed without closing the connection. The
+        # WAL should recycle around 1000 pages, with room for one transaction.
+        assert 0 < Path(str(path) + "-wal").stat().st_size < page_size * 1200
+        assert store.read_evidence("broker_facts", "fact-199") == body
+    finally:
+        store.close()
+
+
+def test_automatic_checkpoint_does_not_wait_for_pinned_reader(
+    tmp_path: Path,
+    submission: Submission,
+) -> None:
+    path = tmp_path / "pinned-autocheckpoint.db"
+    store = APSWCriticalStore(path, submission.account_id)
+    store.open()
+    reader = apsw.Connection(str(path), flags=apsw.SQLITE_OPEN_READONLY)
+    try:
+        store.commit_submission(submission)
+        reader.execute("BEGIN")
+        assert reader.execute("SELECT COUNT(*) FROM broker_facts").fetchone() == (0,)
+        body = canonical_bytes({"payload": "x" * 60_000})
+        for index in range(100):
+            assert store.append_evidence("broker_facts", f"fact-{index}", body)
+        assert reader.execute("SELECT COUNT(*) FROM broker_facts").fetchone() == (0,)
+        assert store.read_evidence("broker_facts", "fact-99") == body
+        reader.execute("ROLLBACK")
+        store.append_evidence("broker_facts", "after-reader", b"{}")
+        log_pages, completed_pages = store.checkpoint()
+        assert log_pages == completed_pages
+    finally:
+        if not reader.get_autocommit():
+            reader.execute("ROLLBACK")
+        reader.close()
+        store.close()
+
+
 def test_sqlite_capacity_exhaustion_latches_owner_and_rolls_back(
     tmp_path: Path, submission: Submission
 ) -> None:

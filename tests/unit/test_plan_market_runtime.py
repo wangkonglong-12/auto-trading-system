@@ -63,3 +63,31 @@ def test_exit_symbols_remain_subscribed_before_entry_plan_arrives() -> None:
     runtime.reconcile(example_plan(), ("600000.SH",))
     assert runtime.status()["symbols"] == ["600000.SH", "000001.SZ"]
     runtime.stop()
+
+
+def test_market_fault_fences_once_then_allows_explicit_recovery(tmp_path) -> None:
+    from auto_trading_system.apps.trade_runtime.engine_simulation import open_offline_engine
+
+    fault = ["QMT_TICK_CALLBACK_INVALID"]
+    market = MockMarketGateway()
+    runtime = PlanMarketRuntime(market, fault_reader=lambda: fault[0])
+    try:
+        with open_offline_engine(tmp_path) as rt:
+            runtime.poll(rt.kernel)
+            epoch = rt.kernel.snapshot().permission_epoch
+            for _ in range(5):
+                runtime.poll(rt.kernel)
+            assert rt.kernel.snapshot().permission_epoch == epoch
+            assert rt.kernel.snapshot().state == "HALTED"
+            assert rt.kernel.market_data_failure == fault[0]
+            fault[0] = None
+            runtime.poll(rt.kernel)
+            assert runtime.failure_code is None
+            assert rt.kernel.market_data_failure is None
+            assert rt.kernel.snapshot().state == "HALTED"  # never auto-resume
+            rt.kernel.start_recovery()
+            runtime.poll(rt.kernel)
+            assert rt.kernel.snapshot().state != "HALTED"
+            assert rt.kernel.snapshot().grant_id is None
+    finally:
+        runtime.stop()

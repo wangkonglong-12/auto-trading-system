@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import hashlib
+import json
 from datetime import datetime
 from pathlib import Path
 from typing import cast
@@ -20,6 +21,8 @@ from auto_trading_system.apps.desktop.setup import (
     default_settings_path,
     detect_sdk_root,
     detect_userdata_mini,
+    inspect_launcher_settings,
+    launcher_settings_issue_message,
     provision_qmt_read_only,
     read_launcher_settings,
     write_launcher_settings,
@@ -67,6 +70,26 @@ def test_launcher_settings_round_trip_and_reject_invalid_paths(tmp_path: Path) -
 
     (settings.sdk_root / "xtquant" / "xttrader.py").unlink()
     assert read_launcher_settings(target) is None
+    assert inspect_launcher_settings(target) == (None, "QMT_SDK_MISSING")
+    assert "XtQuant SDK" in launcher_settings_issue_message("QMT_SDK_MISSING")
+
+
+def test_launcher_rejects_transient_sdk_as_a_durable_connection(tmp_path: Path) -> None:
+    settings = live_files(tmp_path / ".codex_tmp" / "prepared")
+    target = tmp_path / "launcher.json"
+    target.write_text(
+        json.dumps(
+            {
+                "schema": 1,
+                "config_path": str(settings.config_path),
+                "sdk_root": str(settings.sdk_root),
+            }
+        ),
+        encoding="utf-8",
+    )
+    assert inspect_launcher_settings(target) == (None, "QMT_SDK_TEMPORARY")
+    with pytest.raises(ValueError, match="临时目录"):
+        settings.validate()
 
 
 def test_launcher_settings_reject_missing_invalid_and_non_trading_config(tmp_path: Path) -> None:
@@ -306,10 +329,62 @@ def test_detection_handles_unreadable_paths(monkeypatch: pytest.MonkeyPatch) -> 
     assert detect_userdata_mini() is None
 
 
+def test_sdk_detection_finds_durable_local_component_and_ignores_transient_override(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    sdk = tmp_path / "AutoTradingSystem" / "components" / "xtquant-240613"
+    (sdk / "xtquant").mkdir(parents=True)
+    (sdk / "xtquant" / "xttrader.py").write_text("", encoding="utf-8")
+    transient = tmp_path / ".codex_tmp" / "sdk"
+    (transient / "xtquant").mkdir(parents=True)
+    (transient / "xtquant" / "xttrader.py").write_text("", encoding="utf-8")
+    monkeypatch.setenv("LOCALAPPDATA", str(tmp_path))
+    monkeypatch.setenv("ATS_QMT_SDK_ROOT", str(transient))
+    assert detect_sdk_root() == sdk
+
+
+def test_setup_auto_fills_durable_sdk_without_requiring_manual_entry(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    sdk = tmp_path / "AutoTradingSystem" / "components" / "xtquant-240613"
+    (sdk / "xtquant").mkdir(parents=True)
+    (sdk / "xtquant" / "xttrader.py").write_text("", encoding="utf-8")
+    monkeypatch.setenv("LOCALAPPDATA", str(tmp_path))
+    monkeypatch.delenv("ATS_QMT_SDK_ROOT", raising=False)
+    server = LauncherSetupServer(tmp_path / "launcher.json")
+    server.start()
+    try:
+        with httpx.Client(trust_env=False, timeout=3) as client:
+            page = client.get(server.url)
+        assert "连接组件已自动识别，无需填写 - 高级" in page.text
+        assert "<details><summary>连接组件已自动识别" in page.text
+        assert f'name="sdk_root" value="{sdk}"' in page.text
+    finally:
+        server.close()
+
+
 def test_launcher_settings_reject_unknown_schema(tmp_path: Path) -> None:
     path = tmp_path / "launcher.json"
     path.write_text('{"schema":2}', encoding="utf-8")
     assert read_launcher_settings(path) is None
+    assert inspect_launcher_settings(path) == (None, "QMT_SETTINGS_INVALID")
+
+
+def test_first_run_page_explains_stale_saved_qmt_connection(tmp_path: Path) -> None:
+    settings = live_files(tmp_path)
+    target = tmp_path / "launcher.json"
+    write_launcher_settings(target, settings)
+    (settings.sdk_root / "xtquant" / "xttrader.py").unlink()
+    server = LauncherSetupServer(target)
+    server.start()
+    try:
+        with httpx.Client(trust_env=False, timeout=3) as client:
+            page = client.get(server.url)
+        assert page.status_code == 200
+        assert "上次保存的 XtQuant SDK 目录已失效" in page.text
+        assert str(settings.sdk_root) not in page.text
+    finally:
+        server.close()
 
 
 def test_first_run_page_stays_safe_until_valid_settings_are_saved(tmp_path: Path) -> None:

@@ -12,6 +12,7 @@ from auto_trading_system.domain import SecurityCode
 from auto_trading_system.gateways.market import MarketGateway, MarketSubscription, MarketTick
 from auto_trading_system.protocol.v2.canonical import canonical_bytes, digest
 from auto_trading_system.protocol.v2.plans import PlanPayload
+from auto_trading_system.recorder.tick_archive import TickArchive
 from auto_trading_system.runtime.engine_v2 import EngineKernel
 
 
@@ -34,8 +35,9 @@ class PlanMarketRuntime:
         fault_reader: Callable[[], str | None] = lambda: None,
         maximum_symbols: int = 15,
         queue_capacity: int = 2048,
+        archive: TickArchive | None = None,
     ) -> None:
-        if not 1 <= maximum_symbols <= 15 or not 1 <= queue_capacity <= 65_536:
+        if not 1 <= maximum_symbols <= 45 or not 1 <= queue_capacity <= 65_536:
             raise ValueError("invalid plan market runtime bounds")
         self.market = market
         self.fault_reader = fault_reader
@@ -45,9 +47,24 @@ class PlanMarketRuntime:
         self.latest: dict[str, MarketTick] = {}
         self.plan_hash: str | None = None
         self.failure_code: str | None = None
-        market.start(self._enqueue)
+        self.archive = archive
+        self.retired_symbols: frozenset[str] = frozenset()
+        self._cleanup_pending: dict[str, object] = {}
+        if archive is not None:
+            archive.start()
+        try:
+            market.start(self._enqueue)
+        except BaseException:
+            if archive is not None:
+                archive.close()
+            raise
 
     def _enqueue(self, tick: MarketTick) -> None:
+        if self.archive is not None:
+            try:
+                self.archive.append(tick)
+            except RuntimeError:
+                self.failure_code = "MARKET_ARCHIVE_FAILED"
         try:
             self.events.put_nowait(tick)
         except Full:
@@ -56,8 +73,11 @@ class PlanMarketRuntime:
     def poll(
         self, engine: EngineKernel, *, extra_symbols: tuple[str, ...] = ()
     ) -> PlanMarketSnapshot:
-        if self.failure_code is None:
-            self.failure_code = self.fault_reader()
+        source_fault = self.fault_reader()
+        if self.failure_code in {None, "QMT_TICK_CALLBACK_INVALID", "QMT_TICK_CLOCK_SKEW"}:
+            self.failure_code = source_fault
+        if self.archive is not None and not self.archive.healthy:
+            self.failure_code = "MARKET_ARCHIVE_FAILED"
         try:
             if self.failure_code is None:
                 loaded = engine.plans.plans.loaded()
@@ -65,7 +85,13 @@ class PlanMarketRuntime:
                 self._drain()
         except Exception:
             self.failure_code = "MARKET_SUBSCRIPTION_SYNC_FAILED"
-        if self.failure_code is not None:
+        engine.market_data_failure = self.failure_code
+        # One unchanged fault is one fence, not a new HALT every owner poll.
+        # A new recovery/authorization attempt is still fenced while faulty.
+        if self.failure_code is not None and (
+            engine.snapshot().state != "HALTED"
+            or engine.permission.snapshot().reason != self.failure_code
+        ):
             engine.emergency_halt(self.failure_code)
         engine.poll()
         return self.snapshot()
@@ -76,7 +102,9 @@ class PlanMarketRuntime:
             if plan is not None
             else ()
         )
-        wanted = tuple(dict.fromkeys((*extra_symbols, *planned)))
+        wanted = tuple(
+            s for s in dict.fromkeys((*extra_symbols, *planned)) if s not in self.retired_symbols
+        )
         if len(wanted) > self.maximum_symbols:
             raise ValueError("plan exceeds the installed market subscription limit")
         wanted_set = set(wanted)
@@ -84,6 +112,8 @@ class PlanMarketRuntime:
         try:
             for wire in wanted:
                 if wire not in self.subscriptions:
+                    if self.archive is not None:
+                        self.archive.activate(wire)
                     subscription = self.market.subscribe(SecurityCode.parse(wire))
                     self.subscriptions[wire] = subscription
                     additions.append(subscription)
@@ -118,8 +148,29 @@ class PlanMarketRuntime:
             if current is None or tick.occurred_at >= current.occurred_at:
                 self.latest[wire] = tick
 
+    def cleanup_sold(self, symbols: frozenset[str]) -> None:
+        """Only the engine's reconciled disposition proof may populate symbols."""
+        self.retired_symbols |= symbols
+        if self.archive is None:
+            return
+        for symbol in symbols:
+            if symbol in self.subscriptions:
+                continue  # Reconcile must stop the subscription first.
+            if symbol not in self._cleanup_pending:
+                self._cleanup_pending[symbol] = self.archive.retire(symbol)
+
+    def retain(self, symbols: frozenset[str]) -> None:
+        """New live plans or observed holdings can require a retired symbol again."""
+        self.retired_symbols -= symbols
+        for symbol in symbols:
+            self._cleanup_pending.pop(symbol, None)
+
     def stop(self) -> None:
-        self.market.stop()
+        try:
+            self.market.stop()
+        finally:
+            if self.archive is not None and not self.archive.close():
+                raise RuntimeError("MARKET_ARCHIVE_SHUTDOWN_TIMEOUT")
         self.subscriptions.clear()
         self.latest.clear()
         self.plan_hash = None
@@ -146,4 +197,5 @@ class PlanMarketRuntime:
             "symbols": list(value.symbols),
             "latest_quote_count": len(value.latest_symbols),
             "failure_code": value.failure_code,
+            "archive": self.archive.status() if self.archive is not None else None,
         }

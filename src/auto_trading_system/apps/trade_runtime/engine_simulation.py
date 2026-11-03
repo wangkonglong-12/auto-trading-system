@@ -85,7 +85,10 @@ class OfflineEngine:
         )
 
     def confirmed_arm(
-        self, *, directions: tuple[Literal["BUY", "SELL"], ...] = ("BUY",)
+        self,
+        *,
+        directions: tuple[Literal["BUY", "SELL"], ...] = ("BUY",),
+        duration_seconds: int = 300,
     ) -> SessionGrant:
         report = self.kernel.snapshot().recovery
         if report is None:
@@ -110,7 +113,7 @@ class OfflineEngine:
                 self.clock() + timedelta(minutes=5), self.kernel.exit_context.valid_until
             )
             if self.kernel.exit_context
-            else self.clock() + timedelta(minutes=5),
+            else self.clock() + timedelta(seconds=duration_seconds),
             confirmed_by="offline-test-operator",
             recovery_report_hash=report.payload_hash,
         )
@@ -179,6 +182,7 @@ def open_offline_engine(
     entry_state_guard: Callable[[Submission], bool] | None = None,
     entry_target_reader: Callable[[], tuple[EntryTarget, ...]] | None = None,
     limits: EngineLimits | None = None,
+    tail_phases: bool = False,
 ) -> Iterator[OfflineEngine]:
     """Managed Mock lifecycle; injected factories must return unstarted owners."""
     if broker is not None and not isinstance(broker, MockBrokerGateway):
@@ -235,6 +239,7 @@ def open_offline_engine(
             rulebook=payload.rulebook_version,
             clock=clock,
             pause_for_change=pause_plan,
+            tail_phases=tail_phases,
         )
         approvals = OneShotApprovals(boot_id=boot, clock=clock)
 
@@ -328,7 +333,14 @@ def open_offline_engine(
                 max_positions=1,
                 max_order_quantity=100,
             ),
-            risk_guard=(lambda order: order.symbol in {a.symbol for a in payload.allocations})
+            risk_guard=(
+                lambda order: any(
+                    order.symbol in {a.symbol for a in p.payload.allocations}
+                    for p in plans.plans.accepted()
+                )
+            )
+            if tail_phases
+            else (lambda order: order.symbol in {a.symbol for a in payload.allocations})
             if entry_state_guard is not None
             else lambda order: order.symbol == "000001.SZ"
             and (order.quantity == 100 if order.side == "BUY" else 1 <= order.quantity <= 100)

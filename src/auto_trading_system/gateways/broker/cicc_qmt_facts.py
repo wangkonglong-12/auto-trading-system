@@ -4,15 +4,19 @@ from __future__ import annotations
 
 import hmac
 import math
+from collections.abc import Callable
 from dataclasses import dataclass
 from datetime import datetime
 from decimal import ROUND_HALF_UP, Decimal
 from typing import Any
 from uuid import uuid4
 
+from pydantic import JsonValue
+
 from auto_trading_system.domain import SecurityCode
 from auto_trading_system.gateways.broker.cicc_qmt_snapshot import CiccQmtSnapshotClient
 from auto_trading_system.monitoring.qmt_readonly import QmtReadOnlyAdapterError
+from auto_trading_system.protocol.account_monitoring import Observation
 from auto_trading_system.runtime.recovery_v2 import AccountFact, PositionFact
 
 _CENT = Decimal("0.01")
@@ -57,6 +61,48 @@ def _rows(value: object, dataset: str) -> list[object]:
 
 class CiccQmtFactsClient(CiccQmtSnapshotClient):
     """SDK lifecycle is inherited from the proven snapshot client."""
+
+    def read_monitoring(
+        self, clock: Callable[[], datetime], *, buy: int, sell: int
+    ) -> Observation:
+        from auto_trading_system.gateways.broker.account_monitoring import read_observation
+
+        return read_observation(
+            lambda name: self._query_sdk(name, "MONITORING", self._account),
+            self._account_id, clock, buy=buy, sell=sell,
+        )
+
+    def read_operator_details(
+        self, account_alias: str, observed_at: datetime, *, buy: int, sell: int
+    ) -> dict[str, JsonValue]:
+        from auto_trading_system.gateways.broker.qmt_display import display_order, display_trade
+
+        facts = self.read_facts(account_alias, observed_at)
+        orders = _rows(
+            self._query_sdk("query_stock_orders", "ORDERS", self._account, False), "ORDERS"
+        )
+        trades = _rows(self._query_sdk("query_stock_trades", "TRADES", self._account), "TRADES")
+        for row in (*orders, *trades):
+            self._check_identity(row)
+        mapped_orders = [display_order(row, observed_at, buy=buy, sell=sell) for row in orders]
+        mapped_trades = [display_trade(row, observed_at, buy=buy, sell=sell) for row in trades]
+        for rows, field in ((mapped_orders, "client_order_id"), (mapped_trades, "trade_id")):
+            if len({str(row[field]) for row in rows}) != len(rows):
+                raise QmtReadOnlyAdapterError("QMT_DISPLAY_DUPLICATE", "duplicate broker identity")
+        account = facts.account
+        return {
+            "available": True,
+            "observed_at": observed_at.isoformat(),
+            "cash": account.cash,
+            "total_equity": account.total_equity,
+            "cash_frozen": account.cash_frozen,
+            "market_value": account.market_value,
+            "coherent": False,
+            "positions": [p.model_dump(mode="json") for p in account.positions[:100]],
+            "orders": [dict(row) for row in mapped_orders[:100]],
+            "trades": [dict(row) for row in mapped_trades[:100]],
+            "truncated": max(len(account.positions), len(orders), len(trades)) > 100,
+        }
 
     def read_facts(self, account_alias: str, observed_at: datetime) -> QmtAccountFacts:
         if observed_at.tzinfo is None:

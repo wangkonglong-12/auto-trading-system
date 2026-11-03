@@ -5,8 +5,11 @@ from __future__ import annotations
 import json
 import sys
 import webbrowser
+from contextlib import suppress
 from datetime import datetime
 from pathlib import Path
+from threading import Event, Thread, get_ident
+from time import monotonic, sleep
 from types import ModuleType, SimpleNamespace
 from typing import Any, cast
 
@@ -137,6 +140,111 @@ def test_desktop_main_opens_first_run_settings_and_routes_explicit_modes(
     assert calls.pop() == (config, sdk, False)
     monkeypatch.setattr(desktop_main, "launch_setup_window", lambda: None)
     assert desktop_main.main(["--configure"]) == 0
+
+
+def test_desktop_main_retries_only_after_explicit_window_recovery(tmp_path, monkeypatch):
+    config, sdk = tmp_path / "node.json", tmp_path / "sdk"
+    configured = SimpleNamespace(config_path=config, sdk_root=sdk, validate=lambda: None)
+    monkeypatch.setattr(desktop_main, "configured_from_environment", lambda: configured)
+    results = iter((12, 0))
+    calls = []
+
+    def launch(**kwargs):
+        calls.append(kwargs)
+        return next(results)
+
+    monkeypatch.setattr(desktop_main, "launch_window", launch)
+    assert desktop_main.main([]) == 0
+    assert calls == [{"config_path": config, "sdk_root": sdk}] * 2
+
+
+def test_native_locked_window_shows_recovery_without_modal_and_without_clipping(
+    tmp_path, monkeypatch
+):
+    """Real Tk layout/event loop; no SDK, node process, or live profile is used."""
+    import tkinter as tk
+    from tkinter import messagebox
+
+    root = tk.Tk()
+    root.withdraw()
+    root.attributes("-alpha", 0.0)
+    root.overrideredirect(True)
+
+    class Session:
+        def __init__(self, *_args):
+            self.directory = tmp_path
+            self.config = SimpleNamespace(broker="QMT_TRADING")
+            self.stop_requested = Event()
+            self.children = {}
+
+        def start(self):
+            self.stop_requested.set()
+            raise RuntimeError("SUPERVISOR_BLOCKED")
+
+        def stop(self):
+            self.stop_requested.set()
+
+    class Guard:
+        def __init__(self, *_args, **_kwargs):
+            pass
+
+        def acquire(self):
+            pass
+
+        def release(self):
+            pass
+
+    monkeypatch.setattr(tk, "Tk", lambda: root)
+    monkeypatch.setattr(desktop_main, "ConfiguredSession", Session)
+    monkeypatch.setattr(desktop_main, "AccountInstanceGuard", Guard)
+    monkeypatch.setattr(desktop_main, "interrupted_start_available", lambda _config: True)
+    dialogs = []
+    monkeypatch.setattr(messagebox, "showerror", lambda *args, **kwargs: dialogs.append(args))
+    failures = []
+    geometry = {}
+
+    def inspect():
+        try:
+            pending = list(root.winfo_children())
+            widgets = []
+            while pending:
+                widget = pending.pop()
+                widgets.append(widget)
+                pending.extend(widget.winfo_children())
+            button = next(
+                w
+                for w in widgets
+                if w.winfo_class() == "TButton" and w.cget("text") == "恢复启动并核验"
+            )
+            assert not dialogs
+            assert str(button.cget("state")) == "normal"
+            assert button.winfo_viewable()
+            bottom = button.winfo_rooty() - root.winfo_rooty() + button.winfo_height()
+            assert bottom <= root.winfo_height()
+            assert (
+                button.winfo_rootx() - root.winfo_rootx() + button.winfo_width()
+                <= root.winfo_width()
+            )
+            geometry.update(
+                width=root.winfo_width(), height=root.winfo_height(), button_bottom=bottom
+            )
+        except BaseException as exc:
+            failures.append(exc)
+        finally:
+            root.destroy()
+
+    root.after(0, root.deiconify)
+    root.after(1000, inspect)
+    try:
+        assert (
+            desktop_main.launch_window(config_path=tmp_path / "unused.json", sdk_root=tmp_path) == 0
+        )
+        assert not failures, failures
+        assert geometry["height"] >= 440
+    finally:
+        if root.tk is not None:
+            with suppress(tk.TclError):
+                root.destroy()
 
 
 def test_desktop_main_switches_from_safe_shell_to_saved_qmt_node(
@@ -349,7 +457,7 @@ def test_preview_window_runs_lifecycle_and_opens_console(
             self.target()
 
         def join(self, timeout: float) -> None:
-            assert timeout == 20
+            assert timeout == 0
 
     class Variable:
         def __init__(self, value: str) -> None:
@@ -358,9 +466,14 @@ def test_preview_window_runs_lifecycle_and_opens_console(
         def set(self, value: str) -> None:
             self.value = value
 
+    widgets: list[Any] = []
+
     class Widget:
         def __init__(self, *_: object, **kwargs: object) -> None:
             self.state = kwargs.get("state")
+            self.text = kwargs.get("text")
+            self.command = kwargs.get("command")
+            widgets.append(self)
 
         def pack(self, **_: object) -> None:
             pass
@@ -472,13 +585,270 @@ def test_preview_window_runs_lifecycle_and_opens_console(
     assert errors == []
     assert cast(Any, sessions[-1]).stop_count == 1
 
+    destroyed: list[bool] = []
+    failure_close: list[Any] = []
+    monkeypatch.setattr(Window, "destroy", lambda self: destroyed.append(True))
+    monkeypatch.setattr(
+        Window, "protocol", lambda self, name, handler: failure_close.append(handler)
+    )
+
     def fail_start(self: object) -> None:
+        # Real PreviewSession.start cleans up and latches stop_requested before raising.
+        cast(Any, self).stop_requested.set()
         raise RuntimeError("DESKTOP_START_TIMEOUT")
 
     monkeypatch.setattr(Session, "start", fail_start)
     assert desktop_main.launch_window() == 0
     assert len(errors) == 1 and "启动超时" in errors[0]
+    assert destroyed == []  # Failed startup remains visible after cleanup.
+    failure_close[-1]()
+    assert destroyed == [True]  # Already stopped failure window can still close.
     assert "RuntimeError" not in errors[0]
+
+    recovered: list[object] = []
+
+    class LockedSession(Session):
+        def __init__(self, *_: object) -> None:
+            super().__init__(tmp_path / "locked-live")
+            self.config = SimpleNamespace(broker="QMT_TRADING")
+
+        def start(self) -> None:
+            self.stop_requested.set()
+            raise RuntimeError("SUPERVISOR_BLOCKED")
+
+    monkeypatch.setattr(desktop_main, "ConfiguredSession", LockedSession)
+    monkeypatch.setattr(desktop_main, "interrupted_start_available", lambda _: True)
+    monkeypatch.setattr(
+        desktop_main, "recover_interrupted_start", lambda config: recovered.append(config)
+    )
+    tkinter.messagebox.askyesno = lambda *_a, **_kw: False
+
+    def recover_from_window(self: object) -> None:
+        assert len(errors) == 1  # Eligible interruption uses inline recovery, no second modal.
+        button = next(w for w in reversed(widgets) if w.text == "恢复启动并核验")
+        assert button.state == "normal"
+        button.command()
+        assert recovered == []
+        tkinter.messagebox.askyesno = lambda *_a, **_kw: True
+        button.command()
+        assert len(recovered) == 1
+
+    monkeypatch.setattr(Window, "mainloop", recover_from_window)
+    assert (
+        desktop_main.launch_window(config_path=tmp_path / "node.json", sdk_root=tmp_path / "sdk")
+        == 12
+    )
+
+
+@pytest.mark.parametrize("blocked_at", ["start", "tick"])
+def test_window_cancel_and_confirm_exit_remain_responsive_with_blocked_backend(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch, blocked_at: str
+) -> None:
+    entered, release, stopped = Event(), Event(), Event()
+    sessions, windows, buttons, threads, confirmations = [], [], [], [], []
+    ui_thread = get_ident()
+
+    class Session:
+        def __init__(self, directory):
+            self.directory, self.url = directory, "http://127.0.0.1:32000/"
+            self.stop_requested, self.children = Event(), {}
+            self.closed, self.stop_count = False, 0
+            sessions.append(self)
+
+        def start(self):
+            if blocked_at == "start":
+                entered.set()
+                release.wait(8)
+
+        def automation_tick(self):
+            entered.set()
+            release.wait(8)
+
+        def stop(self):
+            assert get_ident() != ui_thread
+            if self.closed:
+                return
+            self.closed = True
+            self.stop_count += 1
+            stopped.set()
+
+    class Widget:
+        def __init__(self, *args, **kwargs):
+            self.command, self.text = kwargs.get("command"), kwargs.get("text")
+            buttons.append(self)
+
+        def pack(self, **kwargs):
+            pass
+
+        def configure(self, **kwargs):
+            pass
+
+    class Variable:
+        def __init__(self, value):
+            self.value = value
+
+        def set(self, value):
+            self.value = value
+
+    class Window:
+        def __init__(self):
+            self.callbacks, self.protocols, self.destroyed = [], {}, False
+            windows.append(self)
+
+        def title(self, value):
+            pass
+
+        def geometry(self, value):
+            pass
+
+        def minsize(self, *args):
+            pass
+
+        def protocol(self, key, value):
+            self.protocols[key] = value
+
+        def after(self, milliseconds, callback):
+            self.callbacks.append(callback)
+
+        def destroy(self):
+            self.destroyed = True
+
+        def mainloop(self):
+            assert entered.wait(2)
+            self.protocols["WM_DELETE_WINDOW"]()  # Cancel the title-bar close.
+            assert not sessions[0].stop_requested.is_set() and not stopped.is_set()
+            next(b for b in buttons if b.text == "停止并退出").command()
+            assert sessions[0].stop_requested.is_set()
+            until = monotonic() + 2
+            while not self.destroyed and monotonic() < until:
+                if self.callbacks:
+                    self.callbacks.pop(0)()
+                sleep(0.005)
+            assert self.destroyed and stopped.is_set()
+            assert not release.is_set()  # UI exited while the backend is still blocked.
+
+    def ask(title, message, **kwargs):
+        assert get_ident() == ui_thread and kwargs["default"] == "no"
+        confirmations.append((title, message))
+        return len(confirmations) == 2
+
+    def spawn(**kwargs):
+        thread = Thread(**kwargs)
+        threads.append(thread)
+        return thread
+
+    tk = ModuleType("tkinter")
+    tk.Tk, tk.StringVar = Window, Variable
+    tk.ttk = SimpleNamespace(Frame=Widget, Label=Widget, Entry=Widget, Button=Widget)
+    tk.messagebox = SimpleNamespace(askyesno=ask, showerror=lambda *a, **k: None)
+    monkeypatch.setitem(sys.modules, "tkinter", tk)
+    monkeypatch.setenv("LOCALAPPDATA", str(tmp_path))
+    monkeypatch.setattr(desktop_main, "PreviewSession", Session)
+    monkeypatch.setattr(desktop_main, "Thread", spawn)
+    monkeypatch.setattr(desktop_main, "current_sid", lambda: "test-sid")
+    monkeypatch.setattr(desktop_main, "WindowsNamedMutexBackend", lambda: object())
+    monkeypatch.setattr(
+        desktop_main,
+        "AccountInstanceGuard",
+        lambda *a, **k: SimpleNamespace(acquire=lambda: None, release=lambda: None),
+    )
+    monkeypatch.setattr(desktop_main, "trading_day_changed", lambda _: False)
+
+    def blocked_browser(_):
+        assert get_ident() != ui_thread
+        release.wait(8)
+
+    monkeypatch.setattr(webbrowser, "open", blocked_browser)
+    try:
+        assert desktop_main.launch_window() == 0
+        assert confirmations == [("确认关闭", "后台运行中，是否确认关闭")] * 2
+        assert sessions[0].stop_count == 1
+    finally:
+        release.set()
+        for thread in threads:
+            thread.join(2)
+            assert not thread.is_alive()
+
+
+def test_shutdown_wait_budget_is_shared_and_only_owned_jobs_are_closed(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    from auto_trading_system.apps.desktop import session as module
+
+    session = PreviewSession(tmp_path / "bounded-stop")
+    elapsed, calls = [0.0], []
+
+    class Client:
+        def invoke(self, action):
+            calls.append(action)
+            elapsed[0] += 2
+
+    class Child:
+        terminated, closed = False, False
+
+        def poll(self):
+            return 0 if self.terminated else None
+
+        def wait(self, seconds):
+            assert 0 <= seconds <= 3
+            elapsed[0] += seconds
+            if not self.terminated:
+                raise TimeoutError()
+            return 0
+
+        def terminate(self):
+            self.terminated = True
+
+        def close(self):
+            self.closed = True
+
+    children = [Child(), Child(), Child()]
+    session.children = dict(zip(("agent", "supervise", "console"), children, strict=True))
+    monkeypatch.setattr(session, "client", lambda *a, **k: Client())
+    monkeypatch.setattr(module, "monotonic", lambda: elapsed[0])
+    session.stop()
+    assert elapsed[0] <= 10
+
+    assert all(child.closed and child.terminated for child in children)
+    assert not session.children and session._stop_done.is_set()
+    assert calls[0] == "HALT"
+    session.stop()
+    assert elapsed[0] <= 10
+
+
+def test_shutdown_reclaims_a_child_that_finishes_starting_after_close(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    from auto_trading_system.apps.desktop import session as module
+
+    session = PreviewSession(tmp_path / "late-child")
+    entered, release = Event(), Event()
+    closed, failures = [], []
+
+    def create(*args, **kwargs):
+        entered.set()
+        assert release.wait(3)
+        return SimpleNamespace(close=lambda: closed.append(True))
+
+    monkeypatch.setattr(module, "OwnedProcess", create)
+
+    def launch():
+        try:
+            session._launch("agent")
+        except RuntimeError as error:
+            failures.append(str(error))
+
+    thread = Thread(target=launch)
+    thread.start()
+    try:
+        assert entered.wait(2)
+        session.stop()
+    finally:
+        release.set()
+        thread.join(3)
+    assert not thread.is_alive()
+    assert closed == [True] and failures == ["DESKTOP_STOP_REQUESTED"]
+    assert session.closed and not session.children
 
 
 def test_first_run_window_opens_settings_and_returns_validated_selection(
@@ -617,6 +987,35 @@ def test_blocked_supervisor_reports_immediately_instead_of_waiting_for_start_tim
     cast(Any, session).client = lambda _: Client()
     with pytest.raises(RuntimeError, match="SUPERVISOR_BLOCKED"):
         session._supervisor_ready()
+
+
+@pytest.mark.parametrize(
+    "reason,expected",
+    [
+        ("CHILD_EXITED", "QMT_READ_ONLY_START_FAILED"),
+        ("CHILD_JOURNAL_UNHEALTHY", "SUPERVISOR_BLOCKED"),
+    ],
+)
+def test_readonly_start_failure_explains_retry_without_unlocking_safety_faults(
+    tmp_path: Path,
+    reason: str,
+    expected: str,
+) -> None:
+    session = PreviewSession(tmp_path / "readonly-retry")
+    session.config = session.config.model_copy(update={"broker": "QMT_READ_ONLY"})
+
+    class Client:
+        def invoke(self, action: str) -> dict[str, object]:
+            return {"action": "BLOCKED", "blocked": True, "reason": reason}
+
+    cast(Any, session).client = lambda _: Client()
+    with pytest.raises(RuntimeError, match=expected) as failure:
+        session._supervisor_ready()
+    message = desktop_main.failure_message(failure.value)
+    if expected == "QMT_READ_ONLY_START_FAILED":
+        assert "MiniQMT" in message and "重新打开" in message and "无需解锁" in message
+    else:
+        assert "已锁定" in message
 
 
 def test_configured_desktop_runs_plan_pull_once_per_minute(tmp_path: Path) -> None:

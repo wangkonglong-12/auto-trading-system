@@ -8,7 +8,7 @@ authorization; later position-lot/adjustment workflows must resolve them explici
 
 from __future__ import annotations
 
-from dataclasses import dataclass
+from dataclasses import dataclass, replace
 from datetime import date, datetime
 from decimal import ROUND_HALF_UP, Decimal
 from itertools import pairwise
@@ -17,6 +17,7 @@ from typing import Literal
 from pydantic import AwareDatetime, Field, JsonValue, model_validator
 
 from auto_trading_system.domain import Money, Price
+from auto_trading_system.domain.trading_time import SHANGHAI_TIMEZONE
 from auto_trading_system.gateways.broker.models import BrokerOrder, BrokerOrderStatus, BrokerTrade
 from auto_trading_system.gateways.broker.query_validation import (
     validate_order_query_result,
@@ -94,6 +95,48 @@ class BrokerRecoverySnapshot:
     account: AccountFact
     event_version: int
     stable: bool
+    display_names: tuple[tuple[str, str], ...] = ()
+
+
+def strategy_recovery_snapshot(
+    snapshot: BrokerRecoverySnapshot,
+    known_ids: frozenset[str],
+) -> BrokerRecoverySnapshot:
+    """Exclude only positively external, zero-fill rejected/cancelled orders.
+
+    A system remark without a Journal record remains unresolved. Any external
+    trade, active order or conflicting response also remains in the proof.
+    """
+    validate_order_query_result(snapshot.orders)
+    validate_trade_query_result(snapshot.trades)
+    if set(snapshot.account.observed_order_ids) != {o.client_order_id for o in snapshot.orders}:
+        return snapshot  # Never conceal an inconsistent full query window.
+    traded = {trade.client_order_id for trade in snapshot.trades}
+    ignored = {
+        order.client_order_id
+        for order in snapshot.orders
+        if order.client_order_id.startswith("ord_external_")
+        and order.client_order_id not in known_ids
+        and order.client_order_id not in traded
+        and order.status in {BrokerOrderStatus.REJECTED, BrokerOrderStatus.CANCELLED}
+        and order.filled_quantity.is_zero
+        and order.updated_at.value.astimezone(SHANGHAI_TIMEZONE).date()
+        == snapshot.account.observed_at.astimezone(SHANGHAI_TIMEZONE).date()
+        and order.updated_at.value <= snapshot.account.observed_at
+    }
+    if not ignored:
+        return snapshot
+    return replace(
+        snapshot,
+        orders=tuple(o for o in snapshot.orders if o.client_order_id not in ignored),
+        account=snapshot.account.model_copy(
+            update={
+                "observed_order_ids": tuple(
+                    key for key in snapshot.account.observed_order_ids if key not in ignored
+                )
+            }
+        ),
+    )
 
 
 class RecoveryReport(WireModel):
@@ -128,10 +171,16 @@ def reconcile(
     report_id: str,
     opening: tuple[PositionLot, ...] = (),
     opening_hash: str | None = None,
+    allow_unmanaged: bool = False,
 ) -> RecoveryReport:
     """No mutation and no assumption that SDK acceptance means an order is final."""
     issues: set[str] = set()
     unresolved: set[str] = set()
+    full_snapshot = snapshot
+    if allow_unmanaged:
+        snapshot = strategy_recovery_snapshot(
+            snapshot, frozenset(record.submission.client_order_id for record in records)
+        )
     if len(records) > 2048 or len(snapshot.orders) > 2048 or len(snapshot.trades) > 10000:
         raise ValueError("recovery input budget exceeded")
     # The pure reconciler is also a public boundary: never silently collapse
@@ -232,7 +281,16 @@ def reconcile(
         issues.add("UNOWNED_BROKER_ORDER")
         unresolved.add(key)
     actual_positions = {p.symbol: p.quantity for p in account.positions if p.quantity}
-    if {key: value for key, value in positions.items() if value} != actual_positions:
+    expected_positions = {key: value for key, value in positions.items() if value}
+    mismatch = (
+        any(
+            quantity < 0 or actual_positions.get(symbol, 0) < quantity
+            for symbol, quantity in expected_positions.items()
+        )
+        if allow_unmanaged
+        else expected_positions != actual_positions
+    )
+    if mismatch:
         issues.add("POSITION_OWNERSHIP_UNRESOLVED")
     # Reserve the full maximum of each attempted NEW BUY, even if cancelled.
     # This conservative ceiling survives restarts without inventing fee refunds.
@@ -244,7 +302,7 @@ def reconcile(
         ),
         Decimal(0),
     )
-    evidence = recovery_evidence(records, snapshot, opening_hash=opening_hash)
+    evidence = recovery_evidence(records, full_snapshot, opening_hash=opening_hash)
     return RecoveryReport(
         report_id=report_id,
         account_id=account_id,

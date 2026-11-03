@@ -35,10 +35,12 @@ MAX_FILE_BYTES = 512 * 1024 * 1024
 MAX_TOTAL_BYTES = 4 * 1024 * 1024 * 1024
 MAX_MANIFEST_BYTES = 4 * 1024 * 1024
 _ALLOWED = re.compile(
-    r"(?:critical/(?:journal-v2\.db|supervision-state\.json|paper-broker\.json|plan-recovery\.json)"
+    r"(?:critical/(?:journal-v2\.db|supervision-state\.json|paper-broker\.json|plan-recovery\.json"
+    r"|daily-risk-baseline\.json|opening-reference\.json|tail-phase-plans\.json"
+    r"|tail-feed-state\.json|tail-feed-phase-plans\.json|tail-feed-local-key\.bin)"
     r"|artifacts/[a-f0-9]{64}\.json"
     r"|daily-catalog/\d{4}-\d{2}-\d{2}(?:\.r\d{4})?\.json"
-    r"|jobs/(?:[a-f0-9]{64}|\.agent-scope|\.retry-(?:all|pending|synced)-cursor)\.json)"
+    r"|jobs/(?:[a-f0-9]{64}|\.agent-scope|\.execution-reporting|\.retry-(?:all|pending|synced)-cursor)\.json)"
 )
 
 

@@ -36,6 +36,17 @@ from auto_trading_system.runtime.node_layout import create_private_directory, in
 from .session import preview_config
 
 _MAX_BODY: Final = 16_384
+_SETTINGS_ISSUE_MESSAGES: Final = {
+    "QMT_SDK_TEMPORARY": "上次连接使用了项目临时目录中的 XtQuant SDK；临时文件可能已被清理，请改用长期保留的 SDK 目录重新连接。",
+    "QMT_SDK_MISSING": "上次保存的 XtQuant SDK 目录已失效，请重新选择包含 xtquant\\xttrader.py 的目录。",
+    "QMT_CONFIG_MISSING": "上次保存的 QMT 连接配置已不存在，请重新连接本机 QMT。",
+    "QMT_CONFIG_INVALID": "上次保存的 QMT 连接配置无法读取，请重新连接本机 QMT。",
+    "QMT_SETTINGS_INVALID": "上次保存的 QMT 连接记录已损坏，请重新连接本机 QMT。",
+}
+
+
+def _is_transient_sdk_root(path: Path) -> bool:
+    return any(part.casefold() == ".codex_tmp" for part in path.parts)
 
 
 @dataclass(frozen=True, slots=True)
@@ -52,6 +63,8 @@ class LauncherSettings:
                 raise ValueError(f"{label}必须使用完整路径")
         if not self.config_path.is_file():
             raise ValueError("没有找到 QMT 实盘节点配置文件")
+        if _is_transient_sdk_root(self.sdk_root):
+            raise ValueError("XtQuant SDK不能使用项目临时目录，请选择长期保留的目录")
         if not (self.sdk_root / "xtquant" / "xttrader.py").is_file():
             raise ValueError("所选目录中没有找到 xtquant/xttrader.py")
         try:
@@ -73,20 +86,13 @@ def detect_sdk_root() -> Path | None:
     """Find a prepared XtQuant SDK without scanning the whole computer."""
     configured = os.environ.get("ATS_QMT_SDK_ROOT")
     candidates: list[Path] = [Path(configured)] if configured else []
+    local_data = os.environ.get("LOCALAPPDATA")
+    if local_data:
+        candidates.append(Path(local_data) / "AutoTradingSystem" / "components" / "xtquant-240613")
     executable = Path(sys.executable).resolve().parent
     source_root = Path(__file__).resolve().parents[4]
     for root in (executable, executable.parent, source_root):
         candidates.extend((root / "sdk", root / "xtquant-sdk"))
-    prepared = source_root / ".codex_tmp"
-    if prepared.is_dir():
-        candidates.extend(
-            path / "sdk"
-            for path in sorted(
-                prepared.glob("qmt-readonly-verified-*"),
-                key=lambda item: item.name,
-                reverse=True,
-            )
-        )
     seen: set[Path] = set()
     for candidate in candidates:
         try:
@@ -94,7 +100,11 @@ def detect_sdk_root() -> Path | None:
             if absolute in seen:
                 continue
             seen.add(absolute)
-            if absolute.resolve() == absolute and (absolute / "xtquant" / "xttrader.py").is_file():
+            if (
+                not _is_transient_sdk_root(absolute)
+                and absolute.resolve() == absolute
+                and (absolute / "xtquant" / "xttrader.py").is_file()
+            ):
                 return absolute
         except OSError:
             continue
@@ -133,6 +143,8 @@ def provision_qmt_read_only(
     """Discover the real QMT stock account and create a safe local connection profile."""
     if not sdk_root.is_absolute() or sdk_root.resolve() != sdk_root.absolute():
         raise ValueError("XtQuant SDK目录必须使用完整路径")
+    if _is_transient_sdk_root(sdk_root):
+        raise ValueError("XtQuant SDK不能使用项目临时目录，请选择长期保留的目录")
     if not (sdk_root / "xtquant" / "xttrader.py").is_file():
         raise ValueError("没有找到可用的XtQuant SDK")
     if (
@@ -201,7 +213,7 @@ def provision_qmt_read_only(
         broker="QMT_READ_ONLY",
         node_id="qmt-connected-" + identity,
         account_id="qmt-" + account_fingerprint,
-        strategy_id="tail-entry",
+        strategy_id="TAIL_CLOSE",
         data_root=str(profile_root / "node-data"),
         qmt_read_only={
             "userdata_mini": str(userdata_mini),
@@ -222,17 +234,40 @@ def provision_qmt_read_only(
 
 
 def read_launcher_settings(path: Path) -> LauncherSettings | None:
+    return inspect_launcher_settings(path)[0]
+
+
+def inspect_launcher_settings(path: Path) -> tuple[LauncherSettings | None, str | None]:
+    """Read saved settings and retain a fixed, path-free reason when they are unusable."""
     if not path.is_file():
-        return None
+        return None, None
     try:
         raw = json.loads(path.read_text(encoding="utf-8"))
         if type(raw) is not dict or raw.get("schema") != 1:
-            return None
+            return None, "QMT_SETTINGS_INVALID"
         settings = LauncherSettings(Path(raw["config_path"]), Path(raw["sdk_root"]))
-        settings.validate()
-        return settings
     except (KeyError, OSError, TypeError, ValueError, json.JSONDecodeError):
-        return None
+        return None, "QMT_SETTINGS_INVALID"
+    try:
+        for value in (settings.config_path, settings.sdk_root):
+            if not value.is_absolute() or value.resolve() != value.absolute():
+                return None, "QMT_SETTINGS_INVALID"
+        if not settings.config_path.is_file():
+            return None, "QMT_CONFIG_MISSING"
+        if _is_transient_sdk_root(settings.sdk_root):
+            return None, "QMT_SDK_TEMPORARY"
+        if not (settings.sdk_root / "xtquant" / "xttrader.py").is_file():
+            return None, "QMT_SDK_MISSING"
+        config = load_node_config(settings.config_path)
+        if config.broker not in {"QMT_READ_ONLY", "QMT_TRADING"}:
+            return None, "QMT_CONFIG_INVALID"
+    except (OSError, TypeError, ValueError):
+        return None, "QMT_CONFIG_INVALID"
+    return settings, None
+
+
+def launcher_settings_issue_message(issue: str | None) -> str:
+    return _SETTINGS_ISSUE_MESSAGES.get(issue or "", "")
 
 
 def write_launcher_settings(path: Path, settings: LauncherSettings) -> None:
@@ -305,9 +340,10 @@ small{{display:block;color:#6c7b90;margin-top:6px}}button{{margin-top:26px;backg
 <label for="userdata">MiniQMT 数据目录</label>
 <input id="userdata" name="userdata_mini" value="{html.escape(userdata_mini, quote=True)}" placeholder="系统未识别时再选择 userdata_mini 目录" required>
 <small>一般已经自动识别。目录名称必须是 userdata_mini。</small>
+<details{"" if sdk_root else " open"}><summary>{"连接组件已自动识别，无需填写 - 高级" if sdk_root else "连接组件未找到 - 高级修复"}</summary>
 <label for="sdk">XtQuant SDK 目录</label>
 <input id="sdk" name="sdk_root" value="{html.escape(sdk_root, quote=True)}" placeholder="目录下应包含 xtquant\\xttrader.py" required>
-<small>系统已经尽量自动识别；这是 SDK 所在目录。</small>
+<small>系统自动填写连接组件的位置，正常使用不需要修改。</small></details>
 <button type="submit">连接并读取 QMT 账户</button></form>
 <details><summary>已有正式节点配置 - 高级</summary>
 <p>只有量化后台已经生成正式 QMT_TRADING 配置时才使用这里。普通使用不需要填写。</p>
@@ -374,13 +410,14 @@ class LauncherSetupServer:
                 if not self._trusted() or self.path != "/":
                     self._send(HTTPStatus.NOT_FOUND, b"")
                     return
-                saved = read_launcher_settings(owner.settings_path)
+                saved, saved_issue = inspect_launcher_settings(owner.settings_path)
                 self._send(
                     HTTPStatus.OK,
                     _page(
                         config_path=str(saved.config_path) if saved else "",
                         sdk_root=str(saved.sdk_root) if saved else str(owner.sdk_root_hint or ""),
                         userdata_mini=str(owner.userdata_mini_hint or ""),
+                        message=launcher_settings_issue_message(saved_issue),
                     ),
                 )
 

@@ -12,6 +12,7 @@ from concurrent.futures import Future, ThreadPoolExecutor
 from datetime import datetime, time
 from threading import Event, Lock
 from time import monotonic, sleep
+from typing import cast
 from uuid import uuid4
 
 from pydantic import JsonValue
@@ -24,12 +25,15 @@ from auto_trading_system.protocol.v2.canonical import canonical_bytes
 from auto_trading_system.runtime.engine_v2 import CN
 from auto_trading_system.runtime.node_layout import validate_layout
 from auto_trading_system.runtime.single_instance import WindowsNamedMutexBackend
+from auto_trading_system.sync.account_upload import AccountUploader
 from auto_trading_system.sync.agent_jobs import AgentJobs, QuantAgentTransport
 from auto_trading_system.sync.artifact_files import ArtifactFiles
 from auto_trading_system.sync.daily_catalog import DailyCatalog, closing_slot
 from auto_trading_system.sync.daily_upload import RetryableSyncError
+from auto_trading_system.sync.execution_upload import ExecutionUploader
 from auto_trading_system.sync.http_v2 import HttpQuantTransport, NodeCredentials, SignedHttpClient
 from auto_trading_system.sync.job_store import JobStore
+from auto_trading_system.sync.tail_feed import TailFeedPuller
 
 JOB_KINDS = frozenset({"pull-plan", "daily-export", "retry", "catch-up"})
 
@@ -61,6 +65,11 @@ class AgentWorker:
     ) -> None:
         self.config, self.engine, self.clock, self.remote = config, engine, clock, remote
         self.stop = stop or Event()
+        self.tail_feed = TailFeedPuller(config, engine, clock) if config.tail_picks else None
+        self.execution_upload = (
+            ExecutionUploader(config, engine) if config.execution_reporting else None
+        )
+        self.account_upload = AccountUploader(config, engine) if config.account_reporting else None
 
     def _refresh_closing(self, catalog: DailyCatalog, now: datetime) -> None:
         prior = catalog.get(now.date())
@@ -89,8 +98,16 @@ class AgentWorker:
         raise IPCError("CLOSING_RECOVERY_PENDING")
 
     def run(self, kind: str) -> dict[str, JsonValue]:
+        if kind == "pull-tail-picks" and self.tail_feed is not None:
+            return cast(dict[str, JsonValue], self.tail_feed.run())
         if kind not in JOB_KINDS:
             raise IPCError("INVALID_JOB")
+        if kind == "pull-plan" and self.config.tail_picks is not None:
+            return {"status": "SKIPPED", "reason": "SIMPLE_TAIL_FEED_ENABLED"}
+        if self.config.tail_picks is not None:
+            # V1 is a read-only selection API. Keep journal facts locally;
+            # the old account-bound daily upload protocol is not part of this mode.
+            return {"status": "SKIPPED", "reason": "SIMPLE_FEED_LOCAL_HISTORY_ONLY"}
         config, now = self.config, self.clock().astimezone(CN)
         if kind in ("pull-plan", "daily-export") and now.date() not in config.calendar.sessions:
             return {"status": "SKIPPED", "reason": "NON_TRADING_DAY"}
@@ -201,6 +218,64 @@ class AgentEndpoint:
         self._active: Future[dict[str, JsonValue]] | None = None
         self._last: dict[str, JsonValue] = {"status": "IDLE"}
         self._id: str | None = None
+        self._report_pool = ThreadPoolExecutor(
+            max_workers=1, thread_name_prefix="node-execution-upload"
+        )
+        self._report_active: Future[dict[str, JsonValue]] | None = None
+        self._report_last: dict[str, JsonValue] = {"status": "DISABLED"}
+        self._account_pool = ThreadPoolExecutor(max_workers=1, thread_name_prefix="account-upload")
+        self._account_active: Future[dict[str, JsonValue]] | None = None
+        self._account_last: dict[str, JsonValue] = {"status": "DISABLED"}
+
+    def pump_account_reports(self) -> None:
+        with self._lock:
+            if self._account_active is not None and self._account_active.done():
+                try:
+                    self._account_last = self._account_active.result()
+                except Exception:
+                    self._account_last = {"status": "PENDING"}
+                self._account_active = None
+            upload = self.worker.account_upload
+            if (self._account_active is None and not self.stop.is_set()
+                    and upload is not None and upload.due()):
+                self._account_active = self._account_pool.submit(upload.run)
+
+    def pump_execution_reports(self) -> None:
+        with self._lock:
+            if self._report_active is not None and self._report_active.done():
+                try:
+                    self._report_last = self._report_active.result()
+                except Exception:
+                    self._report_last = {
+                        "status": "PENDING",
+                        "reason": "ENGINE_OR_UPLOAD_UNAVAILABLE",
+                    }
+                self._report_active = None
+            upload = self.worker.execution_upload
+            if (
+                self._report_active is None
+                and not self.stop.is_set()
+                and upload is not None
+                and upload.due()
+            ):
+                self._report_active = self._report_pool.submit(upload.run)
+
+    def pump_tail_feed(self) -> None:
+        with self._lock:
+            if self._active is not None and self._active.done():
+                try:
+                    self._last = self._active.result()
+                except Exception:
+                    self._last = {"status": "PENDING", "reason": "JOB_FAILED_RETRY_REQUIRED"}
+                self._active = None
+            if (
+                self._active is None
+                and not self.stop.is_set()
+                and self.worker.tail_feed is not None
+                and self.worker.tail_feed.due()
+            ):
+                self._id = "tail-feed-" + uuid4().hex
+                self._active = self._pool.submit(self.worker.run, "pull-tail-picks")
 
     def handle(self, request: Request) -> dict[str, JsonValue]:
         with self._lock:
@@ -233,6 +308,8 @@ class AgentEndpoint:
                     "invocation_id": self._id,
                     "status": "RUNNING" if self._active is not None else "IDLE",
                     "last_result": self._last,
+                    "execution_reporting": self._report_last,
+                    "account_reporting": self._account_last,
                 }
             if request.action == "STOP":
                 self.stop.set()
@@ -244,6 +321,8 @@ class AgentEndpoint:
         # its worker until actual completion, never released on a UI timeout.
         self.stop.set()
         self._pool.shutdown(wait=True, cancel_futures=True)
+        self._report_pool.shutdown(wait=True, cancel_futures=True)
+        self._account_pool.shutdown(wait=True, cancel_futures=True)
 
     def catch_up_on_start(self) -> None:
         with self._lock:
@@ -291,6 +370,9 @@ def run_agent(
         endpoint.catch_up_on_start()
         ready({"component": "agent", "boot_id": boot, "real_trading_enabled": False})
         while not stopped.wait(0.1):
+            endpoint.pump_tail_feed()
+            endpoint.pump_execution_reports()
+            endpoint.pump_account_reports()
             if not server.healthy:
                 raise IPCError("PIPE_WORKER_FAILED")
     finally:

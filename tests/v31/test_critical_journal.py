@@ -187,3 +187,74 @@ def test_expired_mailbox_work_does_not_write(tmp_path: Path, submission: Submiss
         assert owner.recovery_page().result(timeout=1) == ()
     finally:
         assert owner.close()
+
+
+@pytest.mark.parametrize("poll_while_blocked", [True, False])
+def test_inflight_timeout_latches_health_and_rejects_queued_work(
+    tmp_path: Path,
+    submission: Submission,
+    monkeypatch: pytest.MonkeyPatch,
+    poll_while_blocked: bool,
+) -> None:
+    entered, release = Event(), Event()
+    clock = [100.0]
+    monkeypatch.setattr("auto_trading_system.journal.critical_writer.monotonic", lambda: clock[0])
+    path = tmp_path / "timeout.db"
+
+    class SlowStore(APSWCriticalStore):
+        def commit_submission(self, item: Submission) -> CommitEvidence:
+            entered.set()
+            assert release.wait(3)
+            return super().commit_submission(item)
+
+    owner = CriticalJournalOwner(lambda: SlowStore(path, submission.account_id))
+    owner.start()
+    try:
+        running = owner.commit(submission, deadline=101)
+        assert entered.wait(1)
+        queued = owner.request(
+            lambda store: store.append_evidence("broker_facts", "must-not-write", b"{}"),
+            deadline=110,
+        )
+        assert owner.healthy
+        clock[0] = 102
+        if poll_while_blocked:
+            assert not owner.healthy
+        release.set()
+        assert running.result(timeout=2).fresh  # Late commit remains evidence.
+        with pytest.raises(CriticalStoreError, match="UNAVAILABLE"):
+            queued.result(timeout=2)
+        assert not owner.healthy
+        with pytest.raises(CriticalStoreError, match="UNAVAILABLE"):
+            owner.commit(submission, deadline=110).result(timeout=1)
+    finally:
+        release.set()
+        assert owner.close()
+    recovered = APSWCriticalStore(path, submission.account_id)
+    recovered.open()
+    try:
+        assert len(recovered.read_submissions()) == 1
+        assert recovered.read_evidence("broker_facts", "must-not-write") is None
+    finally:
+        recovered.close()
+
+
+def test_startup_timeout_cannot_later_become_healthy(
+    tmp_path: Path, submission: Submission
+) -> None:
+    release = Event()
+
+    class SlowOpenStore(APSWCriticalStore):
+        def open(self) -> None:
+            super().open()
+            assert release.wait(3)
+
+    owner = CriticalJournalOwner(lambda: SlowOpenStore(tmp_path / "slow.db", submission.account_id))
+    try:
+        with pytest.raises(TimeoutError):
+            owner.start(timeout=0.01)
+        assert not owner.healthy
+    finally:
+        release.set()
+        assert owner.close()
+    assert not owner.healthy

@@ -4,5 +4,7 @@
   "singleQuote": false,
   "trailingComma": "all",
   "vueIndentScriptAndStyle": false,
-  "overrides": [{ "files": "src/node/*.vue", "options": { "htmlWhitespaceSensitivity": "ignore" } }]
+  "overrides": [
+    { "files": "src/node/**/*.vue", "options": { "htmlWhitespaceSensitivity": "ignore" } }
+  ]
 }

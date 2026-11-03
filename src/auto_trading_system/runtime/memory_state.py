@@ -115,7 +115,20 @@ class ReservationBook:
             raise ValueError("reservation already exists")
         if len(self._reservations) >= self._capacity:
             raise ValueError("reservation capacity exhausted")
-        if any(item.symbol == submission.symbol for item in self._reservations.values()):
+        same_symbol = [
+            item for item in self._reservations.values() if item.symbol == submission.symbol
+        ]
+        manual_sale = submission.manual_sell_binding
+        if same_symbol and not (
+            submission.side == "SELL"
+            and manual_sale is not None
+            and all(
+                item.side == "SELL"
+                and item.manual_sell_binding is not None
+                and item.manual_sell_binding.operation_id == manual_sale.operation_id
+                for item in same_symbol
+            )
+        ):
             raise ValueError("symbol has an active or uncertain order")
         if not observation.coherent:
             raise ValueError("account observation is not coherent")
@@ -126,7 +139,12 @@ class ReservationBook:
             # Broker sellable already accounts for reflected freezes. Unreflected
             # reservations are deducted separately; a D0 lot also needs the policy gate.
             sellable = dict(observation.sellable).get(submission.symbol)
-            if sellable is None or sellable < submission.quantity:
+            unreflected = sum(
+                item.quantity
+                for item in same_symbol
+                if item.client_order_id not in observation.observed_order_ids
+            )
+            if sellable is None or sellable - unreflected < submission.quantity:
                 raise ValueError("insufficient confirmed sellable quantity")
         self._reservations[submission.client_order_id] = submission
 

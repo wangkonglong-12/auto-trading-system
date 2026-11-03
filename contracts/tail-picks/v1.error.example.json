@@ -1,0 +1,8 @@
+{
+  "schema_version": 1,
+  "error": {
+    "code": "SERVICE_UNAVAILABLE",
+    "message": "选股结果暂时无法读取，请稍后重试。",
+    "retryable": true
+  }
+}

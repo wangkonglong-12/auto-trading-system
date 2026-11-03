@@ -1,0 +1,296 @@
+{
+  "$comment": "Generated from protocol/executions; semantic validators and projection constraints also apply.",
+  "$defs": {
+    "Identity": {
+      "additionalProperties": false,
+      "properties": {
+        "account_id": {
+          "pattern": "^[A-Za-z0-9_.:-]{1,96}$",
+          "title": "Account Id",
+          "type": "string"
+        },
+        "environment": {
+          "enum": [
+            "REAL",
+            "TEST"
+          ],
+          "title": "Environment",
+          "type": "string"
+        },
+        "selection_date": {
+          "format": "date",
+          "title": "Selection Date",
+          "type": "string"
+        },
+        "strategy_id": {
+          "pattern": "^[A-Za-z0-9_.:-]{1,96}$",
+          "title": "Strategy Id",
+          "type": "string"
+        },
+        "symbol": {
+          "pattern": "^[0-9]{6}\\.(SH|SZ)$",
+          "title": "Symbol",
+          "type": "string"
+        }
+      },
+      "required": [
+        "account_id",
+        "strategy_id",
+        "selection_date",
+        "symbol",
+        "environment"
+      ],
+      "title": "Identity",
+      "type": "object"
+    }
+  },
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "additionalProperties": false,
+  "properties": {
+    "available_quantity": {
+      "anyOf": [
+        {
+          "type": "integer"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Available Quantity"
+    },
+    "bought_quantity": {
+      "title": "Bought Quantity",
+      "type": "integer"
+    },
+    "buy_amount": {
+      "pattern": "^(0|[1-9][0-9]{0,11})\\.[0-9]{2}$",
+      "title": "Buy Amount",
+      "type": "string"
+    },
+    "buy_average_price": {
+      "anyOf": [
+        {
+          "pattern": "^(0|[1-9][0-9]{0,9})(\\.[0-9]{1,8})?$",
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "title": "Buy Average Price"
+    },
+    "buy_status": {
+      "title": "Buy Status",
+      "type": "string"
+    },
+    "created_at": {
+      "anyOf": [
+        {
+          "format": "date-time",
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "title": "Created At"
+    },
+    "execution_id": {
+      "title": "Execution Id",
+      "type": "string"
+    },
+    "first_buy_at": {
+      "anyOf": [
+        {
+          "format": "date-time",
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "title": "First Buy At"
+    },
+    "identity": {
+      "$ref": "#/$defs/Identity"
+    },
+    "last_buy_at": {
+      "anyOf": [
+        {
+          "format": "date-time",
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "title": "Last Buy At"
+    },
+    "last_sell_at": {
+      "anyOf": [
+        {
+          "format": "date-time",
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "title": "Last Sell At"
+    },
+    "name": {
+      "anyOf": [
+        {
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "title": "Name"
+    },
+    "phase": {
+      "anyOf": [
+        {
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "title": "Phase"
+    },
+    "reason_code": {
+      "anyOf": [
+        {
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "title": "Reason Code"
+    },
+    "remaining_quantity": {
+      "title": "Remaining Quantity",
+      "type": "integer"
+    },
+    "sell_amount": {
+      "pattern": "^(0|[1-9][0-9]{0,11})\\.[0-9]{2}$",
+      "title": "Sell Amount",
+      "type": "string"
+    },
+    "sell_average_price": {
+      "anyOf": [
+        {
+          "pattern": "^(0|[1-9][0-9]{0,9})(\\.[0-9]{1,8})?$",
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "title": "Sell Average Price"
+    },
+    "sell_status": {
+      "title": "Sell Status",
+      "type": "string"
+    },
+    "sold_quantity": {
+      "title": "Sold Quantity",
+      "type": "integer"
+    },
+    "source_run_id": {
+      "anyOf": [
+        {
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "title": "Source Run Id"
+    },
+    "stage": {
+      "enum": [
+        "WAITING",
+        "BUYING",
+        "NOT_BOUGHT",
+        "HOLDING",
+        "SELLING",
+        "CLOSED",
+        "REVIEW"
+      ],
+      "title": "Stage",
+      "type": "string"
+    },
+    "target_amount": {
+      "anyOf": [
+        {
+          "pattern": "^(0|[1-9][0-9]{0,11})\\.[0-9]{2}$",
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "title": "Target Amount"
+    },
+    "target_quantity": {
+      "anyOf": [
+        {
+          "type": "integer"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "title": "Target Quantity"
+    },
+    "updated_at": {
+      "anyOf": [
+        {
+          "format": "date-time",
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "title": "Updated At"
+    },
+    "version": {
+      "title": "Version",
+      "type": "integer"
+    }
+  },
+  "required": [
+    "execution_id",
+    "identity",
+    "name",
+    "phase",
+    "source_run_id",
+    "target_amount",
+    "target_quantity",
+    "buy_status",
+    "sell_status",
+    "stage",
+    "bought_quantity",
+    "buy_amount",
+    "buy_average_price",
+    "sold_quantity",
+    "sell_amount",
+    "sell_average_price",
+    "remaining_quantity",
+    "first_buy_at",
+    "last_buy_at",
+    "last_sell_at",
+    "reason_code",
+    "version",
+    "created_at",
+    "updated_at"
+  ],
+  "title": "Summary",
+  "type": "object"
+}

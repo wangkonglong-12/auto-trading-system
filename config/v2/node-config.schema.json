@@ -1,9 +1,62 @@
 {
   "$defs": {
+    "BoardSellRule": {
+      "additionalProperties": false,
+      "properties": {
+        "mode": {
+          "enum": [
+            "TIME_ONLY",
+            "TAKE_PROFIT_OR_TIME"
+          ],
+          "title": "Mode",
+          "type": "string"
+        },
+        "sell_at": {
+          "pattern": "^(09|10|11|13|14):[0-5][0-9]$",
+          "title": "Sell At",
+          "type": "string"
+        },
+        "take_profit_pct": {
+          "anyOf": [
+            {
+              "pattern": "^(0|[1-9][0-9]{0,2})(\\.[0-9]{1,2})?$",
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Take Profit Pct"
+        }
+      },
+      "required": [
+        "mode",
+        "sell_at"
+      ],
+      "title": "BoardSellRule",
+      "type": "object"
+    },
     "EngineLimits": {
       "additionalProperties": false,
       "description": "Installed local ceiling, not a permission supplied by a remote plan.",
       "properties": {
+        "allowed_boards": {
+          "default": [
+            "MAIN"
+          ],
+          "items": {
+            "enum": [
+              "MAIN",
+              "CHINEXT",
+              "STAR"
+            ],
+            "type": "string"
+          },
+          "maxItems": 3,
+          "title": "Allowed Boards",
+          "type": "array"
+        },
         "max_buy_value": {
           "description": "人民币元，最多2位小数",
           "pattern": "^(0|[1-9][0-9]{0,11})(\\.[0-9]{1,2})?$",
@@ -16,6 +69,20 @@
           "pattern": "^(0|[1-9][0-9]{0,11})(\\.[0-9]{1,2})?$",
           "title": "Max Daily Loss",
           "type": "string"
+        },
+        "max_daily_symbols": {
+          "anyOf": [
+            {
+              "maximum": 15,
+              "minimum": 1,
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Max Daily Symbols"
         },
         "max_order_quantity": {
           "maximum": 2147483647,
@@ -34,6 +101,34 @@
           "minimum": 0,
           "title": "Max Positions",
           "type": "integer"
+        },
+        "max_symbol_buy_value": {
+          "anyOf": [
+            {
+              "description": "人民币元，最多2位小数",
+              "pattern": "^(0|[1-9][0-9]{0,11})(\\.[0-9]{1,2})?$",
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Max Symbol Buy Value"
+        },
+        "max_total_position_pct": {
+          "anyOf": [
+            {
+              "description": "人民币元，最多2位小数",
+              "pattern": "^(0|[1-9][0-9]{0,11})(\\.[0-9]{1,2})?$",
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Max Total Position Pct"
         },
         "mode": {
           "default": "PAPER",
@@ -285,6 +380,40 @@
       "title": "ExchangeCalendar",
       "type": "object"
     },
+    "ExecutionReportingSettings": {
+      "additionalProperties": false,
+      "properties": {
+        "token": {
+          "anyOf": [
+            {
+              "discriminator": {
+                "mapping": {
+                  "ENVIRONMENT": "#/$defs/EnvironmentSecretReference",
+                  "WINDOWS_CREDENTIAL_MANAGER": "#/$defs/WindowsCredentialReference"
+                },
+                "propertyName": "source"
+              },
+              "oneOf": [
+                {
+                  "$ref": "#/$defs/EnvironmentSecretReference"
+                },
+                {
+                  "$ref": "#/$defs/WindowsCredentialReference"
+                }
+              ]
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "旧版上传令牌引用；新版使用系统设置中的统一接口令牌",
+          "title": "Token"
+        }
+      },
+      "title": "ExecutionReportingSettings",
+      "type": "object"
+    },
     "ExitLotContext": {
       "additionalProperties": false,
       "properties": {
@@ -292,6 +421,32 @@
           "description": "规则包是否允许一次清仓卖出零股",
           "title": "Allow Odd Liquidation",
           "type": "boolean"
+        },
+        "board_rule": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/BoardSellRule"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "冻结的板块退出规则"
+        },
+        "configuration_version": {
+          "anyOf": [
+            {
+              "minimum": 1,
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "冻结配置版本",
+          "title": "Configuration Version"
         },
         "cost": {
           "description": "经来源核对的单位持仓成本，元",
@@ -328,6 +483,55 @@
           "pattern": "^(0|[1-9][0-9]{0,9})(\\.[0-9]{1,8})?$",
           "title": "Price Tick",
           "type": "string"
+        },
+        "prior_fired_rules": {
+          "anyOf": [
+            {
+              "items": {
+                "type": "string"
+              },
+              "type": "array"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "跨日继承的已触发规则",
+          "title": "Prior Fired Rules"
+        },
+        "prior_rule_states": {
+          "anyOf": [
+            {
+              "additionalProperties": {
+                "additionalProperties": {
+                  "$ref": "#/$defs/JsonValue"
+                },
+                "type": "object"
+              },
+              "type": "object"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "跨日继承的扩展规则状态",
+          "title": "Prior Rule States"
+        },
+        "prior_target_remaining": {
+          "anyOf": [
+            {
+              "minimum": 0,
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "跨日继承的目标剩余数量",
+          "title": "Prior Target Remaining"
         },
         "sell_step": {
           "description": "正常卖出数量步长，整数股",
@@ -380,6 +584,35 @@
           "title": "Account Id",
           "type": "string"
         },
+        "board": {
+          "anyOf": [
+            {
+              "enum": [
+                "MAIN",
+                "CHINEXT"
+              ],
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "唯一所属板块引擎",
+          "title": "Board"
+        },
+        "board_rule": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/BoardSellRule"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "冻结的板块退出规则"
+        },
         "calendar_hash": {
           "description": "完整交易日日历规范正文摘要",
           "pattern": "^sha256:[a-f0-9]{64}$",
@@ -399,6 +632,20 @@
           "format": "date-time",
           "title": "Cancel By",
           "type": "string"
+        },
+        "configuration_version": {
+          "anyOf": [
+            {
+              "minimum": 1,
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "冻结配置版本",
+          "title": "Configuration Version"
         },
         "context_id": {
           "description": "不可变退出会话编号",
@@ -421,6 +668,21 @@
           "minItems": 1,
           "title": "Lots",
           "type": "array"
+        },
+        "max_children": {
+          "anyOf": [
+            {
+              "maximum": 101,
+              "minimum": 1,
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "每批次当日最多卖出子单数，含首次委托",
+          "title": "Max Children"
         },
         "max_order_quantity": {
           "description": "上下文单笔数量上限，股",
@@ -446,7 +708,9 @@
           "description": "退出规则版本",
           "enum": [
             "T1_EXIT_BASELINE_V3",
-            "COST_EXIT_V1"
+            "COST_EXIT_V1",
+            "BOARD_MAIN_EXIT_V1",
+            "BOARD_CHINEXT_EXIT_V1"
           ],
           "title": "Rule Id",
           "type": "string"
@@ -589,6 +853,7 @@
       "title": "IPCSecrets",
       "type": "object"
     },
+    "JsonValue": {},
     "OpeningReference": {
       "additionalProperties": false,
       "properties": {
@@ -772,6 +1037,62 @@
       "title": "PolicyVersion",
       "type": "object"
     },
+    "QmtOrderRecoveryBinding": {
+      "additionalProperties": false,
+      "properties": {
+        "client_order_id": {
+          "pattern": "^ord_[A-Za-z0-9_-]{8,64}$",
+          "title": "Client Order Id",
+          "type": "string"
+        },
+        "limit_price": {
+          "description": "每股人民币元，最多8位小数",
+          "pattern": "^(0|[1-9][0-9]{0,9})(\\.[0-9]{1,8})?$",
+          "title": "Limit Price",
+          "type": "string"
+        },
+        "order_sysid": {
+          "pattern": "^[A-Za-z0-9._:-]{1,64}$",
+          "title": "Order Sysid",
+          "type": "string"
+        },
+        "quantity": {
+          "exclusiveMinimum": 0,
+          "maximum": 2147483647,
+          "title": "Quantity",
+          "type": "integer"
+        },
+        "side": {
+          "enum": [
+            "BUY",
+            "SELL"
+          ],
+          "title": "Side",
+          "type": "string"
+        },
+        "symbol": {
+          "pattern": "^[0-9]{6}\\.(SH|SZ|BJ)$",
+          "title": "Symbol",
+          "type": "string"
+        },
+        "trade_date": {
+          "format": "date",
+          "title": "Trade Date",
+          "type": "string"
+        }
+      },
+      "required": [
+        "trade_date",
+        "symbol",
+        "order_sysid",
+        "client_order_id",
+        "side",
+        "quantity",
+        "limit_price"
+      ],
+      "title": "QmtOrderRecoveryBinding",
+      "type": "object"
+    },
     "QmtReadOnlySettings": {
       "additionalProperties": false,
       "properties": {
@@ -780,6 +1101,16 @@
           "pattern": "^[a-f0-9]{16}$",
           "title": "Account Fingerprint",
           "type": "string"
+        },
+        "order_recovery_bindings": {
+          "default": [],
+          "description": "操作员明确核对的券商合同编号映射；恢复仍须核对本账户J1和完整成交",
+          "items": {
+            "$ref": "#/$defs/QmtOrderRecoveryBinding"
+          },
+          "maxItems": 32,
+          "title": "Order Recovery Bindings",
+          "type": "array"
         },
         "session_base": {
           "default": 6102301,
@@ -941,6 +1272,40 @@
       "title": "SupervisionPolicy",
       "type": "object"
     },
+    "TailPicksSettings": {
+      "additionalProperties": false,
+      "properties": {
+        "token": {
+          "anyOf": [
+            {
+              "discriminator": {
+                "mapping": {
+                  "ENVIRONMENT": "#/$defs/EnvironmentSecretReference",
+                  "WINDOWS_CREDENTIAL_MANAGER": "#/$defs/WindowsCredentialReference"
+                },
+                "propertyName": "source"
+              },
+              "oneOf": [
+                {
+                  "$ref": "#/$defs/EnvironmentSecretReference"
+                },
+                {
+                  "$ref": "#/$defs/WindowsCredentialReference"
+                }
+              ]
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "旧版只读令牌引用；新版使用系统设置中的统一接口令牌",
+          "title": "Token"
+        }
+      },
+      "title": "TailPicksSettings",
+      "type": "object"
+    },
     "WindowsCredentialReference": {
       "additionalProperties": false,
       "description": "Reference to a generic credential stored by the installation process.",
@@ -973,6 +1338,48 @@
       ],
       "title": "WindowsCredentialReference",
       "type": "object"
+    },
+    "AccountReportingSettings": {
+      "additionalProperties": false,
+      "properties": {
+        "token": {
+          "description": "绑定本节点及账户的独立监控上传凭据引用",
+          "discriminator": {
+            "mapping": {
+              "ENVIRONMENT": "#/$defs/EnvironmentSecretReference",
+              "WINDOWS_CREDENTIAL_MANAGER": "#/$defs/WindowsCredentialReference"
+            },
+            "propertyName": "source"
+          },
+          "oneOf": [
+            {
+              "$ref": "#/$defs/EnvironmentSecretReference"
+            },
+            {
+              "$ref": "#/$defs/WindowsCredentialReference"
+            }
+          ],
+          "title": "Token"
+        },
+        "origin": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "独立账户监控HTTPS地址；缺省复用quant_origin",
+          "title": "Origin"
+        }
+      },
+      "required": [
+        "token"
+      ],
+      "title": "AccountReportingSettings",
+      "type": "object"
     }
   },
   "additionalProperties": false,
@@ -1002,6 +1409,18 @@
       "format": "path",
       "title": "Data Root",
       "type": "string"
+    },
+    "execution_reporting": {
+      "anyOf": [
+        {
+          "$ref": "#/$defs/ExecutionReportingSettings"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "description": "显式启用主交易及事件上报，默认不联网上传交易记录"
     },
     "ipc_secrets": {
       "$ref": "#/$defs/IPCSecrets"
@@ -1098,7 +1517,7 @@
       "type": "string"
     },
     "quant_origin": {
-      "description": "量化系统HTTPS源地址",
+      "description": "量化系统HTTP或HTTPS源地址",
       "title": "Quant Origin",
       "type": "string"
     },
@@ -1150,6 +1569,18 @@
       "$ref": "#/$defs/SupervisionPolicy",
       "description": "独立进程监护；与策略参数和交易授权分离"
     },
+    "tail_picks": {
+      "anyOf": [
+        {
+          "$ref": "#/$defs/TailPicksSettings"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "description": "显式启用尾盘优名单单接口；默认保留原签名计划链路"
+    },
     "trusted_plan_keys": {
       "description": "可信Ed25519公钥hex",
       "maxProperties": 8,
@@ -1161,6 +1592,18 @@
       },
       "title": "Trusted Plan Keys",
       "type": "object"
+    },
+    "account_reporting": {
+      "anyOf": [
+        {
+          "$ref": "#/$defs/AccountReportingSettings"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "description": "账户监控回传；配置后随程序启动，每60秒自动上传并跨重启续传"
     }
   },
   "required": [

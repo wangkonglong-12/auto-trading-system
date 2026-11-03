@@ -35,9 +35,12 @@ _FIELDS = {
             "state_version",
             "trade_date",
             "recovery",
+            "recovery_error",
             "pause_reason",
             "journal_healthy",
             "operator_authorization_enabled",
+            "installed_trading_settings_hash",
+            "installed_emergency_liquidation_enabled",
             "plan_loaded",
             "exit_context_loaded",
             "owner_sequence",
@@ -69,6 +72,49 @@ def _scalars(value: object, keys: frozenset[str]) -> dict[str, JsonValue]:
     }
 
 
+def _automatic_status(value: object) -> dict[str, JsonValue] | None:
+    if not isinstance(value, dict):
+        return None
+    result = _scalars(
+        value,
+        frozenset(
+            {
+                "supported",
+                "mode",
+                "enabled",
+                "configured",
+                "state",
+                "reason",
+                "settings_hash",
+                "calendar_through",
+                "consent_id",
+                "pause_reason",
+            }
+        ),
+    )
+    result["limits"] = _scalars(
+        value.get("limits"),
+        frozenset(
+            {
+                "daily_value",
+                "symbol_value",
+                "order_value",
+                "daily_symbols",
+                "positions",
+                "position_pct",
+                "daily_loss",
+            }
+        ),
+    )
+    issues = value.get("recovery_issues")
+    result["recovery_issues"] = (
+        [str(item)[:96] for item in issues[:32] if isinstance(item, str)]
+        if isinstance(issues, list)
+        else []
+    )
+    return result
+
+
 def _market_status(value: object) -> dict[str, JsonValue] | None:
     if not isinstance(value, dict):
         return None
@@ -89,9 +135,9 @@ def _market_status(value: object) -> dict[str, JsonValue] | None:
         ),
     )
     for name, fields, maximum in (
-        ("entry_progress", {"symbol", "state"}, 15),
-        ("entry_targets", {"symbol", "target_quantity", "reason", "decided_at"}, 15),
-        ("recent_activity", {"occurred_at", "category", "state", "symbol", "detail"}, 80),
+        ("entry_progress", {"symbol", "state"}, 45),
+        ("entry_targets", {"symbol", "target_quantity", "reason", "decided_at"}, 45),
+        ("recent_activity", {"occurred_at", "category", "state", "symbol", "detail", "name"}, 80),
     ):
         rows = value.get(name)
         result[name] = (
@@ -126,9 +172,19 @@ def project_status(
             or not value["boot_id"]
         ):
             raise IPCError("STATUS_PROGRESS_INVALID")
+        result["buy_settings"] = (
+            _scalars(
+                value.get("buy_settings"),
+                frozenset(["supported", "active_version", "reason", "state"]),
+            )
+            if value.get("buy_settings") is not None
+            else None
+        )
         result["installed_limits"] = _scalars(
             value.get("installed_limits"),
-            frozenset(["mode", "max_buy_value", "max_order_value", "max_positions"]),
+            frozenset(
+                ["mode", "max_buy_value", "max_order_value", "max_positions", "max_daily_symbols"]
+            ),
         )
         result["broker_account"] = (
             _scalars(
@@ -164,14 +220,21 @@ def project_status(
             else None
         )
         result["market_session"] = _market_status(value.get("market_session"))
+        result["daily_auto"] = _automatic_status(value.get("daily_auto"))
         plan = value.get("plan")
         result["plan"] = None
         if isinstance(plan, dict):
-            summary = _scalars(plan, frozenset(["plan_id", "strategy_id", "trade_date"]))
+            summary = _scalars(plan, frozenset(["plan_id", "strategy_id", "trade_date", "source"]))
             symbols = plan.get("symbols")
             summary["symbols"] = (
                 [s for s in symbols[:500] if isinstance(s, str)]
                 if isinstance(symbols, list)
+                else []
+            )
+            phases = plan.get("decision_phases")
+            summary["decision_phases"] = (
+                [p for p in phases[:3] if p in ("1440", "1445", "1450")]
+                if isinstance(phases, list)
                 else []
             )
             result["plan"] = summary

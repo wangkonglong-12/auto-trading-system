@@ -12,7 +12,7 @@ from auto_trading_system.journal.critical_models import RecoveryRecord
 from auto_trading_system.protocol.v2.plans import PlanEnvelope
 from auto_trading_system.reconcile.position_lots import PositionLot
 from auto_trading_system.runtime.recovery_v2 import BrokerRecoverySnapshot, RecoveryReport
-from auto_trading_system.strategies.entry_state import EntryTarget
+from auto_trading_system.strategies.entry_state import EntryPolicy, EntryTarget
 
 
 @dataclass(frozen=True)
@@ -25,3 +25,5 @@ class DaySnapshot:
     opening_hash: str | None
     journal_high_watermark: int
     entry_targets: tuple[EntryTarget, ...] = ()
+    entry_plans: tuple[PlanEnvelope, ...] = ()
+    entry_policies: tuple[EntryPolicy, ...] = ()

@@ -24,18 +24,22 @@ from auto_trading_system.apps.local_console.app import LocalConsoleAssetError
 from auto_trading_system.apps.local_console.node_app import (
     PREFIX,
     _rule_response,
+    _trading_settings_response,
     build_node_console_app,
 )
 from auto_trading_system.apps.local_console.node_bridge import NodeConsoleBridge
 from auto_trading_system.apps.local_console.node_status import NodeStatusCache, project_status
 from auto_trading_system.apps.node_process.__main__ import main
-from auto_trading_system.config.node_v2 import NodeProcessConfig
+from auto_trading_system.config.node_v2 import NodeProcessConfig, TailPicksSettings
 from auto_trading_system.control.ipc_protocol import IPCError
+from auto_trading_system.domain.trading_time import SHANGHAI_TIMEZONE, ShanghaiTimestamp
 from auto_trading_system.protocol.v2.canonical import canonical_bytes, digest
 from auto_trading_system.protocol.v2.plans import PlanEnvelope
 from auto_trading_system.runtime.engine_v2 import EngineKernel
 from auto_trading_system.strategies.sell_rule_drafts import SellRuleDraft
 from auto_trading_system.strategies.sell_rules import SellRules
+from auto_trading_system.strategies.trading_settings import TradingSettings
+from auto_trading_system.strategies.trading_settings_drafts import TradingSettingsDraft
 
 node_fixture = node_helpers.node
 access = auth_helpers.access
@@ -64,6 +68,8 @@ def observation(config: NodeProcessConfig) -> dict[str, JsonValue]:
             "private": "must-not-leak",
         },
         "installed_limits": {"max_buy_value": "0", "private": "must-not-leak"},
+        "installed_trading_settings_hash": "sha256:" + "b" * 64,
+        "installed_emergency_liquidation_enabled": True,
         "secret": "must-not-leak",
     }
 
@@ -101,6 +107,8 @@ def test_status_freshness_is_owner_progress_not_pipe_response(node_fixture: Node
         cache.probe_once(name)
     assert "must-not-leak" not in str(state())
     assert "private" not in str(state())
+    assert state()["engine"]["data"]["installed_trading_settings_hash"] == "sha256:" + "b" * 64
+    assert state()["engine"]["data"]["installed_emergency_liquidation_enabled"] is True
     assert state()["engine"]["data"]["paper_session"]["rule_id"] == "COST_EXIT_V1"
     assert state()["engine"]["availability"] == "CURRENT"
     state()["engine"]["data"]["state"] = "caller-cannot-mutate-cache"
@@ -123,6 +131,130 @@ def test_status_freshness_is_owner_progress_not_pipe_response(node_fixture: Node
     cache.probe_once("engine")
     assert state()["engine"]["availability"] == "UNAVAILABLE"
     assert state()["engine"]["data"]["account_id"] == config.account_id
+
+
+def test_daily_auto_status_has_a_bounded_display_only_projection(node_fixture: Node) -> None:
+    config = node_fixture[0]
+    source = observation(config)
+    source["daily_auto"] = {
+        "supported": True,
+        "enabled": False,
+        "state": "PAUSED",
+        "reason": "RECOVERY_BLOCKED",
+        "limits": {"daily_value": "10000", "private": "must-not-leak"},
+        "recovery_issues": ["UNOWNED_BROKER_ORDER"] * 40,
+        "private_key": "must-not-leak",
+    }
+    displayed = project_status("engine", source, config)["daily_auto"]
+    assert isinstance(displayed, dict)
+    assert displayed["enabled"] is False and displayed["limits"] == {"daily_value": "10000"}
+    assert len(cast(list[str], displayed["recovery_issues"])) == 32
+    assert "must-not-leak" not in str(displayed)
+
+
+def test_daily_auto_http_only_accepts_authenticated_exact_actions(
+    node_fixture: Node, monkeypatch
+) -> None:
+    config = node_fixture[0].model_copy(
+        update={"broker": "QMT_TRADING", "tail_picks": TailPicksSettings()}
+    )
+    bridge = NodeConsoleBridge(config)
+    calls = []
+
+    def invoke(channel, action, payload):
+        assert channel == "authorization"
+        assert payload["session_token"] == "local-session"
+        assert payload["csrf_token"] == "local-csrf"
+        calls.append((action, payload))
+        return {"supported": True, "enabled": False, "state": "DISABLED"}
+
+    monkeypatch.setattr(bridge, "invoke", invoke)
+    monkeypatch.setattr(node_app, "_trading_settings_response", lambda *_: {"live_ready": True})
+    with TestClient(build_node_console_app(config, bridge=bridge), base_url=ORIGIN) as client:
+        assert client.get(PREFIX + "/daily-auto").status_code == 401
+        client.cookies.set(node_app.SESSION_COOKIE, "local-session")
+        client.cookies.set(node_app.CSRF_COOKIE, "local-csrf")
+        assert client.get(PREFIX + "/daily-auto").status_code == 200
+        for route in ("preview", "disable"):
+            assert (
+                client.post(PREFIX + "/daily-auto/" + route, json={}, headers=HEADERS).status_code
+                == 401
+            )
+        headers = {**HEADERS, "x-csrf-token": "local-csrf"}
+        for route in ("preview", "disable"):
+            assert (
+                client.post(PREFIX + "/daily-auto/" + route, json={}, headers=headers).status_code
+                == 200
+            )
+            assert (
+                client.post(
+                    PREFIX + "/daily-auto/" + route,
+                    json={"max_buy_value": "999999"},
+                    headers=headers,
+                ).status_code
+                == 400
+            )
+        data = {"preview_id": "daily-auto-" + "a" * 32, "phrase": "ENABLE DAILY AUTO BUY 12345678"}
+        assert (
+            client.post(PREFIX + "/daily-auto/confirm", json=data, headers=headers).status_code
+            == 200
+        )
+        assert calls[-1][0] == "CONFIRM_DAILY_AUTO" and calls[-1][1]["phrase"] == data["phrase"]
+        count = len(calls)
+        assert (
+            client.post(
+                PREFIX + "/daily-auto/confirm", json={**data, "enabled": True}, headers=headers
+            ).status_code
+            == 400
+        )
+        assert (
+            client.post(
+                PREFIX + "/daily-auto/preview",
+                json={},
+                headers={**headers, "origin": "http://other.test"},
+            ).status_code
+            == 403
+        )
+        assert len(calls) == count
+        # Settings changes invalidate pending previews on the owner even when
+        # the public status cache is empty or stale and consent is still off.
+        calls.clear()
+        assert (
+            client.post(
+                PREFIX + "/trading-settings",
+                json={
+                    "expected_version": 0,
+                    "settings": {
+                        "buy": {
+                            "signal_mode": "TAIL_EXCELLENT_3_PHASES",
+                            "max_daily_buy_value": "10000",
+                            "max_symbol_buy_value": "10000",
+                            "max_order_value": "10000",
+                            "max_daily_symbols": 1,
+                            "cancel_after_seconds": 10,
+                            "max_retries": 3,
+                        },
+                        "sell": None,
+                        "safety": {
+                            "max_daily_loss": "1000",
+                            "max_positions": 1,
+                            "max_total_position_pct": "100",
+                            "emergency_liquidation_enabled": False,
+                        },
+                        "advanced": {
+                            "max_order_quantity": 10000,
+                            "max_chase_bps": 30,
+                            "max_spread_bps": 20,
+                            "quote_max_age_ms": 1000,
+                        },
+                    },
+                },
+                headers=headers,
+            ).status_code
+            == 200
+        )
+        assert [action for action, _ in calls] == ["SESSION"]
+        # Saving parameters must never disable BUY or revoke SELL authorization.
 
 
 def test_rule_status_requires_matching_installed_exit_rules_and_armed_state() -> None:
@@ -152,6 +284,70 @@ def test_rule_status_requires_matching_installed_exit_rules_and_armed_state() ->
     assert paused["simulation_ready"] is True and paused["active"] is False
     paper["sell_rules_hash"] = "sha256:" + "0" * 64
     assert _rule_response(draft, snapshot)["simulation_ready"] is False
+
+
+def test_live_settings_status_requires_the_complete_installed_settings() -> None:
+    settings = TradingSettings.model_validate_json(
+        canonical_bytes(
+            {
+                "buy": {
+                    "order_method": "ASK1_PROTECTED_LIMIT",
+                    "max_daily_buy_value": "50000",
+                    "max_symbol_buy_value": "10000",
+                    "max_order_value": "5000",
+                    "cancel_after_seconds": 10,
+                    "max_retries": 3,
+                },
+                "sell": {
+                    "take_profit_pct": "5",
+                    "stop_loss_pct": "3",
+                    "sell_by": "14:30:00",
+                },
+                "safety": {
+                    "max_daily_loss": "2000",
+                    "max_positions": 5,
+                    "emergency_liquidation_enabled": True,
+                },
+                "advanced": {
+                    "max_order_quantity": 10000,
+                    "max_chase_bps": 30,
+                    "max_spread_bps": 20,
+                    "quote_max_age_ms": 1000,
+                },
+            }
+        )
+    )
+    draft = TradingSettingsDraft(version=2, saved_at=datetime.now(UTC), settings=settings)
+    snapshot: dict[str, JsonValue] = {
+        "components": {
+            "engine": {
+                "data": {
+                    "state": "READY_PAUSED",
+                    "broker": "QMT_TRADING",
+                    "installed_trading_settings_hash": digest(
+                        canonical_bytes(settings.model_dump(mode="json"))
+                    ),
+                    "installed_emergency_liquidation_enabled": True,
+                }
+            }
+        }
+    }
+
+    installed = _trading_settings_response(draft, snapshot)
+    assert installed["live_ready"] is True
+    assert installed["installed_emergency_liquidation_enabled"] is True
+    assert installed["restart_required"] is False
+
+    changed = draft.model_copy(
+        update={
+            "settings": settings.model_copy(
+                update={"advanced": settings.advanced.model_copy(update={"max_chase_bps": 31})}
+            )
+        }
+    )
+    stale = _trading_settings_response(changed, snapshot)
+    assert stale["live_ready"] is False
+    assert stale["restart_required"] is True
 
 
 def test_market_subscription_and_signal_status_reaches_ui_without_private_fields(
@@ -232,6 +428,70 @@ def test_cache_lifecycle(node_fixture: Node) -> None:
 def test_invalid_console_port(node_fixture: Node, port: int) -> None:
     with pytest.raises(ValueError):
         build_node_console_app(node_fixture[0], port=port)
+
+
+def test_execution_test_routes_require_session_csrf_and_accept_only_test_actions(
+    node_fixture: Node,
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    config = node_fixture[0]
+    calls: list[tuple[str, str]] = []
+    submitted: list[tuple[str, int, str]] = []
+
+    class Service:
+        def __init__(self, root: Path, *, origin: str, ca_file: str | None = None) -> None:
+            assert root == config.data_root
+            assert origin == config.quant_origin
+            assert ca_file is None
+
+        def snapshot(self) -> dict[str, JsonValue]:
+            return {"state": "IDLE", "rows": []}
+
+        def submit(self, action: str, *, maximum: int, amount: str) -> None:
+            submitted.append((action, maximum, amount))
+
+        def close(self) -> None:
+            pass
+
+    bridge = NodeConsoleBridge(config)
+
+    def invoke(channel: str, action: str, payload: dict[str, JsonValue]) -> dict[str, JsonValue]:
+        assert (channel, action) == ("authorization", "SESSION")
+        calls.append((channel, action))
+        return {"actor_id": "local-operator"}
+
+    monkeypatch.setattr(node_app, "ExecutionTestService", Service)
+    monkeypatch.setattr(bridge, "invoke", invoke)
+    with TestClient(build_node_console_app(config, bridge=bridge), base_url=ORIGIN) as client:
+        assert client.get(PREFIX + "/execution-test").status_code == 401
+        client.cookies.set(node_app.SESSION_COOKIE, "local-session")
+        client.cookies.set(node_app.CSRF_COOKIE, "local-csrf")
+        assert client.get(PREFIX + "/execution-test").json() == {"state": "IDLE", "rows": []}
+        assert (
+            client.post(
+                PREFIX + "/execution-test", json={"action": "FETCH"}, headers=HEADERS
+            ).status_code
+            == 401
+        )
+        headers = {**HEADERS, "x-csrf-token": "local-csrf"}
+        for action in ("FETCH", "RUN", "RETRY"):
+            assert (
+                client.post(
+                    PREFIX + "/execution-test", json={"action": action}, headers=headers
+                ).status_code
+                == 200
+            )
+        assert submitted == [(a, 3, "2000.00") for a in ("FETCH", "RUN", "RETRY")]
+        for body in (
+            {"action": "ARM"},
+            {"action": "FETCH", "environment": "REAL"},
+            {"action": "FETCH", "origin": "http://untrusted.test"},
+        ):
+            assert (
+                client.post(PREFIX + "/execution-test", json=body, headers=headers).status_code
+                == 400
+            )
+        assert all(channel == "authorization" for channel, _ in calls)
 
 
 def test_http_static_status_and_same_origin_boundaries(node_fixture: Node) -> None:
@@ -315,6 +575,86 @@ def test_http_input_validation_is_bounded_and_redacted(
         )
 
 
+@pytest.mark.parametrize("has_trade", [False, True], ids=["candidate-only", "owned-trade"])
+def test_dashboard_period_snapshot_survives_query_failure_but_not_auth_failure(
+    node_fixture: Node, monkeypatch: pytest.MonkeyPatch, has_trade: bool
+) -> None:
+    config = node_fixture[0]
+    day, next_day = config.calendar.sessions[:2]
+    tick = [datetime.combine(day, time(14, 46), SHANGHAI_TIMEZONE)]
+
+    class DisplayClock:
+        def now(self) -> ShanghaiTimestamp:
+            return ShanghaiTimestamp(tick[0])
+
+    bridge = NodeConsoleBridge(config)
+    failure = [""]
+
+    def query(channel: str, action: str, payload: dict[str, JsonValue]) -> dict[str, JsonValue]:
+        assert (channel, action) == ("query", "OPERATOR_DETAILS")
+        if failure[0]:
+            raise IPCError(failure[0])
+        return {
+            "available": True,
+            "observed_at": tick[0].isoformat(),
+            "orders": [],
+            "trades": [
+                {
+                    "symbol": "600000.SH",
+                    "side": "BUY",
+                    "owned_by_system": True,
+                    "quantity": 100,
+                    "price": "10.00",
+                    "traded_at": tick[0].isoformat(),
+                }
+            ]
+            if has_trade
+            else [],
+        }
+
+    monkeypatch.setattr(bridge, "invoke", query)
+    monkeypatch.setattr(
+        bridge.status,
+        "snapshot",
+        lambda: {
+            "components": {
+                "engine": {
+                    "availability": "CURRENT",
+                    "data": {"plan": {"trade_date": day.isoformat(), "symbols": ["600000.SH"]}},
+                }
+            }
+        },
+    )
+    client = TestClient(
+        build_node_console_app(config, bridge=bridge, clock=DisplayClock()), base_url=ORIGIN
+    )
+    with client:
+        client.cookies.set(node_app.SESSION_COOKIE, "test-session")
+        client.cookies.set(node_app.CSRF_COOKIE, "test-csrf")
+        first = client.get(PREFIX + "/dashboard")
+        assert first.status_code == 200
+        first_buys = first.json()["buys"]
+        assert first_buys["display_state"] == "CURRENT"
+        assert len(first_buys["rows"]) == int(has_trade)
+        snapshot_path = config.data_root / "operator/today_trading.json"
+        saved = snapshot_path.read_bytes()
+        failure[0] = "ACCOUNT_QUERY_FAILED"
+        tick[0] = datetime.combine(next_day, time(14, 29), SHANGHAI_TIMEZONE)
+        cached = client.get(PREFIX + "/dashboard").json()
+        assert cached["buys"]["display_state"] == "SNAPSHOT"
+        assert cached["buys"]["rows"] == first_buys["rows"]
+        if has_trade:
+            assert cached["buys"]["rows"][0]["quantity"] == 100
+            assert cached["buys"]["rows"][0]["amount"] == "1000.00"
+        assert snapshot_path.read_bytes() == saved
+        assert cached["account"]["available"] is False
+        failure[0] = "OPERATOR_SESSION_EXPIRED"
+        assert client.get(PREFIX + "/dashboard").status_code == 401
+        failure[0] = "ACCOUNT_QUERY_FAILED"
+        tick[0] = datetime.combine(next_day, time(14, 30), SHANGHAI_TIMEZONE)
+        assert client.get(PREFIX + "/dashboard").json()["buys"]["rows"] == []
+
+
 def test_real_http_pipe_controls_and_session_restoration(access: Access) -> None:
     config, _, plan, password = access
     with auth_helpers.prepared(access) as (_, control, _):
@@ -340,6 +680,10 @@ def test_real_http_pipe_controls_and_session_restoration(access: Access) -> None
             assert details.status_code == 200
             assert details.json()["available"] in (True, False)
             assert set(details.json()) >= {"positions", "orders", "trades"}
+            dashboard = client.get(PREFIX + "/dashboard")
+            assert dashboard.status_code == 200
+            assert set(dashboard.json()) == {"account", "buys", "process"}
+            assert dashboard.json()["account"]["available"] in (True, False)
             missing_cancel = client.post(
                 PREFIX + "/orders/cancel",
                 json={"client_order_id": "ord_missing0001"},
@@ -515,7 +859,11 @@ def test_trading_settings_page_api_is_authenticated_versioned_and_paused(access:
         assert saved.json()["draft"]["version"] == 1
         assert saved.json()["buy_configured"] is True
         assert saved.json()["active"] is False
-        assert client.get(PREFIX + "/trading-settings").json()["draft"]["settings"] == settings
+        expected = TradingSettings.model_validate_json(canonical_bytes(settings)).model_dump(
+            mode="json"
+        )
+        assert client.get(PREFIX + "/trading-settings").json()["draft"]["settings"] == expected
+        assert expected["safety"]["max_total_position_pct"] == "70"
         conflict = client.post(PREFIX + "/trading-settings", json=body, headers=headers)
         assert conflict.status_code == 409
         invalid = deepcopy(settings)
@@ -529,6 +877,26 @@ def test_trading_settings_page_api_is_authenticated_versioned_and_paused(access:
         assert rejected.json()["code"] == "INVALID_ARGUMENTS"
         assert "三个买入金额" in rejected.json()["issues"][0]["message"]
         assert client.get(PREFIX + "/trading-settings").json()["draft"]["version"] == 1
+
+
+def test_unconfigured_console_reports_setup_issue_and_rejects_settings_save(
+    node_fixture: Node, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    config = node_fixture[0]
+    unconfigured = config.model_copy(update={"node_id": "unconfigured-test"})
+    bridge = NodeConsoleBridge(unconfigured)
+    monkeypatch.setattr(bridge, "invoke", lambda *_args: {})
+    monkeypatch.setenv("ATS_DESKTOP_SETUP_ISSUE", "QMT_SDK_TEMPORARY")
+    with TestClient(build_node_console_app(unconfigured, bridge=bridge), base_url=ORIGIN) as client:
+        status = client.get(PREFIX + "/status")
+        assert status.status_code == 200
+        assert status.json()["qmt_setup_issue"] == "QMT_SDK_TEMPORARY"
+        client.cookies.set(node_app.SESSION_COOKIE, "test-session")
+        client.cookies.set(node_app.CSRF_COOKIE, "test-csrf")
+        headers = {**HEADERS, "x-csrf-token": "test-csrf"}
+        denied = client.post(PREFIX + "/trading-settings", json={}, headers=headers)
+        assert denied.status_code == 409
+        assert denied.json() == {"code": "QMT_CONNECTION_REQUIRED"}
 
 
 def test_engine_control_checks_session_itself(access: Access) -> None:

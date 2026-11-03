@@ -19,6 +19,7 @@
     "check": "pnpm lint && pnpm format:check && pnpm typecheck && pnpm test:coverage && pnpm build"
   },
   "dependencies": {
+    "@vicons/ionicons5": "0.13.0",
     "echarts": "6.1.0",
     "naive-ui": "2.45.3",
     "vue": "3.5.42",

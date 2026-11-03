@@ -23,8 +23,9 @@ from auto_trading_system.domain import Price
 from auto_trading_system.journal.critical_models import Submission
 from auto_trading_system.protocol.v2.base import WireModel
 from auto_trading_system.protocol.v2.records import PriceText, Symbol
+from auto_trading_system.reconcile.position_lots import PositionLot
 from auto_trading_system.runtime.engine_v2 import EngineKernel
-from auto_trading_system.strategies.exit_context import ExitSessionContext
+from auto_trading_system.strategies.exit_context import ExitLotContext, ExitSessionContext
 from auto_trading_system.strategies.exit_execution import exit_child
 from auto_trading_system.strategies.exit_state_store import (
     CAPACITY,
@@ -146,7 +147,7 @@ class _Pending:
 class D1StrategyOwner:
     def __init__(self, engine: EngineKernel, gate: ExitStateGate) -> None:
         gate.owner_only()
-        if engine.exit_context != gate.context:
+        if engine.exit_context_for(gate.context.payload_hash) != gate.context:
             raise ValueError("driver and engine exit contexts differ")
         self.engine, self.gate = engine, gate
         self.context = gate.context
@@ -232,6 +233,7 @@ class D1StrategyOwner:
                     frozenset(record.state.fired_rules),
                     record.state.profit_armed,
                     path_complete=False,
+                    rule_states=record.state.rule_states or {},
                 )
             self._restore = None
             self.gate.ready = True
@@ -271,6 +273,8 @@ class D1StrategyOwner:
         # Older children may reference older (looser) states; only NEW children
         # need the latest state. Missing history never reconstructs permission.
         for item in known:
+            if self.context.board and item.plan_hash != self.context.payload_hash:
+                continue
             if item.client_order_id in self._linked:
                 continue
             binding = item.sell_binding
@@ -305,7 +309,15 @@ class D1StrategyOwner:
         # Cancellation is risk reduction and does not require a fresh trade
         # quote. It remains fenced by the engine's grant, J1 and cancel cutoff.
         for view in snapshot.orders:
-            original = next((s for s in known if s.client_order_id == view.client_order_id), None)
+            original = next(
+                (
+                    s
+                    for s in known
+                    if s.client_order_id == view.client_order_id
+                    and s.plan_hash == self.context.payload_hash
+                ),
+                None,
+            )
             if (
                 view.order is not None
                 and original is not None
@@ -316,7 +328,7 @@ class D1StrategyOwner:
                 and (
                     self._liquidation_requested
                     or (self.gate.clock() - view.order.updated_at.value).total_seconds()
-                    >= self.context.cancel_after_seconds
+                    >= self.cancel_after_seconds
                     or self.gate.clock() >= self.context.stop_new_at
                 )
             ):
@@ -349,6 +361,7 @@ class D1StrategyOwner:
                     fired_rules=tuple(sorted({*state.fired, "EMERGENCY_LIQUIDATION"})),
                     profit_armed=state.profit_armed,
                     path_uncertain=True,
+                    rule_states=state.rule_states or None,
                 )
                 record = ExitTransition(
                     revision=len(self._history) + 1,
@@ -381,41 +394,21 @@ class D1StrategyOwner:
             self._liquidation_requested = False
         for policy in self.context.lots:
             lot, quote = lots.get(policy.lot_id), self.gate.quotes.get(policy.symbol)
-            if lot is None or lot.remaining == 0 or quote is None or not self.gate.fresh(quote):
+            if lot is None or lot.remaining == 0:
+                continue
+            if not self.context.board and (quote is None or not self.gate.fresh(quote)):
                 continue
             state = self._states.get(
                 lot.lot_id, ExitState(lot.bought_quantity, path_complete=False)
             )
-            # Reuse an unconsumed quote after persistence, but never evaluate its
-            # monotonic sample twice. Time rules use the quote's timestamp.
-            if state.last_received_ns != quote.received_ns:
-                decision = evaluate_exit(
-                    ExitLot(
-                        lot.lot_id,
-                        lot.bought_quantity,
-                        lot.trade_date_acquired,
-                        lot.eligible_sell_date,
-                        Price.parse(policy.cost),
-                        Price.parse(policy.previous_close),
-                        Price.parse(policy.open_price),
-                    ),
-                    state,
-                    ExitObservation(
-                        quote.observed_at,
-                        quote.received_ns,
-                        Price.parse(quote.last_price),
-                        True,
-                        False,
-                    ),
-                    self.context.sell_rules,
-                )
-                state = decision.state
-                self._states[lot.lot_id] = state
+            state = self.evaluate_lot(lot, policy, state, quote)
+            self._states[lot.lot_id] = state
             durable = DurableExitState(
                 target_remaining=state.target_remaining,
                 fired_rules=tuple(sorted(state.fired)),
                 profit_armed=state.profit_armed,
                 path_uncertain=not state.path_complete,
+                rule_states=state.rule_states or None,
             )
             previous = self.gate.latest.get(lot.lot_id)
             if previous is None or previous.state != durable:
@@ -444,6 +437,8 @@ class D1StrategyOwner:
                     snapshot.permission_epoch,
                 )
                 return
+            if quote is None or not self.gate.fresh(quote):
+                continue
             # In-flight orders keep their reservations. A tighter target is now
             # durable, but another child waits for terminal account evidence.
             active = next(
@@ -478,6 +473,8 @@ class D1StrategyOwner:
                 quantity = quantity // policy.sell_step * policy.sell_step
             if quantity <= 0:
                 continue
+            if not self.can_start_child(lot, known):
+                continue
             child = exit_child(
                 lot=lot,
                 decision=ExitDecision(state, (), True),
@@ -504,6 +501,39 @@ class D1StrategyOwner:
                 )
                 self.engine.submit(child, valid_until=monotonic() + 0.25)
                 return
+
+    @property
+    def cancel_after_seconds(self) -> int:
+        return self.context.cancel_after_seconds
+
+    def can_start_child(self, lot: PositionLot, known: tuple[Submission, ...]) -> bool:
+        return True
+
+    def evaluate_lot(
+        self, lot: PositionLot, policy: ExitLotContext, state: ExitState, quote: ExitQuote | None
+    ) -> ExitState:
+        if (
+            quote is None
+            or not self.gate.fresh(quote)
+            or state.last_received_ns == quote.received_ns
+        ):
+            return state
+        return evaluate_exit(
+            ExitLot(
+                lot.lot_id,
+                lot.bought_quantity,
+                lot.trade_date_acquired,
+                lot.eligible_sell_date,
+                Price.parse(policy.cost),
+                Price.parse(policy.previous_close),
+                Price.parse(policy.open_price),
+            ),
+            state,
+            ExitObservation(
+                quote.observed_at, quote.received_ns, Price.parse(quote.last_price), True, False
+            ),
+            self.context.sell_rules,
+        ).state
 
     def snapshot(self) -> ExitOwnerSnapshot:
         self.gate.owner_only()

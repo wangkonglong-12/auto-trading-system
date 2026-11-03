@@ -6,6 +6,8 @@ from pathlib import Path
 
 import pytest
 from cryptography.hazmat.primitives.asymmetric.ed25519 import Ed25519PrivateKey
+from test_tail_phase_plans import NOW as PHASE_NOW
+from test_tail_phase_plans import phase_plan
 from test_v2_files_sync import sample_batch
 
 from auto_trading_system.execution.plan_control import EnginePlanControl
@@ -21,6 +23,47 @@ from auto_trading_system.testing.daily_receiver import InMemoryDailyReceiver
 from auto_trading_system.testing.v31_scenarios import example_plan
 
 NOW = datetime.fromisoformat("2026-09-07T14:41:00+08:00")
+
+
+def test_reconnect_loads_all_signed_phases_in_order_and_replay_is_idempotent(
+    tmp_path: Path,
+) -> None:
+    agent, _, remote, _ = system(tmp_path)
+    key = Ed25519PrivateKey.generate()
+    phases = tuple(phase_plan(p, key) for p in ("1440", "1445", "1450"))
+    engine = EnginePlanControl(
+        agent.files,
+        {"test-key": key.public_key()},
+        node_id="simulation-node",
+        account_id="simulation-account",
+        node_generation=1,
+        engine_boot_id="catchup-boot",
+        policies=phases[0].payload.policy_bundle,
+        rulebook=phases[0].payload.rulebook_version,
+        clock=lambda: PHASE_NOW,
+        pause_for_change=lambda: None,
+        tail_phases=True,
+    )
+    agent.engine = engine
+    agent.clock = lambda: PHASE_NOW
+    agent.keys = {"test-key": key.public_key()}
+    remote.lookup = PlanLookup(
+        account_id=phases[2].payload.account_id,
+        strategy_id=phases[2].payload.strategy_id,
+        trade_date=phases[2].payload.trade_date,
+        plan_id=phases[2].payload.plan_id,
+        state="PUBLISHED",
+        state_version=3,
+        etag=digest(b"three-phases"),
+        plan=phases[2],
+        previous_phases=phases[:2],
+    )
+    with agent.store:
+        assert agent.pull_plan() is not None
+        assert engine.plans.accepted() == phases
+        assert len(remote.acks) == 3
+        assert agent.pull_plan() is not None
+        assert len(remote.acks) == 3
 
 
 class Remote(InMemoryDailyReceiver):

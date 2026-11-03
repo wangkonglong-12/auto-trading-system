@@ -9,7 +9,9 @@ from __future__ import annotations
 
 import importlib
 import math
+import re
 from collections.abc import Callable
+from contextlib import suppress
 from dataclasses import dataclass
 from datetime import datetime
 from queue import Empty, Queue
@@ -19,6 +21,7 @@ from typing import Any
 from auto_trading_system.gateways.broker.cicc_qmt import XtquantBindings, load_xtquant_bindings
 from auto_trading_system.gateways.broker.models import CancelOrder, OrderSide, SubmitOrder
 from auto_trading_system.monitoring.qmt_readonly import QmtProbeConfig
+from auto_trading_system.protocol.account_monitoring import Observation
 
 
 class QmtCommandError(RuntimeError):
@@ -64,6 +67,7 @@ class QmtCallbackFact:
     cancel_result: int | None = None
     account_status: int | None = None
     message: str | None = None
+    order: QmtOrderFact | None = None
 
 
 @dataclass(frozen=True, slots=True)
@@ -78,6 +82,7 @@ class QmtOrderFact:
     remark: str
     order_time: int | None = None
     strategy_name: str | None = None
+    order_sysid: str | None = None
 
 
 @dataclass(frozen=True, slots=True)
@@ -92,6 +97,7 @@ class QmtTradeFact:
     remark: str
     traded_time: int
     strategy_name: str | None = None
+    order_sysid: str | None = None
 
 
 @dataclass(frozen=True, slots=True)
@@ -116,6 +122,24 @@ class QmtAccountSnapshot:
 def _attribute(value: object, name: str, kind: type[Any]) -> Any | None:
     result = getattr(value, name, None)
     return result if type(result) is kind else None
+
+
+def _external_sysid(row: object) -> str | None:
+    """A terminal-origin record can lack the SDK-local ID after reconnecting.
+
+    Accept only a bounded contract identity with explicitly empty ownership
+    markers. Never use a missing local ID to reconstruct a system submission.
+    """
+    value = _attribute(row, "order_sysid", str)
+    if (
+        _attribute(row, "order_id", int) == 0
+        and _attribute(row, "order_remark", str) == ""
+        and _attribute(row, "strategy_name", str) == ""
+        and isinstance(value, str)
+        and re.fullmatch(r"[A-Za-z0-9._:-]{1,64}", value)
+    ):
+        return value
+    return None
 
 
 class QmtCommandTransport:
@@ -184,6 +208,17 @@ class QmtCommandTransport:
             ):
                 return
             message = _attribute(value, "error_msg", str)
+            order = None
+            if (
+                kind == "ORDER_UPDATE"
+                and _attribute(value, "strategy_name", str) == "personal-auto-trading"
+                and re.fullmatch(
+                    r"[A-Za-z0-9_-]{8,24}", str(_attribute(value, "order_remark", str))
+                )
+                and re.fullmatch(r"[0-9]{6}\.(SH|SZ|BJ)", str(_attribute(value, "stock_code", str)))
+            ):
+                with suppress(QmtCommandError):
+                    order = self._order_fact(value)
             fact = QmtCallbackFact(
                 kind,
                 self._clock(),
@@ -195,6 +230,7 @@ class QmtCommandTransport:
                 _attribute(value, "cancel_result", int),
                 _attribute(value, "status", int),
                 message[:256] if message else None,
+                order,
             )
             if kind == "DISCONNECTED" or (kind == "ACCOUNT_STATUS" and fact.account_status != 0):
                 self._invalid.set()
@@ -329,6 +365,8 @@ class QmtCommandTransport:
     def query_order(self, order_id: int, remark: str) -> QmtOrderFact | None:
         """Return a matching broker order, never infer absence from a failed query."""
         self._ready()
+        if type(order_id) is not int or order_id <= 0:
+            raise QmtCommandError("QMT_ORDER_QUERY_INVALID")
         self._account_ok()
         try:
             rows = self._trader.query_stock_orders(self._account, False)
@@ -352,6 +390,7 @@ class QmtCommandTransport:
 
     def _order_fact(self, row: object) -> QmtOrderFact:
         order_id = _attribute(row, "order_id", int)
+        external_sysid = _external_sysid(row)
         remark = _attribute(row, "order_remark", str)
         status = _attribute(row, "order_status", int)
         quantity = _attribute(row, "order_volume", int)
@@ -361,7 +400,8 @@ class QmtCommandTransport:
         price = _attribute(row, "price", float)
         if (
             order_id is None
-            or order_id <= 0
+            or order_id < 0
+            or (order_id == 0 and external_sysid is None)
             or remark is None
             or status is None
             or status not in {48, 49, 50, 51, 52, 53, 54, 55, 56, 57, 255}
@@ -389,7 +429,30 @@ class QmtCommandTransport:
             remark,
             order_time,
             strategy_name,
+            external_sysid or self._contract_id(row),
         )
+
+    @staticmethod
+    def _contract_id(row: object) -> str | None:
+        value = _attribute(row, "order_sysid", str)
+        return (
+            value
+            if isinstance(value, str) and re.fullmatch(r"[A-Za-z0-9._:-]{1,64}", value)
+            else None
+        )
+
+    def cancel_contract(self, market: int, contract: str) -> int:
+        self._ready()
+        self._account_ok()
+        if market not in {0, 1} or re.fullmatch(r"[A-Za-z0-9._:-]{1,64}", contract) is None:
+            raise QmtCommandError("QMT_CANCEL_ORDER_ID_INVALID")
+        try:
+            sequence = self._trader.cancel_order_stock_sysid_async(self._account, market, contract)
+        except Exception as exc:
+            raise QmtCommandError("QMT_CANCEL_RESULT_UNKNOWN") from exc
+        if type(sequence) is not int or sequence <= 0:
+            raise QmtCommandError("QMT_CANCEL_REJECTED_BY_SDK")
+        return sequence
 
     def query_orders(self) -> tuple[QmtOrderFact, ...]:
         """Return all current-day orders as validated primitive facts."""
@@ -402,20 +465,24 @@ class QmtCommandTransport:
         if not isinstance(rows, list) or len(rows) > 10000:
             raise QmtCommandError("QMT_ORDER_QUERY_UNKNOWN")
         facts: list[QmtOrderFact] = []
-        seen: set[int] = set()
+        seen: set[tuple[str, str]] = set()
         for row in rows:
-            order_id = _attribute(row, "order_id", int)
-            if order_id is None or order_id <= 0 or order_id in seen:
-                raise QmtCommandError("QMT_ORDER_QUERY_INVALID")
             if (
                 _attribute(row, "account_id", str) != self._account_id
                 or _attribute(row, "account_type", int) != 2
             ):
                 raise QmtCommandError("QMT_ORDER_QUERY_IDENTITY_CONFLICT")
             fact = self._order_fact(row)
+            identity = (
+                ("local", str(fact.order_id))
+                if fact.order_id > 0
+                else (fact.symbol[-2:], str(fact.order_sysid))
+            )
+            if identity in seen:
+                raise QmtCommandError("QMT_ORDER_QUERY_INVALID")
             if fact.order_time is None or fact.order_time <= 0:
                 raise QmtCommandError("QMT_ORDER_QUERY_INVALID")
-            seen.add(order_id)
+            seen.add(identity)
             facts.append(fact)
         return tuple(facts)
 
@@ -439,6 +506,7 @@ class QmtCommandTransport:
                 raise QmtCommandError("QMT_TRADE_QUERY_IDENTITY_CONFLICT")
             trade_id = _attribute(row, "traded_id", str)
             order_id = _attribute(row, "order_id", int)
+            external_sysid = _external_sysid(row)
             symbol = _attribute(row, "stock_code", str)
             order_type = _attribute(row, "order_type", int)
             price = _attribute(row, "traded_price", float)
@@ -452,7 +520,8 @@ class QmtCommandTransport:
                 or not trade_id
                 or trade_id in seen
                 or order_id is None
-                or order_id <= 0
+                or order_id < 0
+                or (order_id == 0 and external_sysid is None)
                 or symbol is None
                 or order_type not in (self._constants.stock_buy, self._constants.stock_sell)
                 or price is None
@@ -481,9 +550,23 @@ class QmtCommandTransport:
                     remark,
                     traded_time,
                     strategy_name,
+                    external_sysid,
                 )
             )
         return tuple(facts)
+
+    def read_monitoring(self) -> Observation:
+        from auto_trading_system.gateways.broker.account_monitoring import read_observation
+
+        self._ready()
+        self._account_ok()
+        result = read_observation(
+            lambda name: getattr(self._trader, name)(self._account), self._account_id,
+            self._clock, buy=self._constants.stock_buy, sell=self._constants.stock_sell,
+        )
+        self._account_ok()
+        self._ready()
+        return result
 
     def query_account(self) -> QmtAccountSnapshot:
         """Return validated cash and aggregate positions for reconciliation and display."""

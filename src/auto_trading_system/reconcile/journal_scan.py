@@ -9,11 +9,13 @@ The SQL rows remain intact for independent audit, backup and later maintenance.
 from __future__ import annotations
 
 import hashlib
+from dataclasses import dataclass
 from datetime import date
 
 from auto_trading_system.journal.critical_models import ActionTarget, RecoveryRecord
 from auto_trading_system.protocol.v2.canonical import canonical_bytes
 from auto_trading_system.reconcile.portfolio_checkpoint import PortfolioCheckpoint
+from auto_trading_system.reconcile.position_lots import PositionLot, lot_id
 
 MAX_CURRENT_RECORDS = 2048
 MAX_SCAN_RECORDS = 100_000
@@ -43,14 +45,30 @@ class PrefixDigest:
         return "sha256:" + snapshot.hexdigest()
 
 
+@dataclass(frozen=True)
+class RecoveredBaseline:
+    trade_date: date
+    submission_high_watermark: int
+    submission_prefix_hash: str
+    lots: tuple[PositionLot, ...]
+
+
 class JournalScan:
     def __init__(
-        self, *, account_id: str, trade_date: date, checkpoint: PortfolioCheckpoint | None
+        self,
+        *,
+        account_id: str,
+        trade_date: date,
+        checkpoint: PortfolioCheckpoint | RecoveredBaseline | None,
+        allow_historical: bool = False,
     ) -> None:
         self.account_id, self.trade_date, self.checkpoint = account_id, trade_date, checkpoint
         self.prefix = PrefixDigest()
         self.current: list[RecoveryRecord] = []
+        self.historical: list[RecoveryRecord] = []
+        self.allow_historical = allow_historical
         self.targets: dict[str, ActionTarget] = {}
+        self.lot_sources: dict[str, str] = {}
         self._live_lots = (
             {lot.lot_id for lot in checkpoint.lots if lot.remaining} if checkpoint else set()
         )
@@ -75,6 +93,10 @@ class JournalScan:
             if self.prefix.count >= MAX_SCAN_RECORDS:
                 raise ValueError("historical scan capacity exhausted")
             item = record.submission
+            if item.action_type == "NEW" and item.side == "BUY" and lot_id(item) in self._live_lots:
+                self.lot_sources[lot_id(item)] = (
+                    "SYSTEM_MANUAL" if item.manual_binding else "AUTOMATIC"
+                )
             if item.account_id != self.account_id:
                 raise ValueError("Journal account differs from engine")
             if self.checkpoint and record.record_seq <= self.checkpoint.submission_high_watermark:
@@ -98,6 +120,14 @@ class JournalScan:
                         raise ValueError("historical target capacity exhausted")
             else:
                 self._verify_prefix()
+                if self.allow_historical and item.trade_date < self.trade_date:
+                    if self.checkpoint and item.trade_date <= self.checkpoint.trade_date:
+                        raise ValueError("historical submission follows its sealed day")
+                    if len(self.historical) >= MAX_CURRENT_RECORDS:
+                        raise ValueError("historical recovery record capacity exhausted")
+                    self.historical.append(record)
+                    self.prefix.add(record)
+                    continue
                 if item.trade_date != self.trade_date:
                     raise ValueError("unsealed historical or future submission")
                 if len(self.current) >= MAX_CURRENT_RECORDS:

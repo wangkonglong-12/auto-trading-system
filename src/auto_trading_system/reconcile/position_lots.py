@@ -155,7 +155,10 @@ def project_lots(
     """
     if len(intents) > 2048 or len(trades) > 10000 or len(opening) > 2048:
         raise ValueError("portfolio projection capacity exceeded")
-    if as_of not in calendar.sessions:
+    # A covered non-session may observe prior custody, never replay trading activity.
+    if as_of not in calendar.sessions and (
+        intents or trades or not calendar.sessions[0] < as_of < calendar.sessions[-1]
+    ):
         raise ValueError("portfolio date absent from verified calendar")
     known: dict[str, LotIntent] = {}
     projection = OrderProjection()
@@ -201,7 +204,9 @@ def project_lots(
         quantity <= 0 for _, quantity in unmanaged_positions
     ):
         raise ValueError("unmanaged position baseline is invalid")
-    locked: set[str] = {symbol for symbol, _ in unmanaged_positions}
+    # A reconciled residual is outside strategy custody, not an unexplained
+    # strategy fill. Only owned lots can supply sell quantities below.
+    locked: set[str] = set()
     unowned: list[str] = []
     quantities: dict[str, int] = {}
     notionals: dict[str, Decimal] = {}

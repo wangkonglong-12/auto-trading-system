@@ -50,6 +50,7 @@ class DispatchPermission:
         self._reason = "STARTUP_PAUSED"
         self._claimed: set[str] = set()
         self._attempted: set[str] = set()
+        self._one_shots: dict[str, float] = {}
 
     def snapshot(self) -> PermissionSnapshot:
         with self._lock:
@@ -65,6 +66,7 @@ class DispatchPermission:
             self._epoch += 1
             self._halted = True
             self._reason = reason
+            self._one_shots.clear()
             return PermissionSnapshot(self._epoch, True, reason, tuple(sorted(self._claimed)))
 
     def allow_after_durable_grant(self, expected_epoch: int) -> int:
@@ -78,13 +80,33 @@ class DispatchPermission:
                 raise ValueError("permission changed while granting authorization")
             self._epoch += 1
             self._halted = False
+            self._one_shots.clear()
             self._reason = "AUTHORIZED"
             return self._epoch
+
+    def allow_once(self, client_order_id: str, expected_epoch: int, deadline: float) -> None:
+        """An exact authenticated intent still must pass J1 before SDK dispatch.
+
+        Never clears HALT or arms automatic trading. A concurrent HALT fences it.
+        """
+        with self._lock:
+            if expected_epoch != self._epoch or deadline <= monotonic():
+                raise ValueError("one-shot permission expired or fenced")
+            self._one_shots = {k: v for k, v in self._one_shots.items() if v > monotonic()}
+            if client_order_id in self._attempted or len(self._one_shots) >= 32:
+                raise ValueError("one-shot permission cannot be reused")
+            self._one_shots[client_order_id] = deadline
+
+    def allows(self, client_order_id: str, epoch: int) -> bool:
+        with self._lock:
+            return self._epoch == epoch and (
+                not self._halted or self._one_shots.get(client_order_id, 0) > monotonic()
+            )
 
     def claim(self, client_order_id: str, epoch: int, deadline: float) -> bool:
         with self._lock:
             if (
-                self._halted
+                (self._halted and self._one_shots.get(client_order_id, 0) <= monotonic())
                 or self._epoch != epoch
                 or monotonic() >= deadline
                 or client_order_id in self._attempted
@@ -92,6 +114,7 @@ class DispatchPermission:
                 return False
             self._claimed.add(client_order_id)
             self._attempted.add(client_order_id)
+            self._one_shots.pop(client_order_id, None)
             return True
 
     def resolve_terminal(self, client_order_id: str, *, confirmed: bool) -> None:
@@ -164,6 +187,7 @@ class SDKDispatcher:
                     CancelOrder(
                         submission.original_client_order_id,
                         submission.original_order_id,
+                        key,
                     )
                 ).request_seq
             else:

@@ -189,34 +189,34 @@ class LocalOperatorSessionManager:
             with self._lock:
                 self._failed_logins.clear()
 
-        session_token = self._new_token()
-        csrf_token = self._new_token()
-        session_key = _token_key(session_token)
-        now = self._clock.now()
-        expires_at = ShanghaiTimestamp.from_instant(
-            now.value + timedelta(seconds=self._policy.absolute_seconds)
-        )
-        record = _SessionRecord(
-            session_key=session_key,
-            csrf_hash=_token_digest(csrf_token),
-            actor_id=self._actor_id,
-            issued_at=now,
-            expires_at=expires_at,
-            created_ns=checked_at_ns,
-            last_seen_ns=checked_at_ns,
-        )
-        with self._lock:
-            self._expire_sessions(checked_at_ns)
-            if len(self._sessions) >= self._policy.max_sessions:
-                self._sessions.popitem(last=False)
-            self._sessions[session_key] = record
-        return IssuedOperatorSession(
-            session_token,
-            csrf_token,
-            self._actor_id,
-            now,
-            expires_at,
-        )
+            session_token = self._new_token()
+            csrf_token = self._new_token()
+            session_key = _token_key(session_token)
+            now = self._clock.now()
+            expires_at = ShanghaiTimestamp.from_instant(
+                now.value + timedelta(seconds=self._policy.absolute_seconds)
+            )
+            record = _SessionRecord(
+                session_key=session_key,
+                csrf_hash=_token_digest(csrf_token),
+                actor_id=self._actor_id,
+                issued_at=now,
+                expires_at=expires_at,
+                created_ns=checked_at_ns,
+                last_seen_ns=checked_at_ns,
+            )
+            with self._lock:
+                self._expire_sessions(checked_at_ns)
+                if len(self._sessions) >= self._policy.max_sessions:
+                    self._sessions.popitem(last=False)
+                self._sessions[session_key] = record
+            return IssuedOperatorSession(
+                session_token,
+                csrf_token,
+                self._actor_id,
+                now,
+                expires_at,
+            )
 
     def authenticate(self, session_token: str | None) -> AuthenticatedOperatorSession:
         token = _validated_token(session_token, code="OPERATOR_SESSION_REQUIRED")
@@ -266,6 +266,44 @@ class LocalOperatorSessionManager:
         authenticated = self.authorize_mutation(session_token, csrf_token)
         with self._lock:
             self._sessions.pop(authenticated.session_key, None)
+
+    def change_password(
+        self,
+        session_token: str,
+        csrf_token: str,
+        current_password: SecretStr,
+        new_password: SecretStr,
+        persist: Callable[[str], None],
+    ) -> None:
+        with self._login_lock:
+            self.authorize_mutation(session_token, csrf_token)
+            now_ns = self._monotonic_clock.monotonic_ns()
+            with self._lock:
+                self._expire_failures(now_ns)
+                self._raise_if_rate_limited(now_ns)
+            if not self._password_hasher.verify(
+                current_password.get_secret_value(), self._password_verifier.get_secret_value()
+            ):
+                with self._lock:
+                    self._failed_logins.append(now_ns)
+                raise OperatorSessionError(
+                    "OPERATOR_LOGIN_FAILED",
+                    "current password was not accepted",
+                    kind=OperatorSessionFailureKind.UNAUTHORIZED,
+                )
+            verifier = self._password_hasher.hash_password(new_password.get_secret_value())
+            authenticated = self.authorize_mutation(session_token, csrf_token)
+            with self._lock:
+                if authenticated.session_key not in self._sessions:
+                    raise OperatorSessionError(
+                        "OPERATOR_SESSION_INVALID",
+                        "session was revoked",
+                        kind=OperatorSessionFailureKind.UNAUTHORIZED,
+                    )
+                persist(verifier)
+                self._password_verifier = SecretStr(verifier)
+                self._sessions.clear()
+                self._failed_logins.clear()
 
     def revoke_all(self) -> int:
         with self._lock:

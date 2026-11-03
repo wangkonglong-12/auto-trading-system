@@ -31,7 +31,9 @@ from auto_trading_system.control.windows_pipe import exchange
 from auto_trading_system.protocol.v2.canonical import canonical_bytes
 from auto_trading_system.protocol.v2.plans import PlanEnvelope
 from auto_trading_system.runtime.node_supervisor import (
+    READONLY_RETRY_REASONS,
     NodeSupervisor,
+    _desktop_supervision_store,
     reset_supervision,
     run_supervisor,
     supervisor_guard,
@@ -374,6 +376,65 @@ def test_manual_reset_archives_previous_state_and_requires_stopped_node(rig: Rig
     assert current.previous_state_hash
     saved = ArtifactFiles(rig.config.data_root / "artifacts").read(current.previous_state_hash)
     assert saved == canonical_bytes(prior.model_dump(mode="json"))
+
+
+@pytest.mark.parametrize("reason", sorted(READONLY_RETRY_REASONS))
+def test_readonly_desktop_reopen_archives_transient_failures(
+    node_fixture: Node, monkeypatch: pytest.MonkeyPatch, reason: str
+) -> None:
+    config = node_fixture[0].model_copy(update={"broker": "QMT_READ_ONLY"})
+    store = SupervisionStore(config)
+    previous = store.read().model_copy(update={"failures": 3, "blocked": True, "reason": reason})
+    store.write(previous)
+    monkeypatch.setenv("ATS_DESKTOP_LOG_DIRECTORY", str(config.data_root / "logs"))
+    current = _desktop_supervision_store(config).read()
+    assert current.failures == 0 and not current.blocked
+    assert current.previous_state_hash
+    assert ArtifactFiles(store.artifacts).read(current.previous_state_hash) == canonical_bytes(
+        previous.model_dump(mode="json")
+    )
+    # Preparation is only performed once per launch; the normal budget remains finite.
+    supervisor = NodeSupervisor(config, store, lambda _: (_ for _ in ()).throw(OSError()), dict)
+    for _ in range(config.supervision.failure_limit):
+        supervisor.next_launch = 0
+        supervisor.tick()
+    assert store.read().blocked
+
+
+@pytest.mark.parametrize(
+    "broker,desktop,reason",
+    [
+        ("QMT_TRADING", True, "CHILD_EXITED"),
+        ("MOCK", True, "CHILD_EXITED"),
+        ("QMT_READ_ONLY", False, "CHILD_EXITED"),
+        *[
+            ("QMT_READ_ONLY", True, reason)
+            for reason in (
+                "CHILD_IDENTITY_MISMATCH",
+                "CHILD_PROGRESS_INVALID",
+                "CHILD_JOURNAL_UNHEALTHY",
+                "DISK_CHECK_FAILED",
+                "DISK_SPACE_LOW",
+                "SUPERVISOR_FAILED",
+            )
+        ],
+    ],
+)
+def test_desktop_reopen_preserves_other_safety_blocks(
+    node_fixture: Node,
+    monkeypatch: pytest.MonkeyPatch,
+    broker: str,
+    desktop: bool,
+    reason: str,
+) -> None:
+    config = node_fixture[0].model_copy(update={"broker": broker})
+    store = SupervisionStore(config)
+    previous = store.read().model_copy(update={"failures": 3, "blocked": True, "reason": reason})
+    store.write(previous)
+    monkeypatch.delenv("ATS_DESKTOP_LOG_DIRECTORY", raising=False)
+    if desktop:
+        monkeypatch.setenv("ATS_DESKTOP_LOG_DIRECTORY", str(config.data_root / "logs"))
+    assert _desktop_supervision_store(config).read() == previous
 
 
 def test_existing_engine_not_adopted_or_signalled(node_fixture: Node) -> None:

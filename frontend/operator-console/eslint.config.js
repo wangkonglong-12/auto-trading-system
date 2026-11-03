@@ -33,7 +33,7 @@ export default [
     },
   },
   {
-    files: ["src/node/*.vue"],
+    files: ["src/node/**/*.vue"],
     rules: { "vue/html-self-closing": ["error", { html: { void: "always" } }] },
   },
 ];

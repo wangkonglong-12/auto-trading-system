@@ -105,16 +105,22 @@ def load_opening(
     account_id: str,
     trade_date: date,
     calendar: ExchangeCalendar,
+    allow_historical: bool = False,
 ) -> PortfolioCheckpoint:
     """Validate metadata first; caller must still verify the entire submission prefix."""
     if body is None or digest(body) != reference.payload_hash:
         raise ValueError("opening checkpoint absent or hash mismatch")
     checkpoint = PortfolioCheckpoint.model_validate_json(body)
+    next_session = calendar.next_session(checkpoint.trade_date)
     if (
         checkpoint.account_id != account_id
         or checkpoint.trade_date != reference.trade_date
         or checkpoint.calendar_version != calendar.version
-        or calendar.next_session(checkpoint.trade_date) != trade_date
+        or (
+            checkpoint.trade_date >= trade_date or trade_date > calendar.sessions[-1]
+            if allow_historical
+            else next_session != trade_date
+        )
     ):
         raise ValueError("opening checkpoint account, calendar or next session mismatch")
     return checkpoint

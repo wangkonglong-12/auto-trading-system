@@ -93,6 +93,36 @@ def test_backup_api_includes_committed_wal(
         store.close()
 
 
+def test_backup_restores_feed_completion_private_key_and_live_recovery_evidence(
+    node: Node, submission: Submission, tmp_path: Path
+) -> None:
+    config, _, _ = node
+    populate(config, submission)
+    values = {
+        "tail-feed-local-key.bin": bytes(range(32)),
+        "tail-feed-state.json": b'{"scope":"test","feed":{"all_ready":true}}',
+        "tail-feed-phase-plans.json": b'{"plans":[],"suspended":false}',
+        "tail-phase-plans.json": b'{"plans":[],"suspended":false}',
+        "daily-risk-baseline.json": b'{"total_equity":"10000"}',
+        "opening-reference.json": b'{"opening":"test"}',
+    }
+    for name, body in values.items():
+        (config.data_root / "critical" / name).write_bytes(body)
+    report_body = b'{"scope":"backup-test","pending":{"event-1":{"seq":1}}}'
+    (config.data_root / "jobs/.execution-reporting.json").write_bytes(report_body)
+    bundle, restored = tmp_path / "feed-backup", tmp_path / "feed-restored"
+    pin = create_backup(config, bundle)
+    manifest = verify_backup(config, bundle, pin)
+    assert {"critical/" + name for name in values} <= {f.path for f in manifest.files}
+    assert "jobs/.execution-reporting.json" in {f.path for f in manifest.files}
+    restore_candidate(config, bundle, pin, restored)
+    for name, body in values.items():
+        assert (restored / "critical" / name).read_bytes() == body
+    assert (restored / "jobs/.execution-reporting.json").read_bytes() == report_body
+    with pytest.raises(ValueError, match="RESTORE_REVIEW_REQUIRED"):
+        validate_layout(config.model_copy(update={"data_root": restored}))
+
+
 @pytest.mark.parametrize("engine", [True, False])
 def test_running_engine_or_supervisor_blocks_before_output_creation(
     node: Node,

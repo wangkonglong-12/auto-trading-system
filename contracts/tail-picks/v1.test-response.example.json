@@ -1,0 +1,47 @@
+{
+  "schema_version": 1,
+  "mode": "TEST",
+  "status": "FOUND",
+  "requested_date": "2026-10-23",
+  "trade_date": "2026-10-14",
+  "server_time": "2026-10-23T12:24:40+08:00",
+  "lookback_days": 366,
+  "batches": [
+    {
+      "phase": "1440",
+      "status": "FAILED",
+      "source_run_id": null,
+      "completed_at": null,
+      "error_code": "SOURCE_FAILED",
+      "stocks": []
+    },
+    {
+      "phase": "1445",
+      "status": "READY",
+      "source_run_id": "tail-158",
+      "completed_at": "2026-10-14T14:45:32+08:00",
+      "error_code": null,
+      "stocks": [
+        {
+          "code": "002317.SZ",
+          "name": "众生药业",
+          "rank": 1
+        }
+      ]
+    },
+    {
+      "phase": "1450",
+      "status": "READY",
+      "source_run_id": "tail-159",
+      "completed_at": "2026-10-14T14:50:26+08:00",
+      "error_code": null,
+      "stocks": [
+        {
+          "code": "002317.SZ",
+          "name": "众生药业",
+          "rank": 1
+        }
+      ]
+    }
+  ]
+}

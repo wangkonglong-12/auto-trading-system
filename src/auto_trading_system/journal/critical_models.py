@@ -6,7 +6,7 @@ queues have different owners and are intentionally absent from this contract.
 
 from __future__ import annotations
 
-from datetime import date
+from datetime import date, datetime, timedelta
 from typing import Annotated, Literal
 
 from pydantic import (
@@ -72,6 +72,9 @@ class SellBinding(CriticalModel):
 class EntryBinding(CriticalModel):
     """Frozen entry target; a plan quantity ceiling is not an execution target."""
 
+    strategy_id: Identifier | None = Field(
+        default=None, description="买入目标的责任策略，供跨日成交恢复核对"
+    )
     plan_id: Identifier = Field(description="本次买入目标所属不可变计划编号")
     allocation_id: Identifier = Field(description="本次买入目标对应计划分配编号")
     target_quantity: int = Field(gt=0, le=2**31 - 1, description="执行时冻结的目标买入股数")
@@ -80,9 +83,77 @@ class EntryBinding(CriticalModel):
     @model_serializer(mode="wrap")
     def compatible_payload(self, handler: SerializerFunctionWrapHandler) -> dict[str, object]:
         result: dict[str, object] = handler(self)
+        if self.strategy_id is None:
+            result.pop("strategy_id", None)
         if self.state_hash is None:
             result.pop("state_hash", None)
         return result
+
+
+class ManualBuyBinding(CriticalModel):
+    """Exact, locally confirmed purchase; durable ownership is independent of selections."""
+
+    strategy_id: Identifier
+    actor_id: Identifier
+    settings_hash: Hash
+    symbol: str
+    name: str = Field(min_length=1, max_length=64)
+    quantity: int = Field(gt=0, le=2**31 - 1)
+    limit_price: str
+    confirmed_at: datetime
+    lower_price: str
+    upper_price: str
+    price_tick: str
+    min_quantity: int = Field(gt=0, le=10000)
+    quantity_step: int = Field(gt=0, le=10000)
+
+    @model_validator(mode="after")
+    def valid(self) -> ManualBuyBinding:
+        SecurityCode.parse(self.symbol)
+        price = Price.parse(self.limit_price).amount
+        lower, upper = Price.parse(self.lower_price).amount, Price.parse(self.upper_price).amount
+        tick = Price.parse(self.price_tick).amount
+        if (
+            self.confirmed_at.utcoffset() != timedelta(hours=8)
+            or not lower <= price <= upper
+            or price % tick != 0
+            or self.quantity < self.min_quantity
+            or (self.quantity - self.min_quantity) % self.quantity_step
+        ):
+            raise ValueError("manual purchase violates verified instrument rules")
+        return self
+
+
+class ManualSellBinding(CriticalModel):
+    """Exact operator confirmation for one allocated child of a stock sale."""
+
+    operation_id: str = Field(pattern=r"^manual-sell-[a-f0-9]{32}$")
+    strategy_id: Identifier
+    actor_id: Identifier
+    settings_hash: Hash
+    symbol: str
+    name: str = Field(min_length=1, max_length=64)
+    quantity: int = Field(gt=0, le=2**31 - 1)
+    limit_price: str
+    confirmed_at: datetime
+    lower_price: str
+    upper_price: str
+    price_tick: str
+    quantity_step: int = Field(gt=0)
+
+    @model_validator(mode="after")
+    def valid(self) -> ManualSellBinding:
+        SecurityCode.parse(self.symbol)
+        price = Price.parse(self.limit_price).amount
+        if (
+            self.confirmed_at.utcoffset() != timedelta(hours=8)
+            or not Price.parse(self.lower_price).amount
+            <= price
+            <= Price.parse(self.upper_price).amount
+            or price % Price.parse(self.price_tick).amount
+        ):
+            raise ValueError("manual sale violates verified price rules")
+        return self
 
 
 class Submission(CriticalModel):
@@ -97,7 +168,7 @@ class Submission(CriticalModel):
         default=None, description="撤单对应本地原始子单编号"
     )
     plan_hash: Hash = Field(description="不可变执行上下文正文摘要，具体类型由context_type指定")
-    context_type: Literal["ENTRY_PLAN", "EXIT_SESSION"] = Field(
+    context_type: Literal["ENTRY_PLAN", "EXIT_SESSION", "MANUAL_ENTRY", "MANUAL_EXIT"] = Field(
         default="ENTRY_PLAN",
         description="plan_hash引用的上下文类型，买入计划或独立退出会话",
     )
@@ -116,6 +187,8 @@ class Submission(CriticalModel):
     sell_binding: SellBinding | None = Field(
         default=None, description="卖出批次证据；历史无绑定记录仅可读取，执行层拒绝派发"
     )
+    manual_binding: ManualBuyBinding | None = None
+    manual_sell_binding: ManualSellBinding | None = None
 
     @model_serializer(mode="wrap")
     def compatible_payload(self, handler: SerializerFunctionWrapHandler) -> dict[str, object]:
@@ -128,10 +201,47 @@ class Submission(CriticalModel):
             result.pop("entry_binding", None)
         if self.context_type == "ENTRY_PLAN":
             result.pop("context_type", None)
+        if self.manual_binding is None:
+            result.pop("manual_binding", None)
+        if self.manual_sell_binding is None:
+            result.pop("manual_sell_binding", None)
         return result
 
     @model_validator(mode="after")
     def validate_order(self) -> Submission:
+        if (self.context_type == "MANUAL_EXIT") != (self.manual_sell_binding is not None):
+            raise ValueError("manual exit requires durable local confirmation")
+        if self.manual_sell_binding is not None:
+            from auto_trading_system.protocol.v2.canonical import canonical_bytes, digest
+
+            sale_binding = self.manual_sell_binding
+            if (
+                self.side != "SELL"
+                or self.sell_binding is None
+                or self.manual_binding is not None
+                or self.entry_binding is not None
+                or (self.symbol, self.quantity, self.limit_price)
+                != (sale_binding.symbol, sale_binding.quantity, sale_binding.limit_price)
+                or self.trade_date != sale_binding.confirmed_at.date()
+                or self.plan_hash != digest(canonical_bytes(sale_binding.model_dump(mode="json")))
+            ):
+                raise ValueError("manual exit differs from exact confirmed sale")
+        if (self.context_type == "MANUAL_ENTRY") != (self.manual_binding is not None):
+            raise ValueError("manual entry requires durable local confirmation")
+        if self.manual_binding is not None:
+            from auto_trading_system.protocol.v2.canonical import canonical_bytes, digest
+
+            binding = self.manual_binding
+            if (
+                self.side != "BUY"
+                or self.entry_binding is not None
+                or self.sell_binding is not None
+                or (self.symbol, self.quantity, self.limit_price)
+                != (binding.symbol, binding.quantity, binding.limit_price)
+                or self.trade_date != binding.confirmed_at.date()
+                or self.plan_hash != digest(canonical_bytes(binding.model_dump(mode="json")))
+            ):
+                raise ValueError("manual entry differs from exact confirmed purchase")
         if self.entry_binding is not None and (
             self.side != "BUY"
             or self.context_type != "ENTRY_PLAN"

@@ -314,16 +314,23 @@ def test_repeated_poll_or_same_quote_does_not_duplicate_child(tmp_path: Path) ->
         assert dict(owner.snapshot().progress)["000001.SZ"] == "ORDER_ACTIVE"
 
 
+@pytest.mark.parametrize("seconds", [5, 8])
 def test_timeout_cancels_unchanged_buy_and_requotes_only_after_terminal_evidence(
     tmp_path: Path,
+    seconds: int,
 ) -> None:
-    with armed(tmp_path) as (runtime, owner, clock):
+    plan, policy = entry_fixture()
+    policy = policy.model_copy(update={"cancel_after_seconds": seconds})
+    with armed(tmp_path, plan=bound_policy(plan, policy), policy=policy) as (runtime, owner, clock):
         publish_entry(owner, clock, 1)
         pump_entry(
             owner, lambda: len(runtime.broker.query_orders()) == 1 and runtime.kernel.critical_idle
         )
 
-        clock.advance(21)
+        clock.advance(seconds - 1)
+        owner.poll()
+        assert runtime.broker.query_orders()[0].status.value == "ACKED"
+        clock.advance(1)
         pump_entry(
             owner,
             lambda: runtime.kernel.snapshot().orders[0].phase == "TERMINAL_CONFIRMED"
@@ -331,11 +338,11 @@ def test_timeout_cancels_unchanged_buy_and_requotes_only_after_terminal_evidence
         )
         assert runtime.broker.query_orders()[0].status.value == "CANCELLED"
 
-        runtime.broker.queue_submit(fill_scenario(100, full=True))
-        publish_entry(owner, clock, 2)
-        pump_entry(owner, lambda: dict(owner.snapshot().progress).get("000001.SZ") == "FINISHED")
+        publish_entry(owner, clock, 2, ask="9.99")
+        pump_entry(owner, lambda: len(runtime.broker.query_orders()) == 2)
         assert len(runtime.broker.query_orders()) == 2
-        assert sum(lot.bought_quantity for lot in runtime.kernel.snapshot().lots) == 100
+        assert runtime.broker.query_orders()[1].limit_price.amount == Decimal("9.99")
+        assert runtime.broker.query_orders()[1].order_quantity.value == 100
 
 
 def test_rejected_children_count_toward_limit_across_fresh_quotes(tmp_path: Path) -> None:

@@ -24,6 +24,30 @@ function settings(): TradingSettingsValues {
 }
 
 describe("operator trading settings validation", () => {
+  it("validates buy and sell timeout seconds independently", () => {
+    const value = settings();
+    value.buy.cancel_after_seconds = 5;
+    value.sell_execution = { cancel_after_seconds: 7 };
+    expect(validateSettings(value)).toEqual([]);
+    for (const seconds of [0, 301, 1.5, NaN]) {
+      value.sell_execution.cancel_after_seconds = seconds;
+      expect(
+        validateSettings(value).some((i) => i.field === "sell_execution.cancel_after_seconds"),
+      ).toBe(true);
+    }
+  });
+  it("validates the account position percentage", () => {
+    for (const pct of ["0", "100.01", "70.001", "-1", "NaN"]) {
+      const value = settings();
+      value.safety.max_total_position_pct = pct;
+      expect(validateSettings(value).some((i) => i.field === "safety.max_total_position_pct")).toBe(
+        true,
+      );
+    }
+    const value = settings();
+    value.safety.max_total_position_pct = "70.25";
+    expect(validateSettings(value)).toEqual([]);
+  });
   it("accepts valid limits and explicitly disabled buying", () => {
     const value = settings();
     expect(validateSettings(value)).toEqual([]);
@@ -48,9 +72,7 @@ describe("operator trading settings validation", () => {
   it("identifies each invalid field and rejects imprecise money", () => {
     const value = settings();
     value.buy.max_daily_buy_value = "1000.123";
-    value.sell.take_profit_pct = "0";
-    value.sell.stop_loss_pct = "100";
-    value.sell.sell_by = "12:00";
+    value.sell = { take_profit_pct: "0", stop_loss_pct: "100", sell_by: "12:00" };
     value.advanced.max_chase_bps = -1;
     value.advanced.quote_max_age_ms = 99;
     const fields = validateSettings(value).map((i) => i.field);

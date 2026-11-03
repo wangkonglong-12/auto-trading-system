@@ -4,6 +4,7 @@ from __future__ import annotations
 
 from collections.abc import Callable, Mapping
 from datetime import datetime
+from pathlib import Path
 from threading import get_ident
 
 from cryptography.exceptions import InvalidSignature
@@ -14,6 +15,7 @@ from auto_trading_system.protocol.v2.canonical import canonical_bytes, digest
 from auto_trading_system.protocol.v2.plans import PolicyVersion, verify_plan
 from auto_trading_system.sync.artifact_files import ArtifactFiles
 from auto_trading_system.sync.plan_files import PlanFiles
+from auto_trading_system.sync.tail_phase_history import TailPhaseHistory
 
 
 class EnginePlanControl:
@@ -37,11 +39,34 @@ class EnginePlanControl:
         rulebook: str,
         clock: Callable[[], datetime],
         pause_for_change: Callable[[], None],
+        tail_phases: bool = False,
+        local_tail_history: Path | None = None,
     ) -> None:
         self._files = files
         self._keys = dict(keys)
         self._owner = get_ident()
         self.plans = PlanFiles(files, keys)
+        if tail_phases:
+            self.plans.tail_history = TailPhaseHistory(
+                local_tail_history or files.root.parent / "critical/tail-phase-plans.json",
+                allow_late=local_tail_history is not None,
+            )
+            self.plans.tail_history.restore(
+                keys, account_id=account_id, generation=node_generation, today=clock().date()
+            )
+            restored = self.plans.accepted()
+            if restored:
+                if any(
+                    p.payload.rulebook_version != rulebook or p.payload.policy_bundle != policies
+                    for p in restored
+                ):
+                    raise ValueError("restored phase policy differs from installed policy")
+                self.plans.restore_for_recovery(
+                    canonical_bytes(restored[-1].model_dump(mode="json")),
+                    account_id=account_id,
+                    node_generation=node_generation,
+                    now=clock(),
+                )
         self.node_id = node_id
         self.account_id = account_id
         self.generation = node_generation
@@ -81,6 +106,8 @@ class EnginePlanControl:
         )
         self._armed = True
         scope = lookup.strategy_id + ":" + lookup.trade_date.isoformat()
+        if self.plans.tail_history is not None and lookup.plan is not None:
+            scope += ":" + str(lookup.plan.payload.source.decision_phase)
         self._latest_version[scope], self._latest_etag[scope] = lookup.state_version, lookup.etag
 
     def apply(self, lookup: PlanLookup, artifact_hash: str | None) -> PlanReceipt:
@@ -88,6 +115,8 @@ class EnginePlanControl:
         if lookup.account_id != self.account_id:
             raise ValueError("plan belongs to another account")
         scope = lookup.strategy_id + ":" + lookup.trade_date.isoformat()
+        if self.plans.tail_history is not None and lookup.plan is not None:
+            scope += ":" + str(lookup.plan.payload.source.decision_phase)
         if lookup.state_version < self._latest_version.get(scope, 0):
             raise ValueError("plan lookup version moved backwards")
         if (
@@ -135,7 +164,11 @@ class EnginePlanControl:
         reason: str
         try:
             if lookup.state == "WITHDRAWN":
-                if self._armed:
+                if self.plans.tail_history is not None:
+                    self._pause_safely()
+                    self.plans.suspend_tail()
+                    status, reason = "WITHDRAWN", "TAIL_SESSION_WITHDRAWN"
+                elif self._armed:
                     self._pause_safely()
                     status, reason = "CHANGE_REQUIRES_PAUSE", "ARMED_PLAN_WITHDRAWN"
                 else:
@@ -152,7 +185,15 @@ class EnginePlanControl:
                     item.component: item for item in payload.policy_bundle
                 }:
                     raise ValueError("plan policy or rulebook is unsupported")
-                if self._armed and loaded != lookup.plan:
+                if self.plans.tail_history is not None:
+                    self.plans.load_tail_phase(
+                        data,
+                        account_id=self.account_id,
+                        node_generation=self.generation,
+                        now=self._clock(),
+                    )
+                    status, reason = "LOADED", "VERIFIED_TAIL_PHASE"
+                elif self._armed and loaded != lookup.plan:
                     self._pause_safely()
                     status, reason = "CHANGE_REQUIRES_PAUSE", "ARMED_PLAN_FROZEN"
                 else:

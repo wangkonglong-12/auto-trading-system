@@ -81,3 +81,46 @@ def test_all_zero_buy_ceilings_explicitly_disable_buying() -> None:
     value = settings(max_daily_buy_value="0", max_symbol_buy_value="0", max_order_value="0")
 
     assert not value.buy.enabled
+
+
+def test_independent_order_timeout_defaults_and_persistence(tmp_path: Path) -> None:
+    payload = settings().model_dump(mode="json")
+    payload["buy"].pop("cancel_after_seconds")
+    value = TradingSettings.model_validate_json(canonical_bytes(payload))
+    assert value.buy.cancel_after_seconds == value.sell_execution.cancel_after_seconds == 5
+    payload["buy"]["cancel_after_seconds"] = 7
+    payload["sell_execution"] = {"cancel_after_seconds": 9}
+    value = TradingSettings.model_validate_json(canonical_bytes(payload))
+    store = TradingSettingsDraftStore(tmp_path)
+    saved = store.save(value, expected_version=0)
+    assert store.read() == saved
+    assert saved.settings.buy.cancel_after_seconds == 7
+    assert saved.settings.sell_execution.cancel_after_seconds == 9
+
+
+@pytest.mark.parametrize("seconds", [0, 301, 1.5, "5", True])
+def test_sell_timeout_rejects_invalid_seconds(seconds: object) -> None:
+    payload = settings().model_dump(mode="json")
+    payload["sell_execution"] = {"cancel_after_seconds": seconds}
+    with pytest.raises(ValueError):
+        TradingSettings.model_validate_json(canonical_bytes(payload))
+
+
+@pytest.mark.parametrize("pct", ["0", "100.01", "70.001", "-1", 70])
+def test_invalid_position_percentage_is_rejected(pct: object) -> None:
+    payload = settings().model_dump(mode="json")
+    payload["safety"]["max_total_position_pct"] = pct
+    with pytest.raises(ValidationError):
+        TradingSettings.model_validate_json(canonical_bytes(payload))
+
+
+def test_legacy_settings_default_to_seventy_percent_and_keep_budget(tmp_path: Path) -> None:
+    value = settings()
+    assert value.safety.max_total_position_pct == "70"
+    assert value.buy.max_daily_buy_value == "50000"
+    store = TradingSettingsDraftStore(tmp_path)
+    payload = value.model_dump(mode="json")
+    payload["safety"]["max_total_position_pct"] = "65.25"
+    updated = TradingSettings.model_validate_json(canonical_bytes(payload))
+    store.save(updated, expected_version=0)
+    assert store.read().settings == updated

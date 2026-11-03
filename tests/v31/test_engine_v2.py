@@ -51,6 +51,34 @@ def recover(runtime: OfflineEngine) -> None:
     wait_for(runtime.kernel, lambda s: s.state in ("REVIEW_REQUIRED", "RECOVERY_BLOCKED"))
 
 
+@pytest.mark.parametrize(
+    "message,expected",
+    [
+        ("QMT_TIMESTAMP_OUTSIDE_TRADE_DATE", "QMT_TIMESTAMP_OUTSIDE_TRADE_DATE"),
+        ("account-private credential-private", "RECOVERY_BROKER_QUERY_FAILED"),
+    ],
+)
+def test_recovery_failure_exposes_only_safe_code_and_resets_on_new_check(
+    tmp_path: Path, message: str, expected: str
+) -> None:
+    with open_offline_engine(tmp_path, preload_plan=False) as rt:
+        reader = rt.kernel._account_reader
+
+        def failed_account() -> AccountFact:
+            raise ValueError(message)
+
+        rt.kernel._account_reader = failed_account
+        rt.kernel.start_recovery()
+        wait_even_halted(rt, lambda s: s.state == "HALTED")
+        assert rt.kernel.recovery_error() == expected
+        assert rt.kernel.snapshot().halted and rt.kernel.snapshot().grant_id is None
+        rt.kernel._account_reader = reader
+        rt.kernel.start_recovery()
+        assert rt.kernel.recovery_error() is None
+        wait_even_halted(rt, lambda s: s.state == "REVIEW_REQUIRED")
+        assert rt.kernel.recovery_error() is None and rt.kernel.snapshot().halted
+
+
 def confirm(runtime: OfflineEngine) -> LocalControlRequest:
     recover(runtime)
     report = runtime.kernel.snapshot().recovery
@@ -717,3 +745,25 @@ def test_control_persistence_excludes_recovery_and_competing_controls(tmp_path: 
         finally:
             release.set()
         wait_for(rt.kernel, lambda s: s.state == "READY_PAUSED")
+
+
+def test_invalid_opening_stays_available_and_halted_without_discarding_evidence(tmp_path):
+    from auto_trading_system.reconcile.portfolio_checkpoint import OpeningReference
+
+    with open_offline_engine(tmp_path, preload_plan=False) as rt:
+        reference = OpeningReference(
+            trade_date=rt.kernel.trade_date, payload_hash="sha256:" + "f" * 64
+        )
+        rt.kernel._opening_reference = reference
+        rt.kernel.start_recovery()
+        wait_even_halted(rt, lambda state: state.state == "HALTED")
+        assert rt.kernel.recovery_error() == "RECOVERY_OPENING_REFERENCE_FAILED"
+        assert rt.journal.healthy
+        assert rt.kernel._opening_reference == reference
+        assert rt.kernel.snapshot().grant_id is None
+        # Owner remains responsive after the failed validation and a repeat check.
+        for _ in range(3):
+            rt.kernel.poll()
+        rt.kernel.start_recovery()
+        wait_even_halted(rt, lambda state: state.state == "HALTED")
+        assert not rt.broker.query_orders()

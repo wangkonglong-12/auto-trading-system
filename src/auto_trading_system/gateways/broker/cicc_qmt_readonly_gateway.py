@@ -6,6 +6,8 @@ from collections.abc import Callable
 from datetime import datetime
 from threading import Lock
 
+from pydantic import JsonValue
+
 from auto_trading_system.gateways.broker.cicc_qmt import XtquantBindings
 from auto_trading_system.gateways.broker.cicc_qmt_facts import CiccQmtFactsClient
 from auto_trading_system.gateways.broker.models import (
@@ -23,6 +25,7 @@ from auto_trading_system.monitoring.qmt_readonly import (
     QmtSignal,
     QmtSignalKind,
 )
+from auto_trading_system.protocol.account_monitoring import Observation
 from auto_trading_system.runtime.recovery_v2 import AccountFact
 
 
@@ -50,6 +53,8 @@ class CiccQmtReadOnlyGateway:
         self._unavailable_sink = unavailable_sink
         self._signal_lock = Lock()
         self._invalid_signal = False
+        self._display_blocked = False
+        self._signal_generation = 0
         self._started = False
         self._subscribed = False
         self._last_account: AccountFact | None = None
@@ -66,6 +71,9 @@ class CiccQmtReadOnlyGateway:
         with self._signal_lock:
             first_failure = not self._invalid_signal
             self._invalid_signal = True
+            self._signal_generation += 1
+            if signal.kind is not QmtSignalKind.ACCOUNT_STATUS:
+                self._display_blocked = True
         if first_failure and self._unavailable_sink is not None:
             self._unavailable_sink(reason)
 
@@ -101,10 +109,30 @@ class CiccQmtReadOnlyGateway:
 
     def _require_active_stock_account(self) -> None:
         self._healthy()
+        self._query_active_stock_account()
+        self._healthy()
+
+    def _query_active_stock_account(self) -> None:
         statuses = self._client.query_account_statuses().target_statuses
         if len(statuses) != 1 or statuses[0].account_type != 2 or statuses[0].status != 0:
             raise QmtReadOnlyAdapterError("QMT_GATEWAY_ACCOUNT_NOT_OK", "account unavailable")
-        self._healthy()
+
+    def _display_generation(self) -> int:
+        with self._signal_lock:
+            if not self._started or self._display_blocked:
+                raise QmtReadOnlyAdapterError("QMT_GATEWAY_UNAVAILABLE", "QMT session unavailable")
+            return self._signal_generation
+
+    def _require_display_stock_account(self) -> int:
+        # A fresh display may recover from a transient account status, while
+        # recovery queries and the engine halt remain latched until explicit recovery.
+        generation = self._display_generation()
+        self._query_active_stock_account()
+        if self._display_generation() != generation:
+            raise QmtReadOnlyAdapterError(
+                "QMT_GATEWAY_ACCOUNT_NOT_OK", "account changed during query"
+            )
+        return generation
 
     def stop(self) -> None:
         if not self._started:
@@ -143,6 +171,41 @@ class CiccQmtReadOnlyGateway:
         if self._last_account is None:
             raise QmtReadOnlyAdapterError("QMT_GATEWAY_SNAPSHOT_MISSING", "account unavailable")
         return self._last_account
+
+    def read_monitoring(self) -> Observation:
+        from auto_trading_system.gateways.broker.qmt_command_transport import QmtConstants
+
+        generation = self._require_display_stock_account()
+        constants = QmtConstants.from_sdk()
+        result = self._client.read_monitoring(
+            self._clock,
+            buy=constants.stock_buy, sell=constants.stock_sell,
+        )
+        if self._require_display_stock_account() != generation:
+            raise ValueError("account changed during monitoring query")
+        return result
+
+    def read_operator_details(self) -> dict[str, JsonValue]:
+        """Display actual activity while leaving conservative recovery unchanged."""
+        from auto_trading_system.gateways.broker.qmt_command_transport import QmtConstants
+        from auto_trading_system.gateways.market.qmt import read_instrument_names
+
+        generation = self._require_display_stock_account()
+        constants = QmtConstants.from_sdk()
+        result = self._client.read_operator_details(
+            self._account_alias, self._clock(), buy=constants.stock_buy, sell=constants.stock_sell
+        )
+        symbols: list[str] = []
+        for key in ("positions", "orders", "trades"):
+            rows = result.get(key)
+            if isinstance(rows, list):
+                symbols.extend(str(row["symbol"]) for row in rows if isinstance(row, dict))
+        result["names"] = dict(read_instrument_names(tuple(symbols)))
+        if self._require_display_stock_account() != generation:
+            raise QmtReadOnlyAdapterError(
+                "QMT_GATEWAY_ACCOUNT_NOT_OK", "account changed during query"
+            )
+        return result
 
     def find_order_by_client_id(self, client_order_id: str) -> BrokerOrder | None:
         del client_order_id

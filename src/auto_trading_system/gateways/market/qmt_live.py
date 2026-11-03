@@ -8,8 +8,9 @@ database, broker-query, or HTTP work on the SDK callback thread.
 from __future__ import annotations
 
 import math
+from collections import deque
 from collections.abc import Callable, Mapping, Sequence
-from dataclasses import dataclass
+from dataclasses import dataclass, replace
 from datetime import datetime
 from decimal import ROUND_HALF_UP, Decimal, InvalidOperation
 from threading import Lock
@@ -36,6 +37,9 @@ from auto_trading_system.gateways.market.qmt import XtdataBindings, load_xtdata_
 
 _MAX_SUBSCRIPTIONS = 15
 _MAX_CALLBACK_BATCH = 256
+_MAX_CLOCK_LEAD_SECONDS = 3
+_MAX_PENDING_TICKS = 256
+_INVALID_CALLBACK_LIMIT = 3
 _REQUIRED_FIELDS = frozenset(
     {
         "time",
@@ -84,12 +88,17 @@ class CiccQmtMarketGateway:
         self._callbacks: dict[int, Callable[[object], None]] = {}
         self._latest: dict[SecurityCode, MarketTick] = {}
         self._fault: str | None = None
+        self._invalid: dict[SecurityCode, int] = {}
+        self._callback_faults: dict[SecurityCode, str] = {}
+        self._bad_after: dict[SecurityCode, int] = {}
+        self._pending_ticks: deque[MarketTick] = deque()
         self._sequence = 0
 
     @property
     def fault_code(self) -> str | None:
+        self._flush_pending()
         with self._lock:
-            return self._fault
+            return self._fault or next(iter(self._callback_faults.values()), None)
 
     @property
     def subscription_count(self) -> int:
@@ -104,6 +113,10 @@ class CiccQmtMarketGateway:
                 raise MarketNotStartedError("QMT market gateway is already started")
             self._sink = event_sink
             self._fault = None
+            self._invalid.clear()
+            self._callback_faults.clear()
+            self._bad_after.clear()
+            self._pending_ticks.clear()
 
     def stop(self) -> None:
         with self._lock:
@@ -120,6 +133,10 @@ class CiccQmtMarketGateway:
             self._by_id.clear()
             self._callbacks.clear()
             self._latest.clear()
+            self._pending_ticks.clear()
+            self._invalid.clear()
+            self._callback_faults.clear()
+            self._bad_after.clear()
         if failure is not None:
             raise MarketDataQueryError("QMT market unsubscribe failed during shutdown") from failure
 
@@ -172,6 +189,10 @@ class CiccQmtMarketGateway:
             self._by_symbol.pop(symbol, None)
             self._callbacks.pop(subscription_id, None)
             self._latest.pop(symbol, None)
+            self._invalid.pop(symbol, None)
+            self._callback_faults.pop(symbol, None)
+            self._bad_after.pop(symbol, None)
+            self._pending_ticks = deque(t for t in self._pending_ticks if t.symbol != symbol)
         return True
 
     def latest_tick(self, symbol: SecurityCode) -> MarketTick | None:
@@ -190,11 +211,10 @@ class CiccQmtMarketGateway:
             raise MarketDataQueryError("QMT instrument-detail query failed") from exc
         if not isinstance(raw, Mapping):
             raise MarketDataQueryError("QMT instrument-detail result is invalid")
-        if raw.get("IsTrading") is not True:
-            raise MarketDataQueryError("QMT reports the security is not tradable")
-        tick = _decimal(raw.get("PriceTick"), "PriceTick", positive=True)
-        lower = _decimal(raw.get("DownStopPrice"), "DownStopPrice", positive=True)
-        upper = _decimal(raw.get("UpStopPrice"), "UpStopPrice", positive=True)
+        # IsTrading is deliberately not an admission gate for this stock-rule query.
+        tick = _price_decimal(raw.get("PriceTick"), "PriceTick", positive=True)
+        lower = _price_decimal(raw.get("DownStopPrice"), "DownStopPrice", positive=True)
+        upper = _price_decimal(raw.get("UpStopPrice"), "UpStopPrice", positive=True)
         if lower >= upper or tick > Decimal("1"):
             raise MarketDataQueryError("QMT instrument price limits are invalid")
         wire = symbol.to_wire()
@@ -204,27 +224,80 @@ class CiccQmtMarketGateway:
 
     def _callback(self, symbol: SecurityCode, payload: object) -> None:
         try:
+            self._flush_pending()
             records = _callback_records(symbol.to_wire(), payload)
             for record in records:
                 received_at = self._clock.now()
                 with self._lock:
                     self._sequence += 1
                     sequence = self._sequence
+                raw_time = record.get("time")
+                lead = (
+                    raw_time / 1000 - received_at.value.timestamp() if type(raw_time) is int else 0
+                )
+                if lead > _MAX_CLOCK_LEAD_SECONDS:
+                    with self._lock:
+                        self._callback_faults[symbol] = "QMT_TICK_CLOCK_SKEW"
+                        self._bad_after[symbol] = sequence
+                    return
+                if lead > 0:
+                    # Validate now, but never expose a future tick to strategies.
+                    # received_at on delivery is the adapter's actual handoff time;
+                    # the exchange timestamp is preserved without clock correction.
+                    due = ShanghaiTimestamp(
+                        datetime.fromtimestamp(cast(int, raw_time) / 1000, tz=SHANGHAI_TIMEZONE)
+                    )
+                    tick = _normalize_tick(symbol, record, due, sequence)
+                    with self._lock:
+                        if len(self._pending_ticks) >= _MAX_PENDING_TICKS:
+                            self._callback_faults[symbol] = "QMT_TICK_CLOCK_SKEW"
+                            self._bad_after[symbol] = sequence
+                            return
+                        self._pending_ticks.append(tick)
+                    continue
                 tick = _normalize_tick(symbol, record, received_at, sequence)
-                with self._lock:
-                    if symbol not in self._by_symbol or self._sink is None:
-                        return
-                    current = self._latest.get(symbol)
-                    if current is not None and tick.occurred_at < current.occurred_at:
-                        continue
-                    self._latest[symbol] = tick
-                    sink = self._sink
-                sink(tick)
+                self._publish(tick)
         except Exception:
-            # SDK callback exceptions must never escape into XtData.  The owner
-            # sees this fail-closed latch on its next poll and halts new orders.
+            # Isolated malformed ticks are discarded. Stale-quote gates still
+            # apply; three consecutive bad callbacks pause the account.
             with self._lock:
-                self._fault = "QMT_TICK_CALLBACK_INVALID"
+                count = self._invalid.get(symbol, 0) + 1
+                self._invalid[symbol] = min(count, _INVALID_CALLBACK_LIMIT)
+                self._bad_after[symbol] = self._sequence
+                if count >= _INVALID_CALLBACK_LIMIT:
+                    self._callback_faults[symbol] = "QMT_TICK_CALLBACK_INVALID"
+
+    def _flush_pending(self) -> None:
+        now = self._clock.now()
+        with self._lock:
+            ready = [t for t in self._pending_ticks if t.occurred_at <= now]
+            self._pending_ticks = deque(t for t in self._pending_ticks if t.occurred_at > now)
+        for tick in ready:
+            try:
+                self._publish(replace(tick, received_at=now))
+            except Exception:
+                with self._lock:
+                    self._fault = "QMT_TICK_DELIVERY_FAILED"
+
+    def _publish(self, tick: MarketTick) -> None:
+        symbol = tick.symbol
+        with self._lock:
+            if symbol not in self._by_symbol or self._sink is None:
+                return
+            current = self._latest.get(symbol)
+            if current is not None and tick.occurred_at < current.occurred_at:
+                return
+            self._latest[symbol] = tick
+            if (tick.source_seq or 0) > self._bad_after.get(symbol, -1):
+                self._invalid.pop(symbol, None)
+                self._callback_faults.pop(symbol, None)
+                self._bad_after.pop(symbol, None)
+            sink = self._sink
+        try:
+            sink(tick)
+        except Exception:
+            with self._lock:
+                self._fault = "QMT_TICK_DELIVERY_FAILED"
 
     def _require_started(self) -> None:
         with self._lock:
@@ -263,6 +336,19 @@ def _decimal(value: object, field: str, *, positive: bool = False) -> Decimal:
     return result
 
 
+def _price_decimal(value: object, field: str, *, positive: bool = False) -> Decimal:
+    number = _decimal(value, field, positive=positive)
+    # Vendor doubles can carry binary tails (e.g. 9.600000000000001).
+    # Normalize only float transport values to the domain's eight-place scale.
+    exponent = number.as_tuple().exponent
+    if isinstance(value, float) and isinstance(exponent, int) and exponent < -8:
+        rounded = number.quantize(Decimal("0.00000001"), rounding=ROUND_HALF_UP)
+        number = Decimal(format(rounded, "f").rstrip("0").rstrip("."))
+    if positive and number <= 0:
+        raise ValueError(f"QMT {field} is outside range")
+    return number
+
+
 def _whole(value: object, field: str) -> int:
     number = _decimal(value, field)
     integral = number.to_integral_value()
@@ -278,7 +364,7 @@ def _book(prices: object, quantities: object, multiplier: int, side: str) -> tup
         raise ValueError(f"QMT {side} book depth is invalid")
     result: list[BookLevel] = []
     for raw_price, raw_quantity in zip(prices[:10], quantities[:10], strict=True):
-        price = _decimal(raw_price, side + "Price")
+        price = _price_decimal(raw_price, side + "Price")
         quantity = _whole(raw_quantity, side + "Vol")
         if price == 0 or quantity == 0:
             continue
@@ -302,12 +388,10 @@ def _normalize_tick(
         raise ValueError("QMT tick time is ahead of the local receive time")
     volume = _whole(record["volume"], "volume")
     pvolume = _whole(record["pvolume"], "pvolume")
-    multiplier = 1
-    if volume:
-        if pvolume % volume or not 1 <= pvolume // volume <= 10_000:
-            raise ValueError("QMT volume unit cannot be verified")
-        multiplier = pvolume // volume
-    elif pvolume:
+    # This A-share adapter receives whole hands and raw shares. QMT rounds
+    # volume to whole hands; odd shares need not divide volume exactly.
+    multiplier = 100
+    if abs(volume * multiplier - pvolume) >= multiplier:
         raise ValueError("QMT volume fields are inconsistent")
     turnover = _decimal(record["amount"], "amount").quantize(
         Decimal("0.01"), rounding=ROUND_HALF_UP
@@ -325,7 +409,7 @@ def _normalize_tick(
         symbol=symbol,
         occurred_at=occurred,
         received_at=received_at,
-        last_price=Price(_decimal(record["lastPrice"], "lastPrice", positive=True)),
+        last_price=Price(_price_decimal(record["lastPrice"], "lastPrice", positive=True)),
         cumulative_volume=Quantity(pvolume),
         cumulative_turnover=Money(turnover),
         bids=_book(record["bidPrice"], record["bidVol"], multiplier, "bid"),

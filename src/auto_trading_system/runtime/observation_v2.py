@@ -18,7 +18,10 @@ from auto_trading_system.reconcile.position_lots import (
     assert_position_match,
     project_lots,
 )
-from auto_trading_system.runtime.recovery_v2 import BrokerRecoverySnapshot
+from auto_trading_system.runtime.recovery_v2 import (
+    BrokerRecoverySnapshot,
+    strategy_recovery_snapshot,
+)
 
 
 @dataclass(frozen=True)
@@ -45,6 +48,9 @@ def check_empty_observation(
     fabricated and no old facts are discarded; any nonempty observation still
     requires an explicit execution context and its regular lot projection.
     """
+    full_snapshot = snapshot
+    if allow_unmanaged:
+        snapshot = strategy_recovery_snapshot(snapshot, frozenset())
     account = snapshot.account
     if (
         not snapshot.stable
@@ -66,11 +72,11 @@ def check_empty_observation(
     ):
         raise ValueError("unassigned account must be fresh, coherent and empty")
     return CheckedObservation(
-        snapshot,
+        full_snapshot,
         previous.checked_query((), (), ()),
         PortfolioProjection(
             (),
-            frozenset(position.symbol for position in account.positions),
+            frozenset(),
             (),
             (),
             tuple(sorted((position.symbol, position.quantity) for position in account.positions)),
@@ -93,11 +99,18 @@ def check_observation(
     event_version: int,
     opening: tuple[PositionLot, ...] = (),
     opening_hash: str | None = None,
-    context_type: Literal["ENTRY_PLAN", "EXIT_SESSION"] = "ENTRY_PLAN",
+    context_type: Literal[
+        "ENTRY_PLAN", "EXIT_SESSION", "MANUAL_ENTRY", "MANUAL_EXIT"
+    ] = "ENTRY_PLAN",
     accepted_scopes: frozenset[tuple[str, str]] | None = None,
     allow_unmanaged: bool = False,
 ) -> CheckedObservation:
     """Project today's immutable J1 allocations over a verified opening checkpoint."""
+    full_snapshot = snapshot
+    if allow_unmanaged:
+        snapshot = strategy_recovery_snapshot(
+            snapshot, frozenset(item.client_order_id for item in submissions)
+        )
     account = snapshot.account
     if (
         not snapshot.stable
@@ -186,4 +199,4 @@ def check_observation(
                 unmanaged_positions=residual,
             )
     assert_position_match(portfolio, {p.symbol: p.quantity for p in account.positions})
-    return CheckedObservation(snapshot, orders, portfolio, terminal)
+    return CheckedObservation(full_snapshot, orders, portfolio, terminal)

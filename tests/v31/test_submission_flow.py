@@ -16,7 +16,11 @@ from auto_trading_system.gateways.broker.mock import (
     SubmitScenario,
 )
 from auto_trading_system.journal.apsw_store import APSWCriticalStore
-from auto_trading_system.journal.critical_models import CommitEvidence, Submission
+from auto_trading_system.journal.critical_models import (
+    CommitEvidence,
+    CriticalStoreError,
+    Submission,
+)
 from auto_trading_system.journal.critical_writer import CriticalJournalOwner, open_critical_journal
 from auto_trading_system.runtime.memory_state import MarketWindow, QuotePoint
 
@@ -105,7 +109,10 @@ def test_halt_or_j1_deadline_invalidates_late_success_without_stalling_ticks(
         else:
             assert run_until_settled(coordinator) == "PERSISTENCE_UNCERTAIN"
             release.set()
-        assert journal.recovery_page().result(timeout=2)[0].submission == submission
+        if not halt_first:
+            assert not journal.healthy
+            with pytest.raises(CriticalStoreError, match="UNAVAILABLE"):
+                journal.recovery_page().result(timeout=2)
         coordinator.poll()
         assert broker.query_orders() == ()
     finally:
@@ -113,6 +120,14 @@ def test_halt_or_j1_deadline_invalidates_late_success_without_stalling_ticks(
         dispatcher.close()
         assert journal.close()
         broker.stop()
+
+    # A timed-out owner stays fenced. Recover late durable evidence only after
+    # that owner has fully stopped, never by reviving it in place.
+    recovered = open_critical_journal(tmp_path / "critical.db", submission.account_id)
+    try:
+        assert recovered.recovery_page().result(timeout=2)[0].submission == submission
+    finally:
+        assert recovered.close()
 
 
 def test_sdk_timeout_after_accept_never_retries(tmp_path: Path, submission: Submission) -> None:

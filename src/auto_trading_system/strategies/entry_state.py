@@ -12,11 +12,13 @@ from typing import Literal
 
 from pydantic import AwareDatetime, Field, model_validator
 
+from auto_trading_system.journal.critical_models import CriticalStoreError
 from auto_trading_system.journal.critical_writer import CriticalStorePort
 from auto_trading_system.protocol.v2.base import Sha256, WireId, WireModel
 from auto_trading_system.protocol.v2.canonical import canonical_bytes, digest
-from auto_trading_system.protocol.v2.plans import PlanPayload
+from auto_trading_system.protocol.v2.plans import Allocation, PlanPayload
 from auto_trading_system.protocol.v2.records import MoneyText, PriceText, Symbol
+from auto_trading_system.strategies.trading_settings import TradingSettings
 
 
 class EntryInstrument(WireModel):
@@ -72,6 +74,28 @@ class EntryPolicy(WireModel):
 
 
 class EntryTarget(WireModel):
+    revision: int = Field(
+        description="买入配置目标修订-revision",
+        default=0,
+        ge=0,
+        le=255,
+        exclude_if=lambda v: v == 0,
+    )
+    previous_hash: Sha256 | None = Field(
+        description="买入配置目标修订-previous_hash", default=None, exclude_if=lambda v: v is None
+    )
+    configuration: TradingSettings | None = Field(
+        description="买入配置目标修订-configuration", default=None, exclude_if=lambda v: v is None
+    )
+    configuration_version: int | None = Field(
+        description="买入配置目标修订-configuration_version",
+        default=None,
+        ge=1,
+        exclude_if=lambda v: v is None,
+    )
+    instrument: EntryInstrument | None = Field(
+        description="买入配置目标修订-instrument", default=None, exclude_if=lambda v: v is None
+    )
     plan_hash: Sha256 = Field(description="已验签冻结计划的正文摘要")
     policy_hash: Sha256 = Field(description="计划引用的已安装买入策略正文摘要")
     account_id: WireId = Field(description="所属账户内部别名")
@@ -89,7 +113,16 @@ class EntryTarget(WireModel):
     @model_validator(mode="after")
     def valid(self) -> EntryTarget:
         if (
-            self.decided_at.utcoffset() != timedelta(hours=8)
+            (
+                self.revision > 0
+                and (
+                    self.previous_hash is None
+                    or self.configuration is None
+                    or self.configuration_version is None
+                )
+            )
+            or (self.instrument is not None and self.instrument.symbol != self.symbol)
+            or self.decided_at.utcoffset() != timedelta(hours=8)
             or self.decided_at.date() != self.trade_date
             or (self.reason == "ELIGIBLE") != (self.target_quantity > 0)
             or (self.target_quantity > 0 and self.arrival_price is None)
@@ -104,7 +137,8 @@ class EntryTarget(WireModel):
 
     @property
     def key(self) -> str:
-        return f"entry-target:{self.plan_hash}:{self.allocation_id}"
+        base = f"entry-target:{self.plan_hash}:{self.allocation_id}"
+        return base if self.revision == 0 else f"{base}:revision:{self.revision}"
 
 
 def validate_policy(
@@ -115,7 +149,11 @@ def validate_policy(
         version.version != policy.version
         or (require_payload_hash and version.payload_hash != policy.payload_hash)
         or plan.rulebook_version != policy.rulebook_version
-        or {a.symbol for a in plan.allocations} != {i.symbol for i in policy.instruments}
+        or (
+            require_payload_hash
+            and {a.symbol for a in plan.allocations} != {i.symbol for i in policy.instruments}
+        )
+        or not {a.symbol for a in plan.allocations} <= {i.symbol for i in policy.instruments}
     ):
         raise ValueError("installed entry policy must exactly match the signed plan")
 
@@ -126,28 +164,75 @@ def load_entry_targets(
     policy: EntryPolicy,
     *,
     require_payload_hash: bool = True,
+    allocations: tuple[Allocation, ...] | None = None,
 ) -> tuple[EntryTarget, ...]:
     validate_policy(plan, policy, require_payload_hash=require_payload_hash)
     store.append_evidence(
         "recovery_checkpoints",
-        f"entry-context:{plan.trade_date}",
+        f"entry-context:{plan.trade_date}:" + digest(canonical_bytes(plan.model_dump(mode="json")))
+        if plan.source.decision_phase is not None
+        else f"entry-context:{plan.trade_date}",
         canonical_bytes(
             {"plan": plan.model_dump(mode="json"), "policy": policy.model_dump(mode="json")}
         ),
     )
     plan_hash = digest(canonical_bytes(plan.model_dump(mode="json")))
     result = []
-    for allocation in plan.allocations:
+    for allocation in allocations if allocations is not None else plan.allocations:
         body = store.read_evidence(
             "recovery_checkpoints", f"entry-target:{plan_hash}:{allocation.allocation_id}"
         )
+        if body is None:
+            claimed = store.read_evidence(
+                "recovery_checkpoints",
+                f"entry-symbol:{plan.account_id}:{plan.trade_date}:{allocation.symbol}",
+            )
+            if claimed is not None:
+                candidate = EntryTarget.model_validate_json(claimed)
+                if (
+                    candidate.plan_hash == plan_hash
+                    and candidate.allocation_id == allocation.allocation_id
+                ):
+                    body = claimed
         if body is not None:
             result.append(EntryTarget.model_validate_json(body))
+            for revision in range(1, 256):
+                amended = store.read_evidence(
+                    "recovery_checkpoints",
+                    f"entry-target:{plan_hash}:{allocation.allocation_id}:revision:{revision}",
+                )
+                if amended is None:
+                    break
+                result.append(EntryTarget.model_validate_json(amended))
     return tuple(result)
 
 
 def append_entry_target(store: CriticalStorePort, target: EntryTarget) -> bool:
     target = EntryTarget.model_validate_json(target.model_dump_json())
+    if target.revision:
+        prior_key = f"entry-target:{target.plan_hash}:{target.allocation_id}"
+        if target.revision > 1:
+            prior_key += f":revision:{target.revision - 1}"
+        prior = store.read_evidence("recovery_checkpoints", prior_key)
+        if (
+            prior is None
+            or EntryTarget.model_validate_json(prior).payload_hash != target.previous_hash
+        ):
+            raise CriticalStoreError("ENTRY_REVISION_CHAIN_INVALID")
+    if target.target_quantity > 0:
+        key = f"entry-symbol:{target.account_id}:{target.trade_date}:{target.symbol}"
+        prior = store.read_evidence("recovery_checkpoints", key)
+        body = canonical_bytes(target.model_dump(mode="json"))
+        if prior is not None and prior != body:
+            previous = EntryTarget.model_validate_json(prior)
+            if (
+                not target.revision
+                or previous.plan_hash != target.plan_hash
+                or previous.allocation_id != target.allocation_id
+            ):
+                raise CriticalStoreError("ENTRY_DAILY_SYMBOL_CONFLICT")
+        if prior is None and not store.append_evidence("recovery_checkpoints", key, body):
+            return False
     return store.append_evidence(
         "recovery_checkpoints", target.key, canonical_bytes(target.model_dump(mode="json"))
     )

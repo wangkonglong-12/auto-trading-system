@@ -1,0 +1,51 @@
+{
+  "$comment": "Generated from protocol/executions; semantic validators and projection constraints also apply.",
+  "$defs": {
+    "Acknowledgment": {
+      "additionalProperties": false,
+      "properties": {
+        "event_hash": {
+          "pattern": "^sha256:[a-f0-9]{64}$",
+          "title": "Event Hash",
+          "type": "string"
+        },
+        "event_id": {
+          "pattern": "^[A-Za-z0-9_.:-]{1,96}$",
+          "title": "Event Id",
+          "type": "string"
+        }
+      },
+      "required": [
+        "event_id",
+        "event_hash"
+      ],
+      "title": "Acknowledgment",
+      "type": "object"
+    }
+  },
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "additionalProperties": false,
+  "properties": {
+    "acknowledgments": {
+      "items": {
+        "$ref": "#/$defs/Acknowledgment"
+      },
+      "maxItems": 20,
+      "minItems": 1,
+      "title": "Acknowledgments",
+      "type": "array"
+    },
+    "schema_version": {
+      "maximum": 1,
+      "minimum": 1,
+      "title": "Schema Version",
+      "type": "integer"
+    }
+  },
+  "required": [
+    "schema_version",
+    "acknowledgments"
+  ],
+  "title": "Receipt",
+  "type": "object"
+}

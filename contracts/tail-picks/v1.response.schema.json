@@ -1,0 +1,96 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "Tail picks V1 successful response",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["schema_version", "trade_date", "server_time", "batches"],
+  "properties": {
+    "schema_version": { "type": "integer", "const": 1 },
+    "trade_date": {
+      "type": "string",
+      "format": "date",
+      "pattern": "^[0-9]{4}-[0-9]{2}-[0-9]{2}$"
+    },
+    "server_time": { "$ref": "#/$defs/cnTime" },
+    "batches": {
+      "type": "array",
+      "minItems": 3,
+      "maxItems": 3,
+      "prefixItems": [
+        { "allOf": [{ "$ref": "#/$defs/batch" }, { "properties": { "phase": { "const": "1440" } } }] },
+        { "allOf": [{ "$ref": "#/$defs/batch" }, { "properties": { "phase": { "const": "1445" } } }] },
+        { "allOf": [{ "$ref": "#/$defs/batch" }, { "properties": { "phase": { "const": "1450" } } }] }
+      ],
+      "items": false
+    }
+  },
+  "$defs": {
+    "cnTime": {
+      "type": "string",
+      "format": "date-time",
+      "pattern": "^[0-9]{4}-[0-9]{2}-[0-9]{2}T[0-9]{2}:[0-9]{2}:[0-9]{2}\\+08:00$"
+    },
+    "runId": { "type": "string", "pattern": "^[A-Za-z0-9_.:-]{1,96}$" },
+    "stock": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["code", "name", "rank"],
+      "properties": {
+        "code": { "type": "string", "pattern": "^[0-9]{6}\\.(SZ|SH)$" },
+        "name": {
+          "oneOf": [
+            { "type": "string", "minLength": 1, "maxLength": 64, "pattern": "^\\S(?:[^\\r\\n]*\\S)?$" },
+            { "type": "null" }
+          ]
+        },
+        "rank": { "type": "integer", "minimum": 1, "maximum": 15 }
+      }
+    },
+    "batch": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["phase", "status", "source_run_id", "completed_at", "error_code", "stocks"],
+      "properties": {
+        "phase": { "type": "string", "enum": ["1440", "1445", "1450"] },
+        "status": { "type": "string", "enum": ["PENDING", "READY", "FAILED"] },
+        "source_run_id": { "oneOf": [{ "$ref": "#/$defs/runId" }, { "type": "null" }] },
+        "completed_at": { "oneOf": [{ "$ref": "#/$defs/cnTime" }, { "type": "null" }] },
+        "error_code": {
+          "enum": [null, "SOURCE_FAILED", "SOURCE_INCOMPLETE", "SOURCE_INVALID", "TOO_MANY_STOCKS", "SOURCE_NOT_READY_BY_CUTOFF"]
+        },
+        "stocks": { "type": "array", "maxItems": 15, "items": { "$ref": "#/$defs/stock" } }
+      },
+      "allOf": [
+        {
+          "if": { "properties": { "status": { "const": "READY" } } },
+          "then": {
+            "properties": {
+              "source_run_id": { "$ref": "#/$defs/runId" },
+              "completed_at": { "$ref": "#/$defs/cnTime" },
+              "error_code": { "type": "null" }
+            }
+          }
+        },
+        {
+          "if": { "properties": { "status": { "const": "PENDING" } } },
+          "then": {
+            "properties": {
+              "completed_at": { "type": "null" },
+              "error_code": { "type": "null" },
+              "stocks": { "maxItems": 0 }
+            }
+          }
+        },
+        {
+          "if": { "properties": { "status": { "const": "FAILED" } } },
+          "then": {
+            "properties": {
+              "error_code": { "type": "string" },
+              "stocks": { "maxItems": 0 }
+            }
+          }
+        }
+      ]
+    }
+  }
+}

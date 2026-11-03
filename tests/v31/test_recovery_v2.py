@@ -17,12 +17,15 @@ from auto_trading_system.gateways.broker.models import (
     OrderSide,
 )
 from auto_trading_system.journal.critical_models import ActionTarget, RecoveryRecord, Submission
+from auto_trading_system.orders.projection import OrderProjection
+from auto_trading_system.runtime.observation_v2 import check_empty_observation
 from auto_trading_system.runtime.recovery_v2 import (
     AccountFact,
     BrokerRecoverySnapshot,
     PositionFact,
     RecoveryReport,
     reconcile,
+    strategy_recovery_snapshot,
 )
 
 
@@ -81,7 +84,12 @@ def evidence() -> tuple[tuple[RecoveryRecord, ...], BrokerRecoverySnapshot]:
     return (record,), BrokerRecoverySnapshot((order,), (trade,), account, 1, True)
 
 
-def report(records: tuple[RecoveryRecord, ...], snapshot: BrokerRecoverySnapshot) -> RecoveryReport:
+def report(
+    records: tuple[RecoveryRecord, ...],
+    snapshot: BrokerRecoverySnapshot,
+    *,
+    allow_unmanaged: bool = False,
+) -> RecoveryReport:
     return reconcile(
         records,
         snapshot,
@@ -90,7 +98,37 @@ def report(records: tuple[RecoveryRecord, ...], snapshot: BrokerRecoverySnapshot
         trade_date=DEMO_NOW.date(),
         now=DEMO_NOW,
         report_id="report1",
+        allow_unmanaged=allow_unmanaged,
     )
+
+
+def test_live_recovery_excludes_existing_holdings_but_requires_all_system_shares() -> None:
+    records, snapshot = evidence()
+    existing = PositionFact(symbol="600000.SH", quantity=1000, sellable=1000)
+    account = snapshot.account.model_copy(
+        update={"positions": (*snapshot.account.positions, existing)}
+    )
+    observed = replace(snapshot, account=account)
+    assert report(records, observed).status == "BLOCKED"
+    assert report(records, observed, allow_unmanaged=True).status == "CLEAR"
+    missing = account.model_copy(
+        update={
+            "positions": (
+                PositionFact(symbol="000001.SZ", quantity=50, sellable=0),
+                existing,
+            )
+        }
+    )
+    blocked = report(records, replace(snapshot, account=missing), allow_unmanaged=True)
+    assert "POSITION_OWNERSHIP_UNRESOLVED" in blocked.issue_codes
+    assert report((), observed, allow_unmanaged=True).status == "BLOCKED"
+    empty = replace(
+        snapshot,
+        orders=(),
+        trades=(),
+        account=account.model_copy(update={"observed_order_ids": ()}),
+    )
+    assert report((), empty, allow_unmanaged=True).status == "CLEAR"
 
 
 def test_terminal_facts_and_current_holding_explain_journal_and_bind_hash() -> None:
@@ -105,6 +143,95 @@ def test_terminal_facts_and_current_holding_explain_journal_and_bind_hash() -> N
     assert good.evidence_hash != changed.evidence_hash
     assert good.payload_hash != changed.payload_hash
     assert snapshot.account.observation().cash == Money.parse("8995")
+
+
+@pytest.mark.parametrize("status", [BrokerOrderStatus.REJECTED, BrokerOrderStatus.CANCELLED])
+def test_external_zero_fill_terminal_orders_do_not_block_tail_or_disappear_from_evidence(status):
+    _, snapshot = evidence()
+    order = replace(
+        snapshot.orders[0],
+        client_order_id="ord_external_manual1",
+        status=status,
+        filled_quantity=Quantity(0),
+        remaining_quantity=Quantity(100),
+    )
+    snapshot = replace(
+        snapshot,
+        orders=(order,),
+        trades=(),
+        account=snapshot.account.model_copy(
+            update={
+                "observed_order_ids": (order.client_order_id,),
+                "positions": (PositionFact(symbol="600000.SH", quantity=1000, sellable=1000),),
+            }
+        ),
+    )
+    assert report((), snapshot).status == "BLOCKED"
+    good = report((), snapshot, allow_unmanaged=True)
+    assert good.status == "CLEAR"
+    changed = replace(order, broker_order_id="another-broker-order")
+    assert (
+        report((), replace(snapshot, orders=(changed,)), allow_unmanaged=True).evidence_hash
+        != good.evidence_hash
+    )
+    checked = check_empty_observation(
+        snapshot=snapshot,
+        previous=OrderProjection(),
+        account_id="test-account",
+        trade_date=DEMO_NOW.date(),
+        now=DEMO_NOW,
+        event_version=1,
+        allow_unmanaged=True,
+    )
+    assert checked.snapshot is snapshot and checked.snapshot.orders == (order,)
+    assert checked.orders.orders() == () and checked.portfolio.lots == ()
+    assert strategy_recovery_snapshot(snapshot, frozenset({order.client_order_id})) is snapshot
+    inconsistent = replace(
+        snapshot, account=snapshot.account.model_copy(update={"observed_order_ids": ()})
+    )
+    assert (
+        "ACCOUNT_ORDER_WINDOW_MISMATCH"
+        in report((), inconsistent, allow_unmanaged=True).issue_codes
+    )
+
+
+@pytest.mark.parametrize("case", ["system", "active", "filled", "trade", "old", "future"])
+def test_only_proven_dead_external_zero_fill_orders_can_be_excluded(case):
+    _, snapshot = evidence()
+    order = replace(
+        snapshot.orders[0],
+        client_order_id="ord_external_manual1",
+        status=BrokerOrderStatus.REJECTED,
+        filled_quantity=Quantity(0),
+        remaining_quantity=Quantity(100),
+    )
+    trades = ()
+    if case == "system":
+        order = replace(order, client_order_id="ord_unmatched_system1")
+    elif case == "active":
+        order = replace(order, status=BrokerOrderStatus.ACKED)
+    elif case == "filled":
+        order = replace(
+            order,
+            status=BrokerOrderStatus.FILLED,
+            filled_quantity=Quantity(100),
+            remaining_quantity=Quantity(0),
+        )
+    elif case == "trade":
+        trades = (replace(snapshot.trades[0], client_order_id=order.client_order_id),)
+    elif case in {"old", "future"}:
+        delta = timedelta(days=-1) if case == "old" else timedelta(seconds=1)
+        order = replace(order, updated_at=ShanghaiTimestamp.from_instant(DEMO_NOW + delta))
+    snapshot = replace(
+        snapshot,
+        orders=(order,),
+        trades=trades,
+        account=snapshot.account.model_copy(
+            update={"observed_order_ids": (order.client_order_id,)}
+        ),
+    )
+    assert strategy_recovery_snapshot(snapshot, frozenset()) is snapshot
+    assert report((), snapshot, allow_unmanaged=True).status == "BLOCKED"
 
 
 @pytest.mark.parametrize(

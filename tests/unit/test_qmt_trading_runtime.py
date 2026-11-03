@@ -1,8 +1,10 @@
 from __future__ import annotations
 
+from concurrent.futures import Future
 from dataclasses import dataclass, field
 from datetime import datetime
 from decimal import Decimal
+from pathlib import Path
 from types import SimpleNamespace
 from typing import Any, ClassVar, cast
 
@@ -13,6 +15,7 @@ from auto_trading_system.domain import Money, Price, Quantity, SecurityCode, Sha
 from auto_trading_system.gateways.market import BookLevel, MarketTick
 from auto_trading_system.gateways.market.qmt_live import QmtInstrumentRule
 from auto_trading_system.protocol.v2.canonical import canonical_bytes
+from auto_trading_system.recorder.tick_archive import TickArchive
 from auto_trading_system.runtime.engine_v2 import CN
 from auto_trading_system.runtime.qmt_trading_runtime import QmtTradingRuntime
 from auto_trading_system.strategies.trading_settings import TradingSettings
@@ -117,6 +120,8 @@ class FakePlanMarket:
 
 
 class FakeEngine:
+    tail_history = None
+
     def __init__(self, loaded: object | None) -> None:
         self._loaded = loaded
         self.plans = SimpleNamespace(plans=self)
@@ -174,6 +179,59 @@ class FakeExitOwner:
         self.called = True
 
 
+def test_phase_restore_reuses_frozen_policy_without_new_market_reference() -> None:
+    market = FakePlanMarket()
+    market.latest["000001.SZ"] = market_tick()
+    runtime = make_runtime(market)
+    plan = example_plan()
+    frozen = runtime._policy(plan)
+    assert frozen is not None
+    future: Future[bytes | None] = Future()
+    future.set_result(
+        canonical_bytes(
+            {"plan": plan.model_dump(mode="json"), "policy": frozen.model_dump(mode="json")}
+        )
+    )
+    engine = SimpleNamespace(journal=SimpleNamespace(request=lambda *_args, **_kwargs: future))
+    market.latest.clear()
+    assert runtime._phase_policy(cast(Any, engine), plan) is None
+    assert runtime._phase_policy(cast(Any, engine), plan) == frozen
+
+
+@pytest.mark.parametrize(
+    "group,field,value",
+    [
+        ("buy", "cancel_after_seconds", 20),
+        ("buy", "max_retries", 1),
+        ("advanced", "max_chase_bps", 40),
+        ("advanced", "max_spread_bps", 30),
+        ("advanced", "quote_max_age_ms", 2000),
+        ("advanced", "max_order_quantity", 20000),
+    ],
+)
+def test_phase_restore_rejects_old_execution_settings(group: str, field: str, value: int) -> None:
+    market = FakePlanMarket()
+    market.latest["000001.SZ"] = market_tick()
+    runtime = make_runtime(market)
+    plan = example_plan()
+    frozen = runtime._policy(plan)
+    assert frozen is not None and runtime.settings is not None
+    future: Future[bytes | None] = Future()
+    future.set_result(
+        canonical_bytes(
+            {"plan": plan.model_dump(mode="json"), "policy": frozen.model_dump(mode="json")}
+        )
+    )
+    engine = SimpleNamespace(journal=SimpleNamespace(request=lambda *_args, **_kwargs: future))
+    previous = getattr(runtime.settings, group)
+    runtime.settings = runtime.settings.model_copy(
+        update={group: previous.model_copy(update={field: value})}
+    )
+    assert runtime._phase_policy(cast(Any, engine), plan) is None
+    with pytest.raises(ValueError, match="execution settings differ"):
+        runtime._phase_policy(cast(Any, engine), plan)
+
+
 class FakeD1Owner(FakeExitOwner):
     instances: ClassVar[list[FakeD1Owner]] = []
 
@@ -218,6 +276,8 @@ def test_live_policy_uses_fresh_quote_and_broker_instrument_rules() -> None:
     assert policy is not None
     assert policy.cancel_after_seconds == 12 and policy.max_children == 3
     assert policy.max_chase_bps == 30 and policy.max_spread_bps == 20
+    assert policy.quote_max_age_ms == 1000
+    assert policy.instruments[0].max_order_quantity == 10000
     assert policy.instruments[0].reference_price == "10.126"
     assert policy.instruments[0].lower_price == "9.11"
     assert policy.instruments[0].upper_price == "11.14"
@@ -238,6 +298,25 @@ def test_live_policy_uses_fresh_quote_and_broker_instrument_rules() -> None:
     assert precise is not None
     assert precise.instruments[0].price_tick == "0.001"
     assert precise.instruments[0].lower_price == "9.111"
+
+
+def test_pending_manual_order_activity_keeps_stock_code_and_name() -> None:
+    runtime = make_runtime(FakePlanMarket())
+    engine = SimpleNamespace(
+        _known={
+            "manual-a": SimpleNamespace(
+                symbol="003021.SZ", manual_binding=SimpleNamespace(name="兆威机电")
+            )
+        },
+        snapshot=lambda: SimpleNamespace(
+            orders=(SimpleNamespace(client_order_id="manual-a", order=None, phase="SUBMITTING"),)
+        ),
+    )
+    runtime._observe_activity(cast(Any, engine))
+    activity = cast(list[dict[str, object]], runtime.status()["recent_activity"])
+    assert activity[0]["symbol"] == "003021.SZ"
+    assert activity[0]["name"] == "兆威机电"
+    assert activity[0]["context"] == "manual-a"
 
 
 def test_live_policy_fails_closed_without_verified_qmt_rules() -> None:
@@ -387,3 +466,105 @@ def test_live_poll_drives_exit_quotes_and_pending_liquidation(
 
     runtime.poll(cast(Any, engine))
     assert len(owner.quotes) == 1 and owner.poll_count == 2
+
+
+def test_restart_restores_volume_history_without_treating_it_as_live(tmp_path: Path) -> None:
+    previous = TickArchive(tmp_path)
+    previous.start()
+    previous.append(market_tick(sequence=90, volume=100_000, second=0))
+    previous.append(market_tick(sequence=91, volume=101_000, second=59))
+    assert previous.close()
+
+    archive = TickArchive(tmp_path)
+    archive.start()
+    market = FakePlanMarket()
+    cast(Any, market).archive = archive
+    live = market_tick(sequence=1, volume=102_000, second=60)
+    market.latest["000001.SZ"] = live
+    runtime = make_runtime(market)
+    gate = SimpleNamespace(rules={"000001.SZ": SimpleNamespace(upper_price="11.14")})
+    owner = FakeEntryOwner(None, gate)
+    runtime.owner = cast(Any, owner)
+    try:
+        runtime._feed()
+        archive.flush().result(2)  # Wait for the asynchronous history read off the owner loop.
+        runtime._feed()
+        assert len(runtime.history_windows["000001.SZ"].records) == 2
+        assert len(runtime.volume_windows["000001.SZ"]) == 3
+        assert not cast(Any, owner.quotes[-1]).path_complete
+        assert market.latest["000001.SZ"] is live
+        market.latest["000001.SZ"] = market_tick(sequence=2, volume=104_000, second=120)
+        runtime._feed()
+        quote = cast(Any, owner.quotes[-1])
+        assert quote.path_complete and quote.recent_volume == 2000
+    finally:
+        assert archive.close()
+
+
+def test_stalled_history_restore_has_a_deadline() -> None:
+    market = FakePlanMarket()
+    cast(Any, market).archive = SimpleNamespace(query=lambda *_a, **_k: Future())
+    market.latest["000001.SZ"] = market_tick()
+    runtime = make_runtime(market)
+    runtime.owner = cast(Any, FakeEntryOwner(None, SimpleNamespace(rules={"000001.SZ": object()})))
+    runtime._feed()
+    runtime._history_deadlines["000001.SZ"] = 0
+    with pytest.raises(RuntimeError, match="restore timed out"):
+        runtime._feed()
+
+
+def test_held_system_stock_stays_subscribed_without_entry_plan_or_sell_driver(
+    tmp_path: Path,
+) -> None:
+    from auto_trading_system.gateways.market import MockMarketGateway
+    from auto_trading_system.runtime.plan_market import PlanMarketRuntime
+
+    gateway = MockMarketGateway()
+    market = PlanMarketRuntime(gateway, archive=TickArchive(tmp_path))
+    runtime = make_runtime(cast(Any, market))
+    engine = FakeEngine(None)
+    portfolio = SimpleNamespace(
+        lots=(SimpleNamespace(symbol="000001.SZ", remaining=100),),
+        quantities=lambda: {"000001.SZ": 100},
+    )
+    cast(Any, engine).exit_inputs = lambda: (portfolio, None, ())
+    cast(Any, engine).disposable_market_symbols = lambda: frozenset()
+    cast(Any, engine).poll = lambda: None
+    cast(Any, engine).accepted = lambda: ()
+    try:
+        runtime.poll(cast(Any, engine))
+        assert market.snapshot().symbols == ("000001.SZ",)
+        assert gateway.subscription_count == 1
+    finally:
+        runtime.stop()
+
+
+def test_same_stock_in_multiple_phases_does_not_generate_infinite_activity() -> None:
+    runtime = make_runtime(FakePlanMarket())
+    engine = SimpleNamespace(snapshot=lambda: SimpleNamespace(orders=()))
+    owners = [
+        SimpleNamespace(
+            gate=SimpleNamespace(
+                plan_hash="plan-" + phase,
+                plan=SimpleNamespace(source=SimpleNamespace(decision_phase=phase)),
+            ),
+            snapshot=lambda state=state: SimpleNamespace(
+                state="READY", progress=(("000001.SZ", state),), targets=()
+            ),
+        )
+        for phase, state in [
+            ("1440", "FINISHED"),
+            ("1445", "DUPLICATE_SIGNAL"),
+            ("1450", "DUPLICATE_SIGNAL"),
+        ]
+    ]
+    for _ in range(200):
+        for owner in owners:
+            runtime.owner = cast(Any, owner)
+            runtime._observe_activity(cast(Any, engine))
+    signals = [e for e in runtime._activity if e["category"] == "ENTRY_SIGNAL"]
+    assert len(signals) == 3
+    assert {e["phase"] for e in signals} == {"1440", "1445", "1450"}
+    runtime.failure_code = "TEST_ERROR"
+    runtime._observe_activity(cast(Any, engine))
+    assert runtime._activity[-1]["category"] == "ERROR"

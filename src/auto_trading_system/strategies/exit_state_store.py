@@ -8,8 +8,9 @@ Scanning every bounded slot detects holes instead of treating a gap as EOF.
 from __future__ import annotations
 
 from datetime import date
+from typing import cast
 
-from pydantic import AwareDatetime, Field, model_validator
+from pydantic import AwareDatetime, Field, JsonValue, model_validator
 
 from auto_trading_system.journal.critical_writer import CriticalStorePort
 from auto_trading_system.protocol.v2.base import Sha256, WireId, WireModel
@@ -27,8 +28,20 @@ class DurableExitState(WireModel):
     profit_armed: bool = Field(description="是否已达到收益回撤跟踪激活条件")
     path_uncertain: bool = Field(description="历史行情路径缺口状态，仅可收紧")
 
+    rule_states: dict[str, dict[str, JsonValue]] | None = Field(
+        default=None,
+        max_length=32,
+        exclude_if=lambda value: value is None,
+        description="各扩展规则的独立可恢复状态，键包含规则版本",
+    )
+
     @model_validator(mode="after")
     def ordered(self) -> DurableExitState:
+        if (
+            self.rule_states is not None
+            and len(canonical_bytes(cast(JsonValue, self.rule_states))) > 8192
+        ):
+            raise ValueError("rule state exceeds bounded storage")
         if tuple(sorted(set(self.fired_rules))) != self.fired_rules:
             raise ValueError("exit rules must be unique and ordered")
         return self
@@ -68,10 +81,10 @@ def load_exit_state(
     """
     store.append_evidence(
         "recovery_checkpoints",
-        f"exit-context:{context.trade_date}",
+        f"exit-context:{context.trade_date}" + (f":{context.board}" if context.board else ""),
         canonical_bytes(context.model_dump(mode="json", exclude_none=True)),
     )
-    return read_exit_history(store, context.payload_hash)
+    return validated_exit_history(store, context)
 
 
 def read_exit_history(store: CriticalStorePort, context_hash: str) -> tuple[ExitTransition, ...]:
@@ -90,6 +103,34 @@ def read_exit_history(store: CriticalStorePort, context_hash: str) -> tuple[Exit
             raise ValueError("exit state chain is incomplete or corrupt")
         history.append(record)
     return tuple(history)
+
+
+def validated_exit_history(
+    store: CriticalStorePort, context: ExitSessionContext
+) -> tuple[ExitTransition, ...]:
+    history = read_exit_history(store, context.payload_hash)
+    latest: dict[str, DurableExitState] = {}
+    lots = {p.lot_id for p in context.lots}
+    for record in history:
+        old = latest.get(record.lot_id)
+        state = record.state
+        if (
+            record.account_id != context.account_id
+            or record.trade_date != context.trade_date
+            or record.lot_id not in lots
+            or (
+                old is not None
+                and (
+                    state.target_remaining > old.target_remaining
+                    or not set(old.fired_rules) <= set(state.fired_rules)
+                    or (old.profit_armed and not state.profit_armed)
+                    or (old.path_uncertain and not state.path_uncertain)
+                )
+            )
+        ):
+            raise ValueError("exit history ownership or target changed")
+        latest[record.lot_id] = state
+    return history
 
 
 def append_exit_transition(store: CriticalStorePort, record: ExitTransition) -> bool:

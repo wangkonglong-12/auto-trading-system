@@ -7,9 +7,11 @@ persisted target can tighten but can never sell half of the remainder again.
 
 from __future__ import annotations
 
-from dataclasses import dataclass, replace
+from dataclasses import dataclass, field, replace
 from datetime import date, datetime, time, timedelta
 from decimal import Decimal
+
+from pydantic import JsonValue
 
 from auto_trading_system.domain import Price
 from auto_trading_system.strategies.sell_rules import SellRules
@@ -41,6 +43,7 @@ class ExitState:
     drawdown_since_ns: int | None = None
     last_received_ns: int | None = None
     path_complete: bool = True
+    rule_states: dict[str, dict[str, JsonValue]] = field(default_factory=dict)
 
 
 @dataclass(frozen=True, slots=True)

@@ -144,6 +144,52 @@ def test_configured_cost_exit_reaches_mock_broker_once(tmp_path: Path) -> None:
         assert len(broker.query_orders()) == 1
 
 
+@pytest.mark.parametrize("seconds", [5, 9])
+def test_sell_timeout_cancels_and_reprices_only_residual(tmp_path: Path, seconds: int) -> None:
+    opening = close_buy_day(tmp_path)
+    context = fixture_context(tmp_path, opening).model_copy(
+        update={
+            "rule_id": "COST_EXIT_V1",
+            "sell_rules": SellRules(
+                take_profit_pct=Decimal("5"), stop_loss_pct=Decimal("3"), sell_by=time(14, 30)
+            ),
+            "cancel_after_seconds": seconds,
+        }
+    )
+    clock = ExitScenarioClock()
+    broker = MockBrokerGateway(clock)
+    with open_exit_owner(tmp_path, opening, context, clock, broker) as (runtime, owner):
+        # The shared offline harness otherwise fixes every order price at 10.
+        runtime.kernel._risk_guard = lambda item: item.symbol == "000001.SZ"
+        runtime.confirmed_arm(directions=("SELL",))
+        broker.queue_submit(fill_scenario(20, full=False))
+        publish(owner, clock, "9.70", 1)
+        pump(
+            owner,
+            lambda: bool(runtime.kernel.snapshot().lots)
+            and runtime.kernel.snapshot().lots[0].remaining == 80
+            and runtime.kernel.critical_idle,
+        )
+        clock.advance(seconds - 1)
+        owner.poll()
+        assert broker.query_orders()[0].status.value == "PARTIALLY_FILLED"
+        clock.advance(1)
+        pump(
+            owner,
+            lambda: runtime.kernel.snapshot().orders[0].phase == "TERMINAL_CONFIRMED"
+            and runtime.kernel.critical_idle,
+        )
+        assert len(broker.query_orders()) == 1
+        broker.queue_submit(fill_scenario(80, full=True))
+        publish(owner, clock, "9.60", 2)
+        owner.gate.quotes["000001.SZ"] = owner.gate.quotes["000001.SZ"].model_copy(
+            update={"bid_price": "9.60"}
+        )
+        pump(owner, lambda: len(broker.query_orders()) == 2)
+        assert broker.query_orders()[1].order_quantity.value == 80
+        assert broker.query_orders()[1].limit_price.amount == Decimal("9.60")
+
+
 def test_operator_liquidation_tightens_strategy_lot_then_submits_sell(tmp_path: Path) -> None:
     with armed(tmp_path) as (runtime, owner, clock):
         owner.request_liquidation()

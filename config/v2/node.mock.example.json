@@ -5,7 +5,7 @@
   "account_id": "example-paper-account",
   "node_generation": 1,
   "journal_generation": "example-journal-1",
-  "strategy_id": "tail-entry",
+  "strategy_id": "TAIL_CLOSE",
   "service_sid": "S-1-5-21-1000-1000-1000-1001",
   "data_root": "C:/AutoTrading/paper-node-data",
   "ipc_secrets": {

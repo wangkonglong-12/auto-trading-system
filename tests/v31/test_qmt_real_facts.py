@@ -99,6 +99,51 @@ def test_real_values_map_but_remain_unattributed(tmp_path: Path) -> None:
     assert trader.called == ["callback", "start"]
 
 
+@pytest.mark.parametrize("dataset", ["orders", "trades", "empty", "truncated"])
+def test_display_query_preserves_real_broker_activity_without_recovery_authority(
+    tmp_path: Path, dataset: str
+) -> None:
+    reader, trader = client(tmp_path)
+    now = datetime.now(UTC)
+    order = SimpleNamespace(
+        account_id=ACCOUNT,
+        account_type=2,
+        stock_code="000001.SZ",
+        order_id=100,
+        order_volume=100,
+        traded_volume=100,
+        order_status=56,
+        order_type=23,
+        price=10.0123,
+        order_time=int(now.timestamp()),
+    )
+    trade = SimpleNamespace(
+        account_id=ACCOUNT,
+        account_type=2,
+        stock_code="000001.SZ",
+        order_id=100,
+        traded_id="fill-1",
+        traded_volume=100,
+        order_type=23,
+        traded_price=10.0123,
+        traded_amount=1001.23,
+        traded_time=int(now.timestamp()),
+    )
+    if dataset == "orders":
+        trader.orders = [order]
+    elif dataset == "trades":
+        trader.trades = [trade]
+    elif dataset == "truncated":
+        trader.orders = [SimpleNamespace(**{**vars(order), "order_id": i + 1}) for i in range(101)]
+    result = reader.read_operator_details("qmt-fingerprint", now, buy=23, sell=24)
+    assert result["available"] is True and result["coherent"] is False
+    assert result["truncated"] is (dataset == "truncated")
+    assert len(cast(list[Any], result["orders"])) <= 100
+    assert all(not r["owned_by_system"] for r in cast(list[Any], result["trades"]))
+    if dataset == "trades":
+        assert cast(list[Any], result["trades"])[0]["price"] == "10.0123"
+
+
 @pytest.mark.parametrize(
     ("source", "value", "code"),
     [

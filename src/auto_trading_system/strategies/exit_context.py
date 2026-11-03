@@ -14,12 +14,14 @@ from decimal import Decimal
 from typing import Literal
 
 from cryptography.hazmat.primitives.asymmetric.ed25519 import Ed25519PrivateKey, Ed25519PublicKey
-from pydantic import AwareDatetime, Field, model_validator
+from pydantic import AwareDatetime, Field, JsonValue, model_validator
 
 from auto_trading_system.protocol.v2.base import Sha256, WireId, WireModel
 from auto_trading_system.protocol.v2.canonical import canonical_bytes, digest, parse_bytes
 from auto_trading_system.protocol.v2.records import MoneyText, PriceText, Symbol
+from auto_trading_system.strategies.board_sell_configuration import BoardSellRule
 from auto_trading_system.strategies.sell_rules import SellRules
+from auto_trading_system.strategies.trading_settings import stock_board
 
 DOMAIN = b"AUTO-TRADING/EXIT-CONTEXT/V1\n"
 
@@ -36,6 +38,20 @@ class ExitLotContext(WireModel):
     sell_step: int = Field(ge=1, le=1000, description="正常卖出数量步长，整数股")
     allow_odd_liquidation: bool = Field(description="规则包是否允许一次清仓卖出零股")
     source_hash: Sha256 = Field(description="开盘价、成本及市场规则来源证据摘要")
+
+    board_rule: BoardSellRule | None = Field(default=None, description="冻结的板块退出规则")
+    configuration_version: int | None = Field(default=None, ge=1, description="冻结配置版本")
+    prior_target_remaining: int | None = Field(
+        default=None, ge=0, description="跨日继承的目标剩余数量"
+    )
+    prior_fired_rules: tuple[str, ...] | None = Field(
+        default=None, description="跨日继承的已触发规则"
+    )
+
+    prior_rule_states: dict[str, dict[str, JsonValue]] | None = Field(
+        default=None,
+        description="跨日继承的扩展规则状态",
+    )
 
     @model_validator(mode="after")
     def prices(self) -> ExitLotContext:
@@ -62,12 +78,15 @@ class ExitSessionContext(WireModel):
     trade_date: date = Field(description="Asia/Shanghai交易日")
     opening_hash: Sha256 = Field(description="已验证前日封存持仓正文摘要")
     calendar_hash: Sha256 = Field(description="完整交易日日历规范正文摘要")
-    rule_id: Literal["T1_EXIT_BASELINE_V3", "COST_EXIT_V1"] = Field(
-        default="T1_EXIT_BASELINE_V3", description="退出规则版本"
-    )
+    rule_id: Literal[
+        "T1_EXIT_BASELINE_V3", "COST_EXIT_V1", "BOARD_MAIN_EXIT_V1", "BOARD_CHINEXT_EXIT_V1"
+    ] = Field(default="T1_EXIT_BASELINE_V3", description="退出规则版本")
     sell_rules: SellRules | None = Field(
         default=None, description="按本批买入成本执行的三项卖出规则"
     )
+    board: Literal["MAIN", "CHINEXT"] | None = Field(default=None, description="唯一所属板块引擎")
+    board_rule: BoardSellRule | None = Field(default=None, description="冻结的板块退出规则")
+    configuration_version: int | None = Field(default=None, ge=1, description="冻结配置版本")
     issued_at: AwareDatetime = Field(description="来源证据完成并签发的时间")
     valid_from: AwareDatetime = Field(description="最早允许退出的时间")
     stop_new_at: AwareDatetime = Field(description="停止新增SELL子单的时间")
@@ -77,6 +96,9 @@ class ExitSessionContext(WireModel):
     max_order_quantity: int = Field(ge=1, le=2**31 - 1, description="上下文单笔数量上限，股")
     cancel_after_seconds: int = Field(
         default=30, ge=1, le=300, description="在途订单连续未更新多少秒后请求撤单"
+    )
+    max_children: int | None = Field(
+        default=None, ge=1, le=101, description="每批次当日最多卖出子单数，含首次委托"
     )
     lots: tuple[ExitLotContext, ...] = Field(
         min_length=1, max_length=15, description="本会话允许退出的批次及价格规则"
@@ -111,6 +133,23 @@ class ExitSessionContext(WireModel):
             raise ValueError("cost exit rule requires exactly one frozen sell policy")
         if self.sell_rules is not None and self.sell_rules.sell_by >= self.stop_new_at.time():
             raise ValueError("sell-by must precede stop-new-order cutoff")
+        is_board = self.rule_id.startswith("BOARD_")
+        complete = (
+            self.board is not None
+            and self.board_rule is not None
+            and self.configuration_version is not None
+        )
+        if is_board != complete:
+            raise ValueError("board exit requires a complete versioned board policy")
+        if is_board and (
+            self.rule_id != f"BOARD_{self.board}_EXIT_V1"
+            or any(stock_board(lot.symbol) != self.board for lot in self.lots)
+        ):
+            raise ValueError("board exit contains foreign holdings")
+        if not is_board and any(
+            v is not None for v in (self.board, self.board_rule, self.configuration_version)
+        ):
+            raise ValueError("legacy exit cannot carry board policy")
         return self
 
     @property

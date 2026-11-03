@@ -10,7 +10,7 @@ from auto_trading_system.strategies.exit_context import ExitSessionContext
 
 @dataclass(frozen=True)
 class ExecutionScope:
-    kind: Literal["ENTRY_PLAN", "EXIT_SESSION"]
+    kind: Literal["ENTRY_PLAN", "EXIT_SESSION", "MANUAL_ENTRY", "MANUAL_EXIT"]
     payload_hash: str
     strategy_id: str
     trade_date: date

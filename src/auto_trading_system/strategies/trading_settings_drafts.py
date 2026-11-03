@@ -57,6 +57,21 @@ class TradingSettingsDraftStore:
             temporary = self.path.with_name(self.path.name + "." + uuid4().hex + ".tmp")
             try:
                 self.path.parent.mkdir(parents=True, exist_ok=True)
+                if previous is not None:
+                    history = self.path.parent / "trading_settings_versions"
+                    history.mkdir(exist_ok=True)
+                    prior_hash = digest(canonical_bytes(previous.settings.model_dump(mode="json")))
+                    prior = history / (prior_hash[7:] + ".json")
+                    if not prior.exists():
+                        backup = temporary.with_name(temporary.name + ".previous")
+                        try:
+                            with backup.open("xb") as record:
+                                record.write(canonical_bytes(previous.model_dump(mode="json")))
+                                record.flush()
+                                os.fsync(record.fileno())
+                            os.replace(backup, prior)
+                        finally:
+                            backup.unlink(missing_ok=True)
                 with temporary.open("xb") as handle:
                     handle.write(canonical_bytes(draft.model_dump(mode="json")))
                     handle.flush()

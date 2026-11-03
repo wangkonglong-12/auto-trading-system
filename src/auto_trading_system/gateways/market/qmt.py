@@ -9,6 +9,7 @@ import math
 import threading
 from collections.abc import Callable, Mapping, Sequence
 from dataclasses import dataclass
+from datetime import date, timedelta
 from decimal import Decimal, InvalidOperation
 from typing import Any, cast
 
@@ -28,6 +29,48 @@ _MAX_CALLBACK_BATCH = 256
 _MAX_BOOK_DEPTH = 50
 
 
+def read_trading_calendar(as_of: date) -> tuple[date, ...]:
+    """Read the QMT exchange calendar for display only, without account access."""
+    try:
+        reader = load_xtdata_bindings().get_trading_calendar
+        if reader is None:
+            return ()
+        rows = reader("SH", (as_of - timedelta(days=31)).strftime("%Y%m%d"), "")
+        if not isinstance(rows, list) or not 2 <= len(rows) <= 800:
+            return ()
+        if any(not isinstance(item, str) or len(item) != 8 or not item.isdigit() for item in rows):
+            return ()
+        days = tuple(date.fromisoformat(f"{item[:4]}-{item[4:6]}-{item[6:]}") for item in rows)
+        if days != tuple(sorted(set(days))) or not (
+            days[0] <= as_of and days[-1] >= as_of - timedelta(days=31)
+        ):
+            return ()
+        return days
+    except Exception:
+        return ()
+
+
+def read_instrument_names(symbols: tuple[str, ...]) -> dict[str, str]:
+    """Read display names only; missing names never substitute made-up securities."""
+    try:
+        reader = load_xtdata_bindings().get_instrument_detail
+    except QmtReadOnlyAdapterError:
+        return {}
+    if reader is None:
+        return {}
+    names: dict[str, str] = {}
+    for symbol in dict.fromkeys(symbols[:100]):
+        SecurityCode.parse(symbol)
+        try:
+            record = reader(symbol, False)
+        except Exception:
+            continue
+        name = record.get("InstrumentName") if isinstance(record, Mapping) else None
+        if isinstance(name, str) and 0 < len(name) <= 64 and name.isprintable():
+            names[symbol] = name
+    return names
+
+
 @dataclass(frozen=True, slots=True)
 class XtdataBindings:
     subscribe_quote: Callable[..., Any]
@@ -35,6 +78,7 @@ class XtdataBindings:
     get_full_tick: Callable[..., Any]
     sdk_version: str | None
     get_instrument_detail: Callable[..., Any] | None = None
+    get_trading_calendar: Callable[..., Any] | None = None
 
 
 def load_xtdata_bindings() -> XtdataBindings:
@@ -46,6 +90,7 @@ def load_xtdata_bindings() -> XtdataBindings:
         unsubscribe_quote = data_module.unsubscribe_quote
         get_full_tick = data_module.get_full_tick
         get_instrument_detail = getattr(data_module, "get_instrument_detail", None)
+        get_trading_calendar = getattr(data_module, "get_trading_calendar", None)
     except (AttributeError, ImportError, ModuleNotFoundError) as exc:
         raise QmtReadOnlyAdapterError(
             "XTDATA_IMPORT_FAILED", "required XtData probe functions are unavailable"
@@ -69,6 +114,7 @@ def load_xtdata_bindings() -> XtdataBindings:
         get_full_tick,
         sdk_version,
         get_instrument_detail,
+        get_trading_calendar,
     )
 
 

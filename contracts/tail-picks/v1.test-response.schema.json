@@ -1,0 +1,194 @@
+{
+  "$defs": {
+    "TailBatch": {
+      "additionalProperties": false,
+      "properties": {
+        "phase": {
+          "enum": [
+            "1440",
+            "1445",
+            "1450"
+          ],
+          "title": "Phase",
+          "type": "string"
+        },
+        "status": {
+          "enum": [
+            "PENDING",
+            "READY",
+            "FAILED"
+          ],
+          "title": "Status",
+          "type": "string"
+        },
+        "source_run_id": {
+          "anyOf": [
+            {
+              "pattern": "^[A-Za-z0-9_.:-]{1,96}$",
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Source Run Id"
+        },
+        "completed_at": {
+          "anyOf": [
+            {
+              "format": "date-time",
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Completed At"
+        },
+        "error_code": {
+          "anyOf": [
+            {
+              "enum": [
+                "SOURCE_FAILED",
+                "SOURCE_INCOMPLETE",
+                "SOURCE_INVALID",
+                "TOO_MANY_STOCKS",
+                "SOURCE_NOT_READY_BY_CUTOFF"
+              ],
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Error Code"
+        },
+        "stocks": {
+          "items": {
+            "$ref": "#/$defs/TailStock"
+          },
+          "maxItems": 15,
+          "title": "Stocks",
+          "type": "array"
+        }
+      },
+      "required": [
+        "phase",
+        "status",
+        "source_run_id",
+        "completed_at",
+        "error_code",
+        "stocks"
+      ],
+      "title": "TailBatch",
+      "type": "object"
+    },
+    "TailStock": {
+      "additionalProperties": false,
+      "properties": {
+        "code": {
+          "pattern": "^[0-9]{6}\\.(SZ|SH)$",
+          "title": "Code",
+          "type": "string"
+        },
+        "name": {
+          "anyOf": [
+            {
+              "maxLength": 64,
+              "minLength": 1,
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Name"
+        },
+        "rank": {
+          "maximum": 15,
+          "minimum": 1,
+          "title": "Rank",
+          "type": "integer"
+        }
+      },
+      "required": [
+        "code",
+        "name",
+        "rank"
+      ],
+      "title": "TailStock",
+      "type": "object"
+    }
+  },
+  "additionalProperties": false,
+  "description": "Read-only diagnostics. Deliberately incompatible with an executable daily feed.",
+  "properties": {
+    "schema_version": {
+      "maximum": 1,
+      "minimum": 1,
+      "title": "Schema Version",
+      "type": "integer"
+    },
+    "mode": {
+      "const": "TEST",
+      "title": "Mode",
+      "type": "string"
+    },
+    "status": {
+      "enum": [
+        "FOUND",
+        "NOT_FOUND"
+      ],
+      "title": "Status",
+      "type": "string"
+    },
+    "requested_date": {
+      "format": "date",
+      "title": "Requested Date",
+      "type": "string"
+    },
+    "trade_date": {
+      "anyOf": [
+        {
+          "format": "date",
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "title": "Trade Date"
+    },
+    "server_time": {
+      "format": "date-time",
+      "title": "Server Time",
+      "type": "string"
+    },
+    "lookback_days": {
+      "maximum": 366,
+      "minimum": 366,
+      "title": "Lookback Days",
+      "type": "integer"
+    },
+    "batches": {
+      "items": {
+        "$ref": "#/$defs/TailBatch"
+      },
+      "maxItems": 3,
+      "title": "Batches",
+      "type": "array"
+    }
+  },
+  "required": [
+    "schema_version",
+    "mode",
+    "status",
+    "requested_date",
+    "trade_date",
+    "server_time",
+    "lookback_days",
+    "batches"
+  ],
+  "title": "TailPicksPreview",
+  "type": "object"
+}

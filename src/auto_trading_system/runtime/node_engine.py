@@ -24,7 +24,8 @@ from uuid import uuid4
 
 from pydantic import JsonValue, SecretStr
 
-from auto_trading_system.config.node_v2 import NodeProcessConfig, resolve_secret, role_keys
+from auto_trading_system.config.daily_auto import DailyAutoStore
+from auto_trading_system.config.node_v2 import NodeProcessConfig, role_keys
 from auto_trading_system.control.approval_v2 import OneShotApprovals
 from auto_trading_system.control.ipc_protocol import IPCError, Request, Role, RPCService
 from auto_trading_system.control.node_authorization import AUTH_ACTIONS, NodeAuthorization
@@ -43,11 +44,15 @@ from auto_trading_system.gateways.broker.port import BrokerGateway
 from auto_trading_system.gateways.market import CiccQmtMarketGateway
 from auto_trading_system.journal.apsw_store import APSWCriticalStore
 from auto_trading_system.journal.checkpoint_blobs import read_checkpoint
-from auto_trading_system.journal.critical_writer import CriticalJournalOwner
+from auto_trading_system.journal.critical_writer import CriticalJournalOwner, CriticalStorePort
 from auto_trading_system.monitoring.qmt_readonly import QmtProbeConfig
+from auto_trading_system.protocol.account_monitoring import Observation
+from auto_trading_system.protocol.executions.models import Batch, Receipt
 from auto_trading_system.protocol.v2.api import PlanLookup, PlanReceipt
 from auto_trading_system.protocol.v2.canonical import canonical_bytes, digest
 from auto_trading_system.reconcile.portfolio_checkpoint import OpeningReference, load_opening
+from auto_trading_system.recorder.tick_archive import TickArchive
+from auto_trading_system.runtime.daily_auto import DailyAutoController
 from auto_trading_system.runtime.daily_risk_file import (
     DailyRiskBaseline,
     load_daily_risk_baseline,
@@ -55,6 +60,7 @@ from auto_trading_system.runtime.daily_risk_file import (
 )
 from auto_trading_system.runtime.day_snapshot import DaySnapshot
 from auto_trading_system.runtime.engine_v2 import CN, EngineKernel, EngineLimits
+from auto_trading_system.runtime.execution_reporting import ExecutionReporter
 from auto_trading_system.runtime.node_layout import validate_layout
 from auto_trading_system.runtime.node_plan_recovery import (
     PlanRecoveryReference,
@@ -74,7 +80,7 @@ from auto_trading_system.runtime.single_instance import (
     WindowsNamedMutexBackend,
     create_account_instance_guard,
 )
-from auto_trading_system.security.operator_password import validate_operator_password_verifier
+from auto_trading_system.runtime.tail_feed import LOCAL_FEED_KEY_ID, LocalTailFeed, installation_key
 from auto_trading_system.security.operator_session import LocalOperatorSessionManager
 from auto_trading_system.strategies.exit_context import ExitLotContext, ExitSessionContext
 from auto_trading_system.strategies.exit_owner import ExitStateGate
@@ -103,20 +109,30 @@ def _live_opening_context(
     if config.broker != "QMT_TRADING":
         return None, None
     reference = load_opening_reference(config.data_root / "critical/opening-reference.json")
+    if reference is not None and reference.trade_date == clock().astimezone(CN).date():
+        reference = load_opening_reference(
+            config.data_root / "critical/opening-reference.previous.json"
+        )
     if reference is None:
         return None, None
     now = clock().astimezone(CN)
     body = journal.request(
         lambda store: read_checkpoint(store, reference.key), deadline=monotonic() + 2
     ).result(timeout=3)
-    checkpoint = load_opening(
-        body,
-        reference,
-        account_id=config.account_id,
-        trade_date=now.date(),
-        calendar=config.calendar,
-    )
-    if settings is None or now.time() >= time(14, 55):
+    try:
+        checkpoint = load_opening(
+            body,
+            reference,
+            account_id=config.account_id,
+            trade_date=now.date(),
+            calendar=config.calendar,
+        )
+    except ValueError:
+        # Retain the reference for the owner's full recovery validation. Bad or
+        # stale opening evidence blocks trading there; it must not kill the
+        # process before the operator console can explain the actual failure.
+        return reference, None
+    if settings is None or settings.sell is None or now.time() >= time(14, 55):
         return reference, None
     managed = tuple(
         lot
@@ -177,7 +193,7 @@ def _live_opening_context(
         valid_until=datetime.combine(now.date(), time(14, 55, 30), CN),
         max_order_value=max_order,
         max_order_quantity=settings.advanced.max_order_quantity,
-        cancel_after_seconds=settings.buy.cancel_after_seconds,
+        cancel_after_seconds=settings.sell_execution.cancel_after_seconds,
         lots=tuple(lots),
     )
 
@@ -202,6 +218,7 @@ def open_node_engine(
     )
     permission = DispatchPermission()
     dispatcher: SDKDispatcher | None = None
+    reporter: ExecutionReporter | None = None
     safe = False
     try:
         journal.start()
@@ -260,7 +277,13 @@ def open_node_engine(
                     unavailable_sink=halt_on_qmt_unavailable,
                 )
             else:
-                gateway = CiccQmtTradingGateway(probe, accounts[0], config.account_id, clock)
+                gateway = CiccQmtTradingGateway(
+                    probe,
+                    accounts[0],
+                    config.account_id,
+                    clock,
+                    order_recovery_bindings=qmt.order_recovery_bindings,
+                )
         else:
             gateway = MockBrokerGateway(
                 _Clock(clock),
@@ -278,9 +301,13 @@ def open_node_engine(
         def pause_plan() -> None:
             permission.halt("PLAN_CHANGED")
 
+        local_key = installation_key(config.data_root) if config.tail_picks else None
+        plan_keys = (
+            {LOCAL_FEED_KEY_ID: local_key.public_key()} if local_key else config.public_keys()
+        )
         plans = EnginePlanControl(
             ArtifactFiles(config.data_root / "artifacts"),
-            config.public_keys(),
+            plan_keys,
             node_id=config.node_id,
             account_id=config.account_id,
             node_generation=config.node_generation,
@@ -289,9 +316,22 @@ def open_node_engine(
             rulebook=config.rulebook,
             clock=clock,
             pause_for_change=pause_plan,
+            tail_phases=bool(
+                live_settings and live_settings.buy.signal_mode == "TAIL_EXCELLENT_3_PHASES"
+            ),
+            local_tail_history=(config.data_root / "critical/tail-feed-phase-plans.json")
+            if config.tail_picks
+            else None,
         )
 
-        if not paper or paper.context is None:
+        local_feed: LocalTailFeed | None = None
+        if config.tail_picks:
+            if live_settings is None or local_key is None:
+                raise ValueError("tail feed requires installed local trading settings")
+            local_feed = LocalTailFeed(config, live_settings, plans, local_key)
+            local_feed.restore(clock())
+
+        if config.tail_picks is None and (not paper or paper.context is None):
             restore_reference(
                 config.data_root / "critical/plan-recovery.json", plans, clock().date()
             )
@@ -332,6 +372,9 @@ def open_node_engine(
                 else EngineLimits(
                     mode="LIVE" if config.broker == "QMT_TRADING" else "PAPER",
                     max_buy_value=(live_settings.buy.max_daily_buy_value if live_settings else "0"),
+                    max_symbol_buy_value=(
+                        live_settings.buy.max_symbol_buy_value if live_settings else "0"
+                    ),
                     max_order_value=(
                         live_settings.buy.max_order_value
                         if live_settings and live_settings.buy.enabled
@@ -348,10 +391,25 @@ def open_node_engine(
                         else 1
                     ),
                     max_daily_loss=(live_settings.safety.max_daily_loss if live_settings else "0"),
+                    max_total_position_pct=(
+                        live_settings.safety.max_total_position_pct if live_settings else None
+                    ),
+                    max_daily_symbols=live_settings.buy.max_daily_symbols
+                    if live_settings
+                    else None,
+                    allowed_boards=live_settings.buy.allowed_boards if live_settings else ("MAIN",),
                 )
             ),
-            risk_guard=lambda item: (paper is not None and item.symbol in paper.session.prices)
-            or (config.broker == "QMT_TRADING" and live_settings is not None),
+            risk_guard=lambda item: (
+                (paper is not None and item.symbol in paper.session.prices)
+                or (config.broker == "QMT_TRADING" and live_settings is not None)
+            )
+            and (
+                item.side != "BUY"
+                or item.context_type == "MANUAL_ENTRY"
+                or local_feed is None
+                or local_feed.allows_buy(clock())
+            ),
             calendar=config.calendar,
             opening_reference=paper.session.opening if paper else live_opening,
             exit_context=paper.context if paper else live_exit,
@@ -366,7 +424,29 @@ def open_node_engine(
             entry_target_reader=paper.targets if paper else None,
             risk_baseline_equity=(installed_risk.total_equity if installed_risk else None),
         )
+        engine.local_tail_feed = local_feed
+        if local_feed is not None:
+            local_feed.apply_context = engine.apply
+        if config.execution_reporting is not None:
+            reporter = ExecutionReporter(config, engine.emergency_halt)
+            engine.execution_reporter = reporter
         dispatcher.observe(lambda broker: broker.start(engine.broker_event)).result(timeout=10)
+        if config.broker == "QMT_TRADING" and live_exit is None:
+            for board in ("MAIN", "CHINEXT"):
+                key = f"exit-context:{engine.trade_date}:{board}"
+
+                def read_board_context(store: CriticalStorePort, key: str = key) -> bytes | None:
+                    return store.read_evidence("recovery_checkpoints", key)
+
+                saved = journal.request(
+                    read_board_context,
+                    deadline=monotonic() + 3,
+                ).result(timeout=4)
+                if saved is not None:
+                    context = ExitSessionContext.model_validate_json(saved)
+                    if context.board != board:
+                        raise ValueError("board context identity mismatch")
+                    engine.install_board_exit(context, lambda item: False, restoring=True)
         engine.start_recovery()
         engine.live_exit_gate = live_exit_gate
         yield engine
@@ -385,6 +465,8 @@ def open_node_engine(
         finally:
             if dispatcher is not None:
                 dispatcher.close()
+            if reporter is not None:
+                reporter.close()
             safe = journal.close() and safe
             if safe:
                 if broker_account_guard is not None:
@@ -410,24 +492,161 @@ class EngineEndpoint:
         self.config, self.engine, self.stop, self.clock = config, engine, stop, clock
         self.paper = paper
         self.market = market
+        self.daily_auto: DailyAutoController | None = None
+        if (
+            config.broker == "QMT_TRADING"
+            and config.tail_picks is not None
+            and isinstance(market, QmtTradingRuntime)
+            and market.settings is not None
+        ):
+            reference_path = config.data_root / "critical/opening-reference.json"
+            sealed = load_opening_reference(reference_path)
+            self.daily_auto = DailyAutoController(
+                engine,
+                DailyAutoStore(
+                    config.data_root, installation_key(config.data_root), digest(config.scope())
+                ),
+                market.settings,
+                clock=clock,
+                save_opening=lambda value: save_opening_reference(reference_path, value),
+                sealed_today=bool(sealed and sealed.trade_date == clock().astimezone(CN).date()),
+            )
         self.mailbox: OwnerMailbox[object] = OwnerMailbox()
+        self.manual_buy = None
+        self.manual_sell = None
+        self.board_sell = None
+        if (
+            config.broker == "QMT_TRADING"
+            and isinstance(market, QmtTradingRuntime)
+            and market.settings is not None
+        ):
+            from auto_trading_system.domain import SecurityCode
+            from auto_trading_system.gateways.market.qmt import read_instrument_names
+            from auto_trading_system.runtime.manual_buy import ManualBuyController
+            from auto_trading_system.strategies.entry_state import EntryInstrument
+
+            installed_hash = digest(canonical_bytes(market.settings.model_dump(mode="json")))
+
+            def instrument(symbol: str, price: str) -> tuple[EntryInstrument, str]:
+                rule = cast(CiccQmtMarketGateway, market.market.market).instrument_rule(
+                    SecurityCode.parse(symbol)
+                )
+                names = read_instrument_names((symbol,))
+                name = names.get(symbol)
+                if not name:
+                    raise ValueError("instrument name is unavailable")
+                evidence: dict[str, JsonValue] = {
+                    "symbol": symbol,
+                    "name": name,
+                    "price_tick": str(rule.price_tick),
+                    "lower": str(rule.lower_price),
+                    "upper": str(rule.upper_price),
+                    "observed_at": clock().isoformat(),
+                }
+                return EntryInstrument(
+                    symbol=symbol,
+                    reference_price=price,
+                    price_tick=str(rule.price_tick),
+                    lower_price=str(rule.lower_price),
+                    upper_price=str(rule.upper_price),
+                    min_quantity=rule.min_buy_quantity,
+                    quantity_step=rule.buy_quantity_step,
+                    max_order_quantity=engine.limits.max_order_quantity,
+                    source_hash=digest(canonical_bytes(evidence)),
+                ), name
+
+            def settings_current() -> bool:
+                draft = TradingSettingsDraftStore(config.data_root).read()
+                return bool(
+                    draft
+                    and market.settings is not None
+                    and digest(canonical_bytes(draft.settings.model_dump(mode="json")))
+                    == digest(canonical_bytes(market.settings.model_dump(mode="json")))
+                )
+
+            def sell_settings_current() -> bool:
+                if engine.local_tail_feed is not None:
+                    return True
+                draft = TradingSettingsDraftStore(config.data_root).read()
+                return bool(
+                    draft
+                    and market.settings is not None
+                    and draft.settings.sell == market.settings.sell
+                    and draft.settings.sell_execution == market.settings.sell_execution
+                )
+
+            if market.settings.sell is None and engine.exit_context is None:
+                self.manual_buy = ManualBuyController(
+                    engine,
+                    strategy_id=config.strategy_id,
+                    settings_hash=installed_hash,
+                    instrument_reader=instrument,
+                    settings_current=settings_current,
+                    save_opening=lambda value: save_opening_reference(
+                        config.data_root / "critical/opening-reference.json", value
+                    ),
+                )
+            from auto_trading_system.runtime.board_sell import BoardSellController
+            from auto_trading_system.runtime.manual_sell import ManualSellController
+            from auto_trading_system.strategies.board_sell_configuration import (
+                BoardSellConfigurationStore,
+            )
+
+            self.board_sell = BoardSellController(
+                engine,
+                BoardSellConfigurationStore(config.data_root),
+                instrument,
+                clock,
+                config.strategy_id,
+            )
+            market.board_sell = self.board_sell
+            self.manual_sell = ManualSellController(
+                engine,
+                strategy_id=config.strategy_id,
+                settings_hash=installed_hash,
+                instrument_reader=instrument,
+                settings_current=sell_settings_current,
+            )
+        from auto_trading_system.runtime.debug_pick import DebugPickController
+
         self.authorization: NodeAuthorization | None = None
         if config.operator_access:
             access = config.operator_access
-            verifier = validate_operator_password_verifier(
-                resolve_secret(access.password_verifier).decode("utf-8")
-            )
+            from auto_trading_system.config.operator_password_store import OperatorPasswordStore
+
+            password_store = OperatorPasswordStore(access.password_verifier)
+            verifier = password_store.read().get_secret_value()
             sessions = LocalOperatorSessionManager(
                 SecretStr(verifier),
                 actor_id=access.actor_id,
                 clock=_Clock(clock),
                 monotonic_clock=SystemClock(),
             )
-            self.authorization = NodeAuthorization(engine, self.mailbox, sessions, clock=clock)
+            self.authorization = NodeAuthorization(
+                engine,
+                self.mailbox,
+                sessions,
+                clock=clock,
+                password_writer=password_store.write,
+                daily_auto=self.daily_auto,
+                debug_pick=DebugPickController(engine, self.daily_auto, self.manual_buy)
+                if self.daily_auto and self.manual_buy
+                else None,
+                manual_buy=self.manual_buy,
+                manual_sell=self.manual_sell,
+                board_sell=self.board_sell,
+            )
         self._status_lock = Lock()
         self._status: dict[str, JsonValue] = {}
         self._owner_sequence = 0
         self._supervision_id = os.environ.get("ATS_NODE_SUPERVISION_ID")
+        from auto_trading_system.runtime.buy_settings import BuySettingsController
+
+        self.buy_settings = (
+            BuySettingsController(self, TradingSettingsDraftStore(config.data_root))
+            if isinstance(market, QmtTradingRuntime) and market.settings is not None
+            else None
+        )
         self.publish_status()
         self.files = ArtifactFiles(config.data_root / "artifacts")
         self.catalog = DailyCatalog(
@@ -441,6 +660,9 @@ class EngineEndpoint:
     def status(self) -> dict[str, JsonValue]:
         snapshot = self.engine.snapshot()
         loaded = self.engine.plans.plans.loaded()
+        installed_settings = (
+            self.market.settings if isinstance(self.market, QmtTradingRuntime) else None
+        )
         return {
             "component": "engine",
             "node_id": self.config.node_id,
@@ -456,12 +678,46 @@ class EngineEndpoint:
             "state_version": snapshot.state_version,
             "trade_date": self.engine.trade_date.isoformat(),
             "plan_loaded": self.engine.plans.plans.loaded() is not None,
-            "exit_context_loaded": self.engine.exit_context is not None,
+            "tail_feed": {
+                "all_ready": self.engine.local_tail_feed.complete,
+                "suspended": self.engine.local_tail_feed.suspended,
+                "phases": [
+                    b.phase
+                    for b in self.engine.local_tail_feed.snapshot.batches
+                    if b.status == "READY"
+                ]
+                if self.engine.local_tail_feed.snapshot
+                else [],
+            }
+            if self.engine.local_tail_feed
+            else None,
+            "execution_reporting": {
+                "configured": self.config.execution_reporting is not None,
+                "failed": self.engine.execution_reporter.failed
+                if self.engine.execution_reporter
+                else False,
+            },
+            "legacy_exit_context_loaded": self.engine.exit_context is not None,
+            "exit_context_loaded": self.engine.exit_context is not None
+            or bool(self.engine.board_exit_contexts),
+            "board_sell": self.board_sell.status() if self.board_sell else None,
+            "buy_settings": self.buy_settings.snapshot() if self.buy_settings else None,
             "recovery": snapshot.recovery.status if snapshot.recovery else None,
+            "recovery_error": self.engine.recovery_error(),
+            "recovery_issues": list(snapshot.recovery.issue_codes) if snapshot.recovery else [],
+            "daily_auto": self.daily_auto.snapshot() if self.daily_auto else None,
             "pause_reason": self.engine.permission.snapshot().reason,
             "journal_healthy": self.engine.journal.healthy,
             "operator_authorization_enabled": self.authorization is not None,
-            "installed_limits": self.engine.limits.model_dump(mode="json"),
+            "installed_limits": self.engine.buy_limits.model_dump(mode="json"),
+            "installed_trading_settings_hash": (
+                digest(canonical_bytes(installed_settings.model_dump(mode="json")))
+                if installed_settings is not None
+                else None
+            ),
+            "installed_emergency_liquidation_enabled": bool(
+                installed_settings and installed_settings.safety.emergency_liquidation_enabled
+            ),
             "paper_session": self.paper.status() if self.paper else None,
             "market_session": self.market.status() if self.market else None,
             "broker_account": self.engine.broker_account_summary(),
@@ -472,9 +728,23 @@ class EngineEndpoint:
             ],
             "plan": {
                 "plan_id": loaded.payload.plan_id,
+                "source": "DEBUG"
+                if loaded.payload.source.algorithm_version == "local-debug-pick-v1"
+                else "AUTO",
                 "strategy_id": loaded.payload.strategy_id,
                 "trade_date": loaded.payload.trade_date.isoformat(),
-                "symbols": [item.symbol for item in loaded.payload.allocations],
+                "decision_phases": [
+                    plan.payload.source.decision_phase
+                    for plan in self.engine.plans.plans.accepted()
+                    if plan.payload.source.decision_phase is not None
+                ],
+                "symbols": list(
+                    dict.fromkeys(
+                        item.symbol
+                        for plan in self.engine.plans.plans.accepted()
+                        for item in plan.payload.allocations
+                    )
+                ),
             }
             if loaded
             else None,
@@ -527,6 +797,25 @@ class EngineEndpoint:
             )
             actor = authorization.authorize_control_channel(auth_request)
             if request.action == "OPERATOR_DETAILS":
+                if self.config.broker == "QMT_READ_ONLY":
+
+                    def request_display() -> Future[dict[str, JsonValue]]:
+                        authorization.authorize_control_channel(request)
+                        if not self.engine.dispatcher.idle:
+                            raise IPCError("ACCOUNT_QUERY_BUSY")
+                        return self.engine.dispatcher.observe(
+                            lambda broker: cast(
+                                CiccQmtReadOnlyGateway, broker
+                            ).read_operator_details()
+                        )
+
+                    display_query = cast(Future[dict[str, JsonValue]], call(request_display))
+                    try:
+                        display = display_query.result(timeout=5)
+                    except Exception:
+                        raise IPCError("ACCOUNT_QUERY_FAILED") from None
+                    call(lambda: authorization.authorize_control_channel(request))
+                    return display
 
                 def request_snapshot() -> Future[BrokerRecoverySnapshot]:
                     authorization.authorize_control_channel(request)
@@ -554,10 +843,25 @@ class EngineEndpoint:
                 if not isinstance(client_order_id, str):
                     raise IPCError("INVALID_ARGUMENTS")
 
+                def cancel_snapshot() -> Future[BrokerRecoverySnapshot]:
+                    authorization.authorize_control_channel(auth_request)
+                    try:
+                        return self.engine.request_cancel_snapshot(client_order_id)
+                    except ValueError as exc:
+                        raise IPCError(str(exc)) from None
+
+                cancel_query = cast(Future[BrokerRecoverySnapshot], call(cancel_snapshot))
+                try:
+                    cancel_observation = cancel_query.result(timeout=2)
+                except Exception:
+                    raise IPCError("ACCOUNT_QUERY_FAILED") from None
+
                 def operator_cancel() -> dict[str, JsonValue]:
                     authorization.authorize_control_channel(auth_request)
                     try:
-                        return self.engine.operator_cancel_order(client_order_id)
+                        return self.engine.operator_cancel_order(
+                            client_order_id, cancel_observation
+                        )
                     except ValueError as exc:
                         raise IPCError(str(exc)) from None
 
@@ -569,8 +873,10 @@ class EngineEndpoint:
                 if not isinstance(self.market, QmtTradingRuntime):
                     raise IPCError("LIQUIDATION_UNAVAILABLE")
                 runtime = self.market
-                draft = TradingSettingsDraftStore(self.config.data_root).read()
-                if draft is None or not draft.settings.safety.emergency_liquidation_enabled:
+                if (
+                    runtime.settings is None
+                    or not runtime.settings.safety.emergency_liquidation_enabled
+                ):
                     raise IPCError("LIQUIDATION_DISABLED")
 
                 def liquidation() -> dict[str, JsonValue]:
@@ -590,7 +896,10 @@ class EngineEndpoint:
 
                 return cast(dict[str, JsonValue], call(liquidation))
             if request.action == "OPERATOR_HALT":
-                self.engine.emergency_halt("AUTHENTICATED_OPERATOR_HALT")
+                if self.daily_auto:
+                    self.daily_auto.request_stop()
+                else:
+                    self.engine.emergency_halt("AUTHENTICATED_OPERATOR_HALT")
                 return {
                     "status": "APPLIED",
                     "action": "HALT",
@@ -612,7 +921,94 @@ class EngineEndpoint:
                 }
 
             return cast(dict[str, JsonValue], call(operator_recover))
+        if request.action == "GET_ACCOUNT_OBSERVATION":
+            if self.config.account_reporting is None or request.payload:
+                raise IPCError("ACCOUNT_REPORTING_NOT_CONFIGURED")
+            from auto_trading_system.sync.account_store import publish_observation
+
+            def read_account_observation(broker: BrokerGateway) -> Observation:
+                if not isinstance(broker, (CiccQmtReadOnlyGateway, CiccQmtTradingGateway)):
+                    raise ValueError("account monitoring requires QMT")
+                return broker.read_monitoring()
+
+            def capture_account() -> Future[Observation]:
+                if not self.engine.dispatcher.idle:
+                    raise IPCError("ACCOUNT_QUERY_BUSY")
+                return self.engine.dispatcher.observe(read_account_observation)
+
+            account_query = cast(Future[Observation], call(capture_account))
+            try:
+                observation = account_query.result(timeout=3)
+                hashed = publish_observation(
+                    self.config.data_root / "jobs/.account-observation.json", observation)
+            except Exception:
+                raise IPCError("ACCOUNT_QUERY_FAILED") from None
+            return {"observation_hash": hashed}
+        if request.action in {"GET_EXECUTION_EVENTS", "ACK_EXECUTION_EVENTS"}:
+            reporter = self.engine.execution_reporter
+            if reporter is None:
+                raise IPCError("EXECUTION_REPORTING_NOT_CONFIGURED")
+            if request.action == "GET_EXECUTION_EVENTS":
+                if request.payload:
+                    raise IPCError("INVALID_ARGUMENTS")
+                report_batch = reporter.batch()
+                if report_batch is None:
+                    return {"status": "EMPTY"}
+                report_reference = self.files.put(
+                    report_batch.model_dump_json().encode(), maximum_bytes=65536
+                )
+                return {"status": "READY", "artifact_hash": report_reference}
+            if set(request.payload) != {"batch_hash", "receipt_hash"} or any(
+                not isinstance(v, str) for v in request.payload.values()
+            ):
+                raise IPCError("INVALID_ARGUMENTS")
+            report_batch = Batch.model_validate_json(
+                self.files.read(cast(str, request.payload["batch_hash"]), maximum_bytes=65536)
+            )
+            report_receipt = Receipt.model_validate_json(
+                self.files.read(cast(str, request.payload["receipt_hash"]), maximum_bytes=65536)
+            )
+            reporter.acknowledge(report_batch, report_receipt)
+            return {"status": "ACKNOWLEDGED"}
+        if request.action in {"TAIL_FEED_STATUS", "LOAD_TAIL_PICKS", "TAIL_FEED_FAULT"}:
+            if self.config.tail_picks is None or self.engine.local_tail_feed is None:
+                raise IPCError("TAIL_FEED_NOT_CONFIGURED")
+
+            def feed_operation() -> dict[str, JsonValue]:
+                feed = self.engine.local_tail_feed
+                assert feed is not None
+                if request.action == "LOAD_TAIL_PICKS":
+                    if set(request.payload) != {"artifact_hash"} or not isinstance(
+                        request.payload["artifact_hash"], str
+                    ):
+                        raise IPCError("INVALID_ARGUMENTS")
+                    try:
+                        feed.accept(self.files.read(request.payload["artifact_hash"]), self.clock())
+                    except ValueError as error:
+                        if str(error) == "control persistence is pending":
+                            raise IPCError("TAIL_FEED_ENGINE_BUSY") from error
+                        self.engine.emergency_halt("TAIL_FEED_VALIDATION_FAILED")
+                        feed.fault()
+                        raise
+                    except OSError:
+                        self.engine.emergency_halt("TAIL_FEED_PERSISTENCE_FAILED")
+                        raise
+                else:
+                    if request.payload:
+                        raise IPCError("INVALID_ARGUMENTS")
+                    if request.action == "TAIL_FEED_FAULT" and feed.debug_plan is None:
+                        self.engine.emergency_halt("TAIL_FEED_SUSPENDED")
+                        feed.fault()
+                return {
+                    "trade_date": self.engine.trade_date.isoformat(),
+                    "all_ready": feed.complete,
+                    "suspended": feed.suspended,
+                }
+
+            return cast(dict[str, JsonValue], call(feed_operation))
         if request.action == "LOAD_PLAN":
+            if self.config.tail_picks is not None:
+                raise IPCError("SIGNED_REMOTE_PLAN_DISABLED_FOR_SIMPLE_FEED")
             if set(request.payload) != {"lookup_hash", "artifact_hash"}:
                 raise IPCError("INVALID_ARGUMENTS")
             lookup_hash, plan_hash = (
@@ -654,6 +1050,11 @@ class EngineEndpoint:
         if request.payload:
             raise IPCError("INVALID_ARGUMENTS")
         if request.action == "SEAL_DAY":
+            sealed = load_opening_reference(
+                self.config.data_root / "critical/opening-reference.json"
+            )
+            if sealed is not None and sealed.trade_date == self.clock().astimezone(CN).date():
+                return sealed.model_dump(mode="json")
             pending = cast(Future[OpeningReference], call(self.engine.seal_portfolio))
             reference = pending.result(timeout=3)
             save_opening_reference(
@@ -739,6 +1140,8 @@ def run_engine(
             plan_market = PlanMarketRuntime(
                 qmt_market,
                 fault_reader=lambda: qmt_market.fault_code,
+                maximum_symbols=45 if engine.plans.plans.tail_history is not None else 15,
+                archive=TickArchive(config.data_root / "market" / "ticks"),
             )
             draft = TradingSettingsDraftStore(config.data_root).read()
             entry_install = next(item for item in config.policies if item.component == "entry")
@@ -762,6 +1165,12 @@ def run_engine(
                                 "HELLO",
                                 "STATUS",
                                 "LOAD_PLAN",
+                                "TAIL_FEED_STATUS",
+                                "LOAD_TAIL_PICKS",
+                                "TAIL_FEED_FAULT",
+                                "GET_EXECUTION_EVENTS",
+                                "GET_ACCOUNT_OBSERVATION",
+                                "ACK_EXECUTION_EVENTS",
                                 "RECOVER_DAILY",
                                 "EXPORT_DAILY",
                                 "REFRESH_DAILY",
@@ -826,6 +1235,8 @@ def run_engine(
             while not stopped.wait(0.005):
                 if not all(server.healthy for server in servers):
                     raise IPCError("PIPE_WORKER_FAILED")
+                if endpoint.buy_settings is not None:
+                    endpoint.buy_settings.poll()
                 if paper:
                     paper.poll(engine)
                 elif market:
@@ -833,6 +1244,14 @@ def run_engine(
                 else:
                     engine.poll()
                 endpoint.mailbox.poll()
+                if endpoint.manual_sell is not None:
+                    endpoint.manual_sell.poll()
+                if endpoint.daily_auto is not None:
+                    endpoint.daily_auto.poll()
+                if endpoint.manual_buy is not None and (
+                    endpoint.daily_auto is None or not endpoint.daily_auto.enabled
+                ):
+                    endpoint.manual_buy.poll()
                 if not risk_baseline_saved:
                     baseline = engine.risk_baseline_equity()
                     if baseline is not None:

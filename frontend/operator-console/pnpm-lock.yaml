@@ -7,6 +7,9 @@ settings:
 importers:
   .:
     dependencies:
+      "@vicons/ionicons5":
+        specifier: 0.13.0
+        version: 0.13.0
       echarts:
         specifier: 6.1.0
         version: 6.1.0
@@ -67,6 +70,11 @@ importers:
         version: 3.3.11(typescript@5.9.3)
 
 packages:
+  "@vicons/ionicons5@0.13.0":
+    resolution:
+      {
+        integrity: sha512-zvZKBPjEXKN7AXNo2Na2uy+nvuv6SP4KAMQxpKL2vfHMj0fSvuw7JZcOPCjQC3e7ayssKnaoFVAhbYcW6v41qQ==,
+      }
   "@babel/helper-string-parser@7.29.7":
     resolution:
       {
@@ -2527,6 +2535,7 @@ packages:
       }
 
 snapshots:
+  "@vicons/ionicons5@0.13.0": {}
   "@babel/helper-string-parser@7.29.7": {}
 
   "@babel/helper-validator-identifier@7.29.7": {}

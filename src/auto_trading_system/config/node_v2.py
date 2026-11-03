@@ -22,6 +22,7 @@ from auto_trading_system.config.models import SecretReference, StrictConfigModel
 from auto_trading_system.config.paper_session import PaperSession
 from auto_trading_system.config.windows_credentials import build_default_secret_providers
 from auto_trading_system.control.ipc_protocol import Role
+from auto_trading_system.protocol.qmt_recovery import QmtOrderRecoveryBinding
 from auto_trading_system.protocol.v2.base import WireId
 from auto_trading_system.protocol.v2.canonical import canonical_bytes, parse_bytes
 from auto_trading_system.protocol.v2.plans import PolicyVersion
@@ -62,6 +63,12 @@ class QmtReadOnlySettings(StrictConfigModel):
         pattern=r"^[a-f0-9]{16}$", description="已验证股票资金账号的SHA-256前16位"
     )
     session_base: int = Field(default=6102301, ge=1, le=2_147_483_646)
+    order_recovery_bindings: tuple[QmtOrderRecoveryBinding, ...] = Field(
+        default=(),
+        max_length=32,
+        exclude_if=lambda value: not value,
+        description="操作员明确核对的券商合同编号映射；恢复仍须核对本账户J1和完整成交",
+    )
 
     @model_validator(mode="after")
     def dedicated_path(self) -> Self:
@@ -72,6 +79,25 @@ class QmtReadOnlySettings(StrictConfigModel):
         ):
             raise ValueError("QMT userdata_mini must be a direct absolute directory")
         return self
+
+
+class TailPicksSettings(StrictConfigModel):
+    token: SecretReference | None = Field(
+        default=None, description="旧版只读令牌引用；新版使用系统设置中的统一接口令牌"
+    )
+
+
+class ExecutionReportingSettings(StrictConfigModel):
+    token: SecretReference | None = Field(
+        default=None, description="旧版上传令牌引用；新版使用系统设置中的统一接口令牌"
+    )
+
+
+class AccountReportingSettings(StrictConfigModel):
+    token: SecretReference = Field(description="绑定本节点及账户的独立监控上传凭据引用")
+    origin: str | None = Field(
+        default=None, description="独立账户监控HTTPS地址；缺省复用quant_origin"
+    )
 
 
 class NodeProcessConfig(StrictConfigModel):
@@ -88,10 +114,24 @@ class NodeProcessConfig(StrictConfigModel):
     operator_access: OperatorAccess | None = Field(
         default=None, description="交互式恢复确认/PAPER授权；未配置时保持此入口关闭"
     )
-    quant_origin: str = Field(description="量化系统HTTPS源地址")
+    quant_origin: str = Field(description="量化系统HTTP或HTTPS源地址")
     quant_key_id: WireId = Field(description="量化HTTP签名密钥编号")
     quant_secret: SecretReference = Field(description="量化HTTP密钥引用，与三类IPC凭证分离")
+    tail_picks: TailPicksSettings | None = Field(
+        default=None,
+        exclude_if=lambda value: value is None,
+        description="显式启用尾盘优名单单接口；默认保留原签名计划链路",
+    )
+    execution_reporting: ExecutionReportingSettings | None = Field(
+        default=None,
+        exclude_if=lambda value: value is None,
+        description="显式启用主交易及事件上报，默认不联网上传交易记录",
+    )
     quant_ca_file: Path | None = Field(default=None, description="可选私有CA证书文件；仍校验主机名")
+    account_reporting: AccountReportingSettings | None = Field(
+        default=None, exclude_if=lambda value: value is None,
+        description="账户监控回传；配置后随程序启动，每60秒自动上传并跨重启续传",
+    )
     trusted_plan_keys: dict[WireId, str] = Field(
         min_length=1, max_length=8, description="可信Ed25519公钥hex"
     )
@@ -121,7 +161,7 @@ class NodeProcessConfig(StrictConfigModel):
             raise ValueError("CA path must be absolute")
         origin = urlsplit(self.quant_origin)
         if (
-            origin.scheme != "https"
+            origin.scheme not in {"http", "https"}
             or not origin.hostname
             or origin.username
             or origin.password
@@ -129,15 +169,39 @@ class NodeProcessConfig(StrictConfigModel):
             or origin.fragment
             or origin.path not in ("", "/")
         ):
-            raise ValueError("quant origin must be HTTPS without a path or credentials")
+            raise ValueError("quant origin must be HTTP(S) without a path or credentials")
         references = [
             self.quant_secret,
             self.ipc_secrets.agent,
             self.ipc_secrets.jobrunner,
             self.ipc_secrets.operator,
         ]
+        if self.account_reporting is not None:
+            reporting_origin = urlsplit(self.account_reporting.origin or self.quant_origin)
+            if (
+                self.broker not in {"QMT_READ_ONLY", "QMT_TRADING"}
+                or reporting_origin.scheme != "https"
+                or not reporting_origin.hostname
+                or reporting_origin.username or reporting_origin.password
+                or reporting_origin.path not in ("", "/")
+                or reporting_origin.query or reporting_origin.fragment
+            ):
+                raise ValueError("account reporting requires QMT and HTTPS")
+            references.append(self.account_reporting.token)
+        if self.tail_picks is not None:
+            if self.broker != "QMT_TRADING" or self.strategy_id != "TAIL_CLOSE":
+                raise ValueError("tail feed requires the explicit QMT trading tail profile")
+            if self.tail_picks.token is not None:
+                references.append(self.tail_picks.token)
         if self.operator_access:
             references.append(self.operator_access.password_verifier)
+        if self.execution_reporting is not None:
+            if self.broker == "QMT_READ_ONLY":
+                raise ValueError(
+                    "read-only account observations cannot be strategy execution reports"
+                )
+            if self.execution_reporting.token is not None:
+                references.append(self.execution_reporting.token)
         if len({ref.model_dump_json() for ref in references}) != len(references):
             raise ValueError("HTTP and IPC roles require separate credential references")
         if {item.component for item in self.policies} != {"entry", "exit", "execution", "risk"}:
@@ -186,14 +250,28 @@ class NodeProcessConfig(StrictConfigModel):
             "service_sid": self.service_sid,
         }
         if self.qmt_read_only:
-            fields["qmt_read_only"] = self.qmt_read_only.model_dump(mode="json")
+            # Per-order recovery metadata does not change the account/terminal
+            # identity used by calendar, plan and consent scope hashes.
+            fields["qmt_read_only"] = self.qmt_read_only.model_dump(
+                mode="json", exclude={"order_recovery_bindings"}
+            )
         return canonical_bytes(fields)
 
 
 def load_node_config(path: Path) -> NodeProcessConfig:
     with path.open("rb") as source:
         value = parse_bytes(source.read(131073), max_bytes=131072)
-    return NodeProcessConfig.model_validate_json(canonical_bytes(value))
+    config = NodeProcessConfig.model_validate_json(canonical_bytes(value))
+    from auto_trading_system.config.system_settings import SystemSettingsStore
+
+    origin = SystemSettingsStore(config.data_root).read().quant_origin
+    if origin is not None:
+        config = config.model_copy(update={"quant_origin": origin})
+    if config.broker == "QMT_TRADING" and config.tail_picks is not None:
+        from auto_trading_system.config.execution_calendar import cached_execution_calendar
+
+        config = config.model_copy(update={"calendar": cached_execution_calendar(config)})
+    return config
 
 
 def resolve_secret(
